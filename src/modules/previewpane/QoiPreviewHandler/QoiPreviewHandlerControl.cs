@@ -12,7 +12,7 @@ namespace Microsoft.PowerToys.PreviewHandler.Qoi
     /// <summary>
     /// Implementation of Control for Qoi Preview Handler.
     /// </summary>
-    public class QoiPreviewHandlerControl : FormHandlerControl
+    public partial class QoiPreviewHandlerControl : FormHandlerControl
     {
         /// <summary>
         /// Picture box control to display the Qoi thumbnail.
@@ -58,12 +58,12 @@ namespace Microsoft.PowerToys.PreviewHandler.Qoi
             {
                 Bitmap thumbnail = null;
 
-                if (!(dataSource is string filePath))
+                if (dataSource is not string filePath)
                 {
                     throw new ArgumentException($"{nameof(dataSource)} for {nameof(QoiPreviewHandlerControl)} must be a string but was a '{typeof(T)}'");
                 }
 
-                using FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read);
 
                 thumbnail = QoiImage.FromStream(fs);
 
@@ -94,7 +94,7 @@ namespace Microsoft.PowerToys.PreviewHandler.Qoi
         /// <param name="e">Provides data for the ContentsResized event.</param>
         private void RTBContentsResized(object sender, ContentsResizedEventArgs e)
         {
-            var richTextBox = sender as RichTextBox;
+            RichTextBox richTextBox = sender as RichTextBox;
             richTextBox.Height = e.NewRectangle.Height + 5;
         }
 

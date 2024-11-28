@@ -18,11 +18,11 @@ namespace MouseWithoutBorders
 {
     public partial class FormHelper : System.Windows.Forms.Form
     {
-        private readonly List<FocusArea> focusZone = new();
+        private readonly List<FocusArea> focusZone = [];
         private readonly Lock bmScreenLock = new();
+        private readonly IClipboardHelper remoteClipboardHelper;
         private long lastClipboardEventTime;
 
-        private IClipboardHelper remoteClipboardHelper;
         private const string TEXT_TYPE_SEP = "{4CFF57F7-BEDD-43d5-AE8F-27A61E886F2F}";
 
         private const int MAX_TEXT_SIZE = 20 * 1024 * 1024;
@@ -435,9 +435,9 @@ namespace MouseWithoutBorders
                     Application.DoEvents();
 
                     // Simulate input to help bring to the foreground, as it doesn't seem to work in every case otherwise.
-                    NativeMethods.INPUT input = new NativeMethods.INPUT { type = (int)NativeMethods.InputType.INPUT_MOUSE, mi = { } };
-                    NativeMethods.INPUT[] inputs = new NativeMethods.INPUT[] { input };
-                    _ = NativeMethods.SendInput(1, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
+                    NativeMethods.INPUT input = new() { type = (int)NativeMethods.InputType.INPUT_MOUSE, mi = { } };
+                    NativeMethods.INPUT[] inputs = [input];
+                    _ = NativeMethods.SendInput(1, inputs, Marshal.SizeOf<NativeMethods.INPUT>());
                     m.Result = SetForeGround() ? new IntPtr(1) : IntPtr.Zero;
                     break;
 

@@ -18,6 +18,9 @@
     <AssemblyName>PowerToys.QoiPreviewHandler</AssemblyName>
     <ProjectGuid>{6B04803D-B418-4833-A67E-B0FC966636A5}</ProjectGuid>
     <RootNamespace>Microsoft.PowerToys.PreviewHandler.Qoi</RootNamespace>
+	<IsAotCompatible>true</IsAotCompatible>
+	<CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
+	<CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
   </PropertyGroup>
 
   <ItemGroup>

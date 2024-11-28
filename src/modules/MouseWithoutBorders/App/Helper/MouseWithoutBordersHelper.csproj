@@ -15,7 +15,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>..\Logo.ico</ApplicationIcon>
     <NoWin32Manifest>true</NoWin32Manifest>
-
+	<IsAotCompatible>true</IsAotCompatible>
+	<CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
+	<CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
