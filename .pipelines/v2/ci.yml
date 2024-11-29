@@ -19,6 +19,12 @@ steps:
     nugetConfigPath: './nuget.config'
     includeNuGetOrg: false
   displayName: 'Restore NuGet packages'
+
+- task: PowerShell@2
+  displayName: UpdateVersions
+  inputs:
+    filePath: '.\.pipelines\UpdateVersions.ps1'
+
 - task: MSBuild@1
   inputs:
     solution: 'PowerToys.sln'
