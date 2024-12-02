@@ -1,33 +1,63 @@
 trigger:
-- main
+  batch: true
+  branches:
+    include:
+      - main
+      - stable
+#  paths:
+#    exclude:
+#      - doc/*
+#      - temp/*
+#      - tools/*
+#      - '**.md'
 
-pool:
-  vmImage: 'windows-latest'
+pr:
+  branches:
+    include:
+      - main
+      - stable
+#  paths:
+#    exclude:
+#      - '**.md'
+#      - doc
 
-steps:
+name: $(BuildDefinitionName)_$(date:yyMM).$(date:dd)$(rev:rrr)
 
-- task: NuGetToolInstaller@1
-  displayName: 'Install NuGet'
-- task: NuGetAuthenticate@1
-  displayName: 'Authenticate NuGet'
+parameters:
+  - name: buildPlatforms
+    type: object
+    default:
+      - x64
+      - arm64
+  - name: enableMsBuildCaching
+    type: boolean
+    displayName: "Enable MSBuild Caching"
+    default: false
+  - name: runTests
+    type: boolean
+    displayName: "Run Tests"
+    default: true
+  - name: useVSPreview
+    type: boolean
+    displayName: "Build Using Visual Studio Preview"
+    default: false
+#   - task: PowerShell@2
+#   displayName: UpdateVersions
+#   inputs:
+#     filePath: '.\.pipelines\UpdateVersions.ps1'
 
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: '**/*.sln'
-    feedsToUse: 'config'
-    nugetConfigPath: './nuget.config'
-    includeNuGetOrg: false
-  displayName: 'Restore NuGet packages'
-
-- task: PowerShell@2
-  displayName: UpdateVersions
-  inputs:
-    filePath: '.\.pipelines\UpdateVersions.ps1'
-
-- task: MSBuild@1
-  inputs:
-    solution: 'PowerToys.sln'
-    msbuildArchitecture: 'x64'
-    configuration: 'Release'
-  displayName: 'Build solution'
+# - task: NuGetCommand@2
+#   inputs:
+#     command: 'restore'
+#     restoreSolution: '**/*.sln'
+#     feedsToUse: 'config'
+#     nugetConfigPath: './nuget.config'
+#     includeNuGetOrg: false
+#   displayName: 'Restore NuGet packages'
+extends:
+  template: templates/pipeline-ci-build.yml
+  parameters:
+    buildPlatforms: ${{ parameters.buildPlatforms }}
+    enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
+    runTests: ${{ parameters.runTests }}
+    useVSPreview: ${{ parameters.useVSPreview }}
