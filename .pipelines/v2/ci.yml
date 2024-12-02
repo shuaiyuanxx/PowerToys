@@ -72,67 +72,71 @@ parameters:
 #     nugetConfigPath: './nuget.config'
 #     includeNuGetOrg: false
 #   displayName: 'Restore NuGet packages'
-extends:
-  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
-  parameters:
-    customBuildTags:
-    - 1ES.PT.ViaStartRight
-    pool:
-      name: SHINE-INT-S
-      ${{ if eq(parameters.useVSPreview, true) }}:
-        demands: ImageOverride -equals SHINE-VS17-Preview
-      ${{ else }}:
-        image: SHINE-VS17-Latest
-      os: windows
-    sdl:
-      tsa:
-        enabled: true
-        configFile: '$(Build.SourcesDirectory)\.pipelines\tsa.json'
+# extends:
+#   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+#   parameters:
+#     customBuildTags:
+#     - 1ES.PT.ViaStartRight
+#     # pool:
+#     #   name: SHINE-INT-S
+#     #   ${{ if eq(parameters.useVSPreview, true) }}:
+#     #     demands: ImageOverride -equals SHINE-VS17-Preview
+#     #   ${{ else }}:
+#     #     image: SHINE-VS17-Latest
+#     #   os: windows
+#     pool:
+#       vmImage: windows-2019
+#     sdl:
+#       tsa:
+#         enabled: true
+#         configFile: '$(Build.SourcesDirectory)\.pipelines\tsa.json'
 
-    stages:
-      - stage: Build
-        displayName: Build
-        dependsOn: []
-        jobs:
-          - template: .pipelines/v2/templates/job-build-project.yml@self
-            parameters:
-              pool:
-                name: SHINE-INT-L
-                ${{ if eq(parameters.useVSPreview, true) }}:
-                  demands: ImageOverride -equals SHINE-VS17-Preview
-                ${{ else }}:
-                  image: SHINE-VS17-Latest
-                os: windows
-              variables:
-                IsPipeline: 1 # The installer uses this to detect whether it should pick up localizations
-                SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
-                # IsExperimentationLive: 1 # The build and installer use this to turn on experimentation
-              buildPlatforms: ${{ parameters.buildPlatforms }}
-              buildConfigurations: ${{ parameters.buildConfigurations }}
-              versionNumber: ${{ parameters.versionNumber }}
-              publishArtifacts: false # 1ES PT handles publication for us.
-              codeSign: false
-              runTests: false
-              # signingIdentity:
-              #   serviceName: $(SigningServiceName)
-              #   appId: $(SigningAppId)
-              #   tenantId: $(SigningTenantId)
-              #   akvName: $(SigningAKVName)
-              #   authCertName: $(SigningAuthCertName)
-              #   signCertName: $(SigningSignCertName)
-              # Have msbuild use the release nuget config profile
-              additionalBuildOptions: /p:RestoreConfigFile="$(Build.SourcesDirectory)\.pipelines\release-nuget.config"
-              # beforeBuildSteps:
-              #   # Sets versions for all PowerToy created DLLs
-              #   - pwsh: |-
-              #       .pipelines/versionSetting.ps1 -versionNumber '${{ parameters.versionNumber }}' -DevEnvironment ''
-              #     displayName: Prepare versioning
+stages:
+- stage: Build
+  displayName: Build
+  dependsOn: []
+  jobs:
+    - template: templates/job-build-project.yml@self
+      parameters:
+        # pool:
+        #   name: SHINE-INT-L
+        #   ${{ if eq(parameters.useVSPreview, true) }}:
+        #     demands: ImageOverride -equals SHINE-VS17-Preview
+        #   ${{ else }}:
+        #     image: SHINE-VS17-Latest
+        #   os: windows
+        pool:
+          vmImage: windows-2022
+        variables:
+          IsPipeline: 1 # The installer uses this to detect whether it should pick up localizations
+          SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
+          # IsExperimentationLive: 1 # The build and installer use this to turn on experimentation
+        buildPlatforms: ${{ parameters.buildPlatforms }}
+        buildConfigurations: ${{ parameters.buildConfigurations }}
+        versionNumber: ${{ parameters.versionNumber }}
+        publishArtifacts: false # 1ES PT handles publication for us.
+        codeSign: false
+        runTests: false
+        # signingIdentity:
+        #   serviceName: $(SigningServiceName)
+        #   appId: $(SigningAppId)
+        #   tenantId: $(SigningTenantId)
+        #   akvName: $(SigningAKVName)
+        #   authCertName: $(SigningAuthCertName)
+        #   signCertName: $(SigningSignCertName)
+        # Have msbuild use the release nuget config profile
+        additionalBuildOptions: /p:RestoreConfigFile="$(Build.SourcesDirectory)\.pipelines\release-nuget.config"
+        # beforeBuildSteps:
+        #   # Sets versions for all PowerToy created DLLs
+        #   - pwsh: |-
+        #       .pipelines/versionSetting.ps1 -versionNumber '${{ parameters.versionNumber }}' -DevEnvironment ''
+        #     displayName: Prepare versioning
 
-              #   # Prepare the localizations and telemetry config before the release build
-              #   - template: .pipelines/v2/templates/steps-fetch-and-prepare-localizations.yml@self
+        #   # Prepare the localizations and telemetry config before the release build
+        #   - template: .pipelines/v2/templates/steps-fetch-and-prepare-localizations.yml@self
 
-              #   - script: |
-              #       call nuget.exe restore -configFile .pipelines/release-nuget.config -PackagesDirectory . .pipelines/packages.config || exit /b 1
-              #       move /Y "Microsoft.PowerToys.Telemetry.2.0.2\build\include\TraceLoggingDefines.h" "src\common\Telemetry\TraceLoggingDefines.h" || exit /b 1
-              #       move /Y "Microsoft.PowerToys.Telemetry.2.0.2\build\include\TelemetryBase.cs" "src\common\Telemetry\TelemetryBase.cs" || exit /b 1
-              #     displayName: Emplace telemetry files
+        #   - script: |
+        #       call nuget.exe restore -configFile .pipelines/release-nuget.config -PackagesDirectory . .pipelines/packages.config || exit /b 1
+        #       move /Y "Microsoft.PowerToys.Telemetry.2.0.2\build\include\TraceLoggingDefines.h" "src\common\Telemetry\TraceLoggingDefines.h" || exit /b 1
+        #       move /Y "Microsoft.PowerToys.Telemetry.2.0.2\build\include\TelemetryBase.cs" "src\common\Telemetry\TelemetryBase.cs" || exit /b 1
+        #     displayName: Emplace telemetry files
