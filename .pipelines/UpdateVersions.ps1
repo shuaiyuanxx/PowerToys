@@ -23,25 +23,41 @@ Get-ChildItem -Recurse packages.config | foreach-object {
     $newVersionString = 'package id="Microsoft.WindowsAppSDK" version="' + $WinAppSDKVersion + '"'
     $oldVersionString = 'package id="Microsoft.WindowsAppSDK" version="[-.0-9a-zA-Z]*"'
     $content = Get-Content $_.FullName -Raw
-    $content = $content -replace $oldVersionString, $newVersionString
-    Set-Content -Path $_.FullName -Value $content
-    Write-Host "Modified " $_.FullName 
+    if ($content -match $oldVersionString) {
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $_.FullName -Value $content
+        Write-Host "Modified " $_.FullName 
+    }
 }
 
 Get-ChildItem -Recurse *.vcxproj | foreach-object {
     $newVersionString = '\Microsoft.WindowsAppSDK.' + $WinAppSDKVersion + '\'
     $oldVersionString = '\\Microsoft.WindowsAppSDK.[-.0-9a-zA-Z]*\\'
     $content = Get-Content $_.FullName -Raw
-    $content = $content -replace $oldVersionString, $newVersionString
-    Set-Content -Path $_.FullName -Value $content
-    Write-Host "Modified " $_.FullName 
+    if ($content -match $oldVersionString) {
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $_.FullName -Value $content
+        Write-Host "Modified " $_.FullName 
+    }
 }
 
 Get-ChildItem -Recurse *.csproj | foreach-object {
     $newVersionString = 'PackageReference Include="Microsoft.WindowsAppSDK" Version="'+ $WinAppSDKVersion + '"'
     $oldVersionString = 'PackageReference Include="Microsoft.WindowsAppSDK" Version="[-.0-9a-zA-Z]*"'
     $content = Get-Content $_.FullName -Raw
+    if ($content -match $oldVersionString) {
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $_.FullName -Value $content
+        Write-Host "Modified " $_.FullName 
+    }
+}
+
+$directoryPackagesProps = "Directory.Packages.props"
+$newVersionString = '<PackageVersion Include="Microsoft.WindowsAppSDK" Version="' + $WinAppSDKVersion + '" />'
+$oldVersionString = '<PackageVersion Include="Microsoft.WindowsAppSDK" Version="[-.0-9a-zA-Z]*" />'
+$content = Get-Content $directoryPackagesProps -Raw
+if ($content -match $oldVersionString) {
     $content = $content -replace $oldVersionString, $newVersionString
-    Set-Content -Path $_.FullName -Value $content
-    Write-Host "Modified " $_.FullName 
+    Set-Content -Path $directoryPackagesProps -Value $content
+    Write-Host "Modified " $directoryPackagesProps
 }
