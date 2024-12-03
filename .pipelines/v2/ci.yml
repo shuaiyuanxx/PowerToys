@@ -94,7 +94,7 @@ extends:
         displayName: Build
         dependsOn: []
         jobs:
-          - template: .pipelines/v2/templates/job-build-project.yml@self
+          - template: .pipelines/v2/templates/job-build-project-simple.yml@self
             parameters:
               pool:
                 name: SHINE-INT-L
@@ -122,6 +122,10 @@ extends:
               #   signCertName: $(SigningSignCertName)
               # Have msbuild use the release nuget config profile
               additionalBuildOptions: /p:RestoreConfigFile="$(Build.SourcesDirectory)\.pipelines\release-nuget.config"
+              beforeBuildSteps:
+                - pwsh: |-
+                      nuget update '$(build.sourcesdirectory)\PowerToys.sln' -Id Microsoft.WindowsAppSDK
+                  displayName: Update WindowsAppSDK NuGet package
               # beforeBuildSteps:
               #   # Sets versions for all PowerToy created DLLs
               #   - pwsh: |-
