@@ -179,13 +179,12 @@ jobs:
   # In the Microsoft Azure DevOps tenant, NuGetCommand is ambiguous.
   # This should be `task: NuGetCommand@2`
   - task: NuGetCommand@2
-    displayName: Restore NuGet packages
     inputs:
-      command: restore
-      feedsToUse: config
-      configPath: NuGet.config
-      restoreSolution: packages.config
-      restoreDirectory: '$(Build.SourcesDirectory)\packages'
+      command: 'restore'
+      feedsToUse: 'config'
+      nugetConfigPath: '$(build.sourcesdirectory)\nuget.config'
+      restoreSolution: '$(build.sourcesdirectory)\**\*.sln'
+      includeNuGetOrg: false
 
   - pwsh: |-
       & "$(build.sourcesdirectory)\.pipelines\verifyAndSetLatestVCToolsVersion.ps1"
