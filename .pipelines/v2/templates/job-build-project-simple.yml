@@ -151,24 +151,29 @@ jobs:
       & '.pipelines/verifyArm64Configuration.ps1' -solution '$(build.sourcesdirectory)\installer\PowerToysSetup.sln'
     displayName: Verify ARM64 configurations
 
-  - ${{ if eq(parameters.enablePackageCaching, true) }}:
-    - task: Cache@2
-      displayName: 'Cache nuget packages (PackageReference)'
-      inputs:
-        key: '"PackageReference" | "$(Agent.OS)" | Directory.Packages.props'
-        restoreKeys: |
-           "PackageReference" | "$(Agent.OS)"
-           "PackageReference"
-        path: $(NUGET_PACKAGES)
+  # - ${{ if eq(parameters.enablePackageCaching, true) }}:
+  #   - task: Cache@2
+  #     displayName: 'Cache nuget packages (PackageReference)'
+  #     inputs:
+  #       key: '"PackageReference" | "$(Agent.OS)" | Directory.Packages.props'
+  #       restoreKeys: |
+  #          "PackageReference" | "$(Agent.OS)"
+  #          "PackageReference"
+  #       path: $(NUGET_PACKAGES)
 
-    - task: Cache@2
-      displayName: 'Cache nuget packages (packages.config)'
-      inputs:
-        key: '"packages.config" | "$(Agent.OS)" | **/packages.config'
-        restoreKeys: |
-           "packages.config" | "$(Agent.OS)"
-           "packages.config"
-        path: packages
+  #   - task: Cache@2
+  #     displayName: 'Cache nuget packages (packages.config)'
+  #     inputs:
+  #       key: '"packages.config" | "$(Agent.OS)" | **/packages.config'
+  #       restoreKeys: |
+  #          "packages.config" | "$(Agent.OS)"
+  #          "packages.config"
+  #       path: packages
+
+  - task: PowerShell@2
+    displayName: Update WinAppSDK Versions
+    inputs:
+      filePath: '$(build.sourcesdirectory)\.pipelines\UpdateVersions.ps1'
 
   - template: .\steps-restore-nuget.yml
 

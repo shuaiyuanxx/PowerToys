@@ -121,12 +121,7 @@ extends:
               #   authCertName: $(SigningAuthCertName)
               #   signCertName: $(SigningSignCertName)
               # Have msbuild use the release nuget config profile
-              additionalBuildOptions: /p:RestoreConfigFile="$(Build.SourcesDirectory)\.pipelines\release-nuget.config"
-              beforeBuildSteps:
-                - pwsh: |-
-                      .pipelines\UpdateVersions.ps1
-                  displayName: Update WindowsAppSDK version
-
+              # additionalBuildOptions: /p:RestoreConfigFile="$(Build.SourcesDirectory)\.pipelines\release-nuget.config"
               # beforeBuildSteps:
               #   # Sets versions for all PowerToy created DLLs
               #   - pwsh: |-
