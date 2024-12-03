@@ -18,6 +18,7 @@ $latestVersion = $latestVersions -split "`n" | `
 if ($latestVersion) {
     $WinAppSDKVersion = $latestVersion
     Write-Host "Extracted version: $WinAppSDKVersion"
+    Write-Host "##vso[task.setvariable variable=WinAppSDKVersion]$WinAppSDKVersion"
 } else {
     Write-Host "Failed to extract version number from nuget list output"
     exit 1
