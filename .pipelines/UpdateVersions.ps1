@@ -1,12 +1,16 @@
 # Execute nuget list and capture the output
 $nugetOutput = nuget list Microsoft.WindowsAppSDK `
-    -Source "https://pkgs.dev.azure.com/microsoft/ProjectReunion/_packaging/WinAppSDK-Developer-Builds/nuget/v3/index.json" `
-    -PreRelease `
+    -Source "https://microsoft.pkgs.visualstudio.com/ProjectReunion/_packaging/Project.Reunion.nuget.internal/nuget/v3/index.json" `
     -AllVersions
 
+$filteredVersions = $nugetOutput | Where-Object { $_ -match "Microsoft.WindowsAppSDK 1\.6\." }
+# Write-Host "Filtered versions: $filteredVersions"
+$latestVersions = $filteredVersions | Sort-Object { [version]($_ -split ' ')[1] } -Descending | Select-Object -First 1
+Write-Host "Latest versions found: $latestVersions"
+
 # Extract the latest version number from the output
-$latestVersion = $nugetOutput -split "`n" | `
-    Select-String -Pattern 'Microsoft.WindowsAppSDK\s+([0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9]+)' | `
+$latestVersion = $latestVersions -split "`n" | `
+    Select-String -Pattern 'Microsoft.WindowsAppSDK\s*([0-9]+\.[0-9]+\.[0-9]+-*[a-zA-Z0-9]*)' | `
     ForEach-Object { $_.Matches[0].Groups[1].Value } | `
     Sort-Object -Descending | `
     Select-Object -First 1
@@ -19,29 +23,51 @@ if ($latestVersion) {
     exit 1
 }
 
-Get-ChildItem -Recurse packages.config | foreach-object {
-    $newVersionString = 'package id="Microsoft.WindowsAppSDK" version="' + $WinAppSDKVersion + '"'
-    $oldVersionString = 'package id="Microsoft.WindowsAppSDK" version="[-.0-9a-zA-Z]*"'
+# Update packages.config files
+Get-ChildItem -Recurse packages.config | ForEach-Object {
     $content = Get-Content $_.FullName -Raw
-    $content = $content -replace $oldVersionString, $newVersionString
-    Set-Content -Path $_.FullName -Value $content
-    Write-Host "Modified " $_.FullName 
+    if ($content -match 'package id="Microsoft.WindowsAppSDK"') {
+        $newVersionString = 'package id="Microsoft.WindowsAppSDK" version="' + $WinAppSDKVersion + '"'
+        $oldVersionString = 'package id="Microsoft.WindowsAppSDK" version="[-.0-9a-zA-Z]*"'
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $_.FullName -Value $content
+        Write-Host "Modified " $_.FullName 
+    }
 }
 
-Get-ChildItem -Recurse *.vcxproj | foreach-object {
-    $newVersionString = '\Microsoft.WindowsAppSDK.' + $WinAppSDKVersion + '\'
-    $oldVersionString = '\\Microsoft.WindowsAppSDK.[-.0-9a-zA-Z]*\\'
-    $content = Get-Content $_.FullName -Raw
-    $content = $content -replace $oldVersionString, $newVersionString
-    Set-Content -Path $_.FullName -Value $content
-    Write-Host "Modified " $_.FullName 
+# Update Directory.Packages.props file
+$propsFile = "Directory.Packages.props"
+if (Test-Path $propsFile) {
+    $content = Get-Content $propsFile -Raw
+    if ($content -match '<PackageVersion Include="Microsoft.WindowsAppSDK"') {
+        $newVersionString = '<PackageVersion Include="Microsoft.WindowsAppSDK" Version="' + $WinAppSDKVersion + '" />'
+        $oldVersionString = '<PackageVersion Include="Microsoft.WindowsAppSDK" Version="[-.0-9a-zA-Z]*" />'
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $propsFile -Value $content
+        Write-Host "Modified " $propsFile
+    }
 }
 
-Get-ChildItem -Recurse *.csproj | foreach-object {
-    $newVersionString = 'PackageReference Include="Microsoft.WindowsAppSDK" Version="'+ $WinAppSDKVersion + '"'
-    $oldVersionString = 'PackageReference Include="Microsoft.WindowsAppSDK" Version="[-.0-9a-zA-Z]*"'
+# Update .vcxproj files
+Get-ChildItem -Recurse *.vcxproj | ForEach-Object {
     $content = Get-Content $_.FullName -Raw
-    $content = $content -replace $oldVersionString, $newVersionString
-    Set-Content -Path $_.FullName -Value $content
-    Write-Host "Modified " $_.FullName 
+    if ($content -match '\\Microsoft.WindowsAppSDK.') {
+        $newVersionString = '\Microsoft.WindowsAppSDK.' + $WinAppSDKVersion + '\'
+        $oldVersionString = '\\Microsoft.WindowsAppSDK.[-.0-9a-zA-Z]*\\'
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $_.FullName -Value $content
+        Write-Host "Modified " $_.FullName
+    }
+}
+
+# Update .csproj files
+Get-ChildItem -Recurse *.csproj | ForEach-Object {
+    $content = Get-Content $_.FullName -Raw
+    if ($content -match 'PackageReference Include="Microsoft.WindowsAppSDK"') {
+        $newVersionString = 'PackageReference Include="Microsoft.WindowsAppSDK" Version="'+ $WinAppSDKVersion + '"'
+        $oldVersionString = 'PackageReference Include="Microsoft.WindowsAppSDK" Version="[-.0-9a-zA-Z]*"'
+        $content = $content -replace $oldVersionString, $newVersionString
+        Set-Content -Path $_.FullName -Value $content
+        Write-Host "Modified " $_.FullName 
+    }
 }

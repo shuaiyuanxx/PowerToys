@@ -124,8 +124,9 @@ extends:
               additionalBuildOptions: /p:RestoreConfigFile="$(Build.SourcesDirectory)\.pipelines\release-nuget.config"
               beforeBuildSteps:
                 - pwsh: |-
-                      nuget update '$(build.sourcesdirectory)\PowerToys.sln' -Id Microsoft.WindowsAppSDK
-                  displayName: Update WindowsAppSDK NuGet package
+                      .pipelines\UpdateVersions.ps1
+                  displayName: Update WindowsAppSDK version
+
               # beforeBuildSteps:
               #   # Sets versions for all PowerToy created DLLs
               #   - pwsh: |-
