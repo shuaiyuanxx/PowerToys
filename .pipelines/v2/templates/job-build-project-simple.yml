@@ -170,12 +170,22 @@ jobs:
   #          "packages.config"
   #       path: packages
 
+  - task: NuGetAuthenticate@1
+
   - task: PowerShell@2
     displayName: Update WinAppSDK Versions
     inputs:
       filePath: '$(build.sourcesdirectory)\.pipelines\UpdateVersions.ps1'
-
-  - template: .\steps-restore-nuget.yml
+  # In the Microsoft Azure DevOps tenant, NuGetCommand is ambiguous.
+  # This should be `task: NuGetCommand@2`
+  - task: NuGetCommand@2
+    displayName: Restore NuGet packages
+    inputs:
+      command: restore
+      feedsToUse: config
+      configPath: NuGet.config
+      restoreSolution: packages.config
+      restoreDirectory: '$(Build.SourcesDirectory)\packages'
 
   - pwsh: |-
       & "$(build.sourcesdirectory)\.pipelines\verifyAndSetLatestVCToolsVersion.ps1"
