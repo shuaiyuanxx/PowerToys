@@ -67,7 +67,7 @@ stages:
       #             platform: ${{ platform }}
       #             configuration: Release
 
-      - stage: Fuzz ${platform}
+      - stage: Fuzz
         displayName: Fuzz ${{ platform }}
         dependsOn:
           - Build_${platform}
