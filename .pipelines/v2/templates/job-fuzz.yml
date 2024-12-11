@@ -28,12 +28,12 @@ jobs:
           **/tests/*.FuzzTests/**
       - script: |
           echo "Printing files in target directory..."
-          dir "$(Pipeline.Workspace)\build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}\x64\Release\tests\AdvancedPaste.FuzzTests\net8.0-windows10.0.19041.0"
+          dir "$(Pipeline.Workspace)\build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}\x64\Release\x64\Release\tests\AdvancedPaste.FuzzTests\net8.0-windows10.0.19041.0"
         displayName: "Print files in target directory"
 
       - task: onefuzz-task@0
         inputs:
           onefuzzOSes: Windows
         env:
-          onefuzzDropDirectory: $(Pipeline.Workspace)\build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}\x64\Release\tests\AdvancedPaste.FuzzTests\net8.0-windows10.0.19041.0
+          onefuzzDropDirectory: $(Pipeline.Workspace)\build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}\x64\Release\x64\Release\tests\AdvancedPaste.FuzzTests\net8.0-windows10.0.19041.0
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
