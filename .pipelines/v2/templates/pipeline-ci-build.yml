@@ -70,7 +70,7 @@ stages:
       - stage: Fuzz
         displayName: Fuzz ${{ platform }}
         dependsOn:
-          - Build_${platform}
+          - Build_${{platform}}
         jobs:
           - template: job-fuzz.yml
             parameters:
