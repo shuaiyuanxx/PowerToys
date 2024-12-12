@@ -76,6 +76,7 @@ extends:
                 SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
               buildPlatforms: ${{ parameters.buildPlatforms }}
               enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
+              publishArtifacts: false
               runTests: ${{ parameters.runTests }}
               useVSPreview: ${{ parameters.useVSPreview }}
       - stage: Fuzz
