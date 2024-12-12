@@ -405,23 +405,23 @@ jobs:
           flattenFolders: True
           OverWrite: True
 
-      # # Check if deps.json files don't reference different dll versions.
-      # - pwsh: |-
-      #     & '.pipelines/verifyDepsJsonLibraryVersions.ps1' -targetDir '$(build.sourcesdirectory)\$(BuildPlatform)\$(BuildConfiguration)'
-      #   displayName: Audit deps.json files for all applications
+      # Check if deps.json files don't reference different dll versions.
+      - pwsh: |-
+          & '.pipelines/verifyDepsJsonLibraryVersions.ps1' -targetDir '$(build.sourcesdirectory)\$(BuildPlatform)\$(BuildConfiguration)'
+        displayName: Audit deps.json files for all applications
 
-      # # Check if asset files on the main application paths are playing nice and avoiding basic conflicts.
-      # - pwsh: |-
-      #     & '.pipelines/verifyPossibleAssetConflicts.ps1' -targetDir '$(build.sourcesdirectory)\$(BuildPlatform)\$(BuildConfiguration)'
-      #   displayName: Audit base applications path asset conflicts
+      # Check if asset files on the main application paths are playing nice and avoiding basic conflicts.
+      - pwsh: |-
+          & '.pipelines/verifyPossibleAssetConflicts.ps1' -targetDir '$(build.sourcesdirectory)\$(BuildPlatform)\$(BuildConfiguration)'
+        displayName: Audit base applications path asset conflicts
 
-      # - pwsh: |-
-      #     & '.pipelines/verifyPossibleAssetConflicts.ps1' -targetDir '$(build.sourcesdirectory)\$(BuildPlatform)\$(BuildConfiguration)\WinUI3Apps'
-      #   displayName: Audit WinAppSDK applications path asset conflicts
+      - pwsh: |-
+          & '.pipelines/verifyPossibleAssetConflicts.ps1' -targetDir '$(build.sourcesdirectory)\$(BuildPlatform)\$(BuildConfiguration)\WinUI3Apps'
+        displayName: Audit WinAppSDK applications path asset conflicts
 
-      # - pwsh: |-
-      #     & '.pipelines/verifyNoticeMdAgainstNugetPackages.ps1' -path '$(build.sourcesdirectory)\'
-      #   displayName: Verify NOTICE.md and NuGet packages match
+      - pwsh: |-
+          & '.pipelines/verifyNoticeMdAgainstNugetPackages.ps1' -path '$(build.sourcesdirectory)\'
+        displayName: Verify NOTICE.md and NuGet packages match
 
       - ${{ if eq(parameters.runTests, true) }}:
           # Publish test results which ran in MSBuild

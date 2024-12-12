@@ -13,7 +13,6 @@
 		<Compile Include="..\AdvancedPaste\Helpers\JsonHelper.cs" Link="JsonHelper.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" />
 		<PackageReference Include="MSTest" />
 	</ItemGroup>
 
