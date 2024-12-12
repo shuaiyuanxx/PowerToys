@@ -6,7 +6,10 @@
         "$type": "libfuzzerDotNet",
         "dll": "AdvancedPaste.FuzzTests.dll",
         "class": "AdvancedPaste.FuzzTests.FuzzTests",
-        "method": "FuzzPhoneNumber"
+        "method": "FuzzToJsonFromXmlOrCsv",
+        "FuzzingTargetBinaries": [
+          "PowerToys.AdvancedPaste.dll"
+        ]
       },
       "adoTemplate": {
         // supply the values appropriate to your
@@ -34,7 +37,8 @@
         // (globs are supported)
         "AdvancedPaste.FuzzTests.dll",
         "AdvancedPaste.FuzzTests.pdb"
-      ]
+      ],
+      "SdlWorkItemId": "49911822"
     }
   ]
 }
