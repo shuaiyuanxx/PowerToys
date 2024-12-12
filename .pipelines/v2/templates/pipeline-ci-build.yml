@@ -56,16 +56,16 @@ stages:
               runTests: ${{ parameters.runTests }}
               useVSPreview: ${{ parameters.useVSPreview }}
 
-      # - ${{ if eq(parameters.runTests, true) }}:
-      #     - stage: Test_${{ platform }}
-      #       displayName: Test ${{ platform }}
-      #       dependsOn:
-      #         - Build_${{platform}}
-      #       jobs:
-      #         - template: job-test-project.yml
-      #           parameters:
-      #             platform: ${{ platform }}
-      #             configuration: Release
+      - ${{ if eq(parameters.runTests, true) }}:
+          - stage: Test_${{ platform }}
+            displayName: Test ${{ platform }}
+            dependsOn:
+              - Build_${{platform}}
+            jobs:
+              - template: job-test-project.yml
+                parameters:
+                  platform: ${{ platform }}
+                  configuration: Release
 
       - stage: Fuzz
         displayName: Fuzz ${{ platform }}
