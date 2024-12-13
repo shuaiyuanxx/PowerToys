@@ -49,7 +49,7 @@ parameters:
     default: false
 
 extends:
-  template: v1/1ES.Unofficial.PipelineTemplate.yml@1esPipelines
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     pool:
       name: SHINE-INT-S
@@ -62,7 +62,7 @@ extends:
       tsa:
         enabled: true
         configFile: '$(Build.SourcesDirectory)\.pipelines\tsa.json'
-        
+
     stages:
       - stage: Build
         jobs:
