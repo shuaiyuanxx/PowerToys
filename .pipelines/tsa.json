@@ -1,6 +1,6 @@
 {
     "codebaseName": "PowerToys_main",
-    "notificationAliases": ["powertoys@microsoft.com"],
+    "notificationAliases": ["leilzh@microsoft.com"],
     "instanceUrl": "https://microsoft.visualstudio.com",
     "projectName": "OS",
     "areaPath": "OS\\Windows Client and Services\\WinPD\\DEEP-Developer Experience, Ecosystem and Partnerships\\SHINE\\PowerToys"
