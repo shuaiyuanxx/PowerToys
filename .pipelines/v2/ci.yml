@@ -35,7 +35,7 @@ parameters:
   - name: runTests
     type: boolean
     displayName: "Run Tests"
-    default: true
+    default: false
   - name: useVSPreview
     type: boolean
     displayName: "Build Using Visual Studio Preview"

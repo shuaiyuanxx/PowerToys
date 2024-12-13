@@ -50,22 +50,25 @@ stages:
                   demands: ImageOverride -equals SHINE-VS17-Preview
               buildPlatforms:
                 - ${{ platform }}
+              variables:
+                IsPipeline: 1 # The installer uses this to detect whether it should pick up localizations
+                SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
               buildConfigurations: [Release]
               enablePackageCaching: true
               enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
               runTests: ${{ parameters.runTests }}
               useVSPreview: ${{ parameters.useVSPreview }}
 
-      # - ${{ if eq(parameters.runTests, true) }}:
-      #     - stage: Test_${{ platform }}
-      #       displayName: Test ${{ platform }}
-      #       dependsOn:
-      #         - Build_${{platform}}
-      #       jobs:
-      #         - template: job-test-project.yml
-      #           parameters:
-      #             platform: ${{ platform }}
-      #             configuration: Release
+      - ${{ if eq(parameters.runTests, true) }}:
+          - stage: Test_${{ platform }}
+            displayName: Test ${{ platform }}
+            dependsOn:
+              - Build_${{platform}}
+            jobs:
+              - template: job-test-project.yml
+                parameters:
+                  platform: ${{ platform }}
+                  configuration: Release
 
       - stage: Fuzz
         displayName: Fuzz ${{ platform }}

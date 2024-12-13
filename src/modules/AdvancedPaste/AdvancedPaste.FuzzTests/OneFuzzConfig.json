@@ -36,7 +36,10 @@
         // you will need to add any other files required
         // (globs are supported)
         "AdvancedPaste.FuzzTests.dll",
-        "AdvancedPaste.FuzzTests.pdb"
+        "AdvancedPaste.FuzzTests.pdb",
+        "Microsoft.Windows.SDK.NET.dll",
+        "Newtonsoft.Json.dll",
+        "WinRT.Runtime.dll"
       ],
       "SdlWorkItemId": 49911822
     }
