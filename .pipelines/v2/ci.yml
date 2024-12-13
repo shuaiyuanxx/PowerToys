@@ -11,14 +11,18 @@ resources:
 name: $(BuildDefinitionName)_$(date:yyMM).$(date:dd)$(rev:rrr)
 
 variables:
-  - name: buildPlatforms
-      - x64
   - name: enableMsBuildCaching
     value: false
   - name: runTests
     value: false
 
 parameters:
+  - name: buildPlatforms
+    displayName: "Build Platforms"
+    type: object
+    default:
+      - x64
+      - arm64
   - name: useVSPreview
     type: boolean
     displayName: "Build Using Visual Studio Preview"
