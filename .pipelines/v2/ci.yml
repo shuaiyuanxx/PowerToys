@@ -1,51 +1,129 @@
-trigger:
-  batch: true
-  branches:
-    include:
-      - main
-      - stable
-#  paths:
-#    exclude:
-#      - doc/*
-#      - temp/*
-#      - tools/*
-#      - '**.md'
+pr: none
+trigger: none
 
-pr:
-  branches:
-    include:
-      - main
-      - stable
-#  paths:
-#    exclude:
-#      - '**.md'
-#      - doc
-
+schedules:
+  - cron: "0 0 * * *"
+    displayName: Daily fuzzing submission
+    branches:
+      include:
+        - main
+    always: true
 name: $(BuildDefinitionName)_$(date:yyMM).$(date:dd)$(rev:rrr)
 
 parameters:
-  - name: buildPlatforms
-    type: object
-    default:
-      - x64
-      - arm64
+  - name: platform
+    type: string
+    default: x64
   - name: enableMsBuildCaching
     type: boolean
     displayName: "Enable MSBuild Caching"
     default: false
-  - name: runTests
-    type: boolean
-    displayName: "Run Tests"
-    default: true
   - name: useVSPreview
     type: boolean
     displayName: "Build Using Visual Studio Preview"
     default: false
 
-extends:
-  template: templates/pipeline-ci-build.yml
-  parameters:
-    buildPlatforms: ${{ parameters.buildPlatforms }}
-    enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
-    runTests: ${{ parameters.runTests }}
-    useVSPreview: ${{ parameters.useVSPreview }}
+stages:
+  - stage: Build_${{ parameters.platform }}
+    displayName: Build ${{ parameters.platform }}
+    jobs:
+      - template: templates/job-build-project.yml
+        parameters:
+          pool:
+            ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
+              name: SHINE-INT-L
+            ${{ else }}:
+              name: SHINE-OSS-L
+            ${{ if eq(parameters.useVSPreview, true) }}:
+              demands: ImageOverride -equals SHINE-VS17-Preview
+          buildPlatforms:
+            - ${{ parameters.platform }}
+          buildConfigurations: [Release]
+          enablePackageCaching: true
+          enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
+          runTests: true
+          useVSPreview: ${{ parameters.useVSPreview }}
+
+  - stage: Fuzz
+    displayName: Fuzz ${{ parameters.platform }}
+    dependsOn:
+      - Build_${{parameters.platform}}
+    jobs:
+      - template: templates/job-fuzz.yml
+        parameters:
+          platform: ${{ parameters.platform }}
+          configuration: Release
+          inputArtifactStem: ""
+# trigger: none
+# pr: none
+
+# resources:
+#   repositories:
+#     - repository: 1ESPipelineTemplates
+#       type: git
+#       name: 1ESPipelineTemplates/1ESPipelineTemplates
+#       ref: refs/tags/release
+
+# name: $(BuildDefinitionName)_$(date:yyMM).$(date:dd)$(rev:rrr)
+
+# variables:
+#   - name: enableMsBuildCaching
+#     value: false
+#   - name: runTests
+#     value: true
+#   -
+# parameters:
+#   - name: buildPlatforms
+#     displayName: "Build Platforms"
+#     type: object
+#     default:
+#       - x64
+#   - name: useVSPreview
+#     type: boolean
+#     displayName: "Build Using Visual Studio Preview"
+#     default: false
+
+# extends:
+#   template: v1/1ES.Unofficial.PipelineTemplate.yml@1ESPipelineTemplates
+#   parameters:
+#     pool:
+#       name: SHINE-INT-L
+#       ${{ if eq(parameters.useVSPreview, true) }}:
+#         demands: ImageOverride -equals SHINE-VS17-Preview
+#       ${{ else }}:
+#         image: SHINE-VS17-Latest
+#       os: windows
+#     sdl:
+#       tsa:
+#         enabled: true
+#         configFile: '$(Build.SourcesDirectory)\.pipelines\tsa.json'
+
+#     stages:
+#       - stage: Build
+#         jobs:
+#           - template: .pipelines/v2/templates/job-build-project.yml@self
+#             parameters:
+#               pool:
+#                 name: SHINE-INT-L
+#                 ${{ if eq(parameters.useVSPreview, true) }}:
+#                   demands: ImageOverride -equals SHINE-VS17-Preview
+#                 ${{ else }}:
+#                   image: SHINE-VS17-Latest
+#                 os: windows
+#               variables:
+#                 IsPipeline: 1 # The installer uses this to detect whether it should pick up localizations
+#                 SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
+#               buildPlatforms: ${{ parameters.buildPlatforms }}
+#               enableMsBuildCaching: ${{ variables.enableMsBuildCaching }}
+#               publishArtifacts: false
+#               runTests: ${{ variables.runTests }}
+#               useVSPreview: ${{ parameters.useVSPreview }}
+
+#       - stage: Fuzz
+#         dependsOn: Build
+#         jobs:
+#           - template: .pipelines/v2/templates/job-fuzz.yml@self
+#             parameters:
+#               platform: "x64"
+#               configuration: Release
+#               inputArtifactStem: ""
