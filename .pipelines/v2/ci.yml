@@ -52,7 +52,7 @@ extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     pool:
-      name: SHINE-INT-L
+      name: SHINE-INT-S
       ${{ if eq(parameters.useVSPreview, true) }}:
         demands: ImageOverride -equals SHINE-VS17-Preview
       ${{ else }}:
