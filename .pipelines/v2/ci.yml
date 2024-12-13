@@ -1,25 +1,5 @@
-trigger:
-  batch: true
-  branches:
-    include:
-      - main
-      - stable
-#  paths:
-#    exclude:
-#      - doc/*
-#      - temp/*
-#      - tools/*
-#      - '**.md'
-
-pr:
-  branches:
-    include:
-      - main
-      - stable
-#  paths:
-#    exclude:
-#      - '**.md'
-#      - doc
+trigger: none
+pr: none
 
 resources:
   repositories:
@@ -30,19 +10,15 @@ resources:
 
 name: $(BuildDefinitionName)_$(date:yyMM).$(date:dd)$(rev:rrr)
 
-parameters:
+variables:
   - name: buildPlatforms
-    type: object
-    default:
       - x64
   - name: enableMsBuildCaching
-    type: boolean
-    displayName: "Enable MSBuild Caching"
-    default: false
+    value: false
   - name: runTests
-    type: boolean
-    displayName: "Run Tests"
-    default: false
+    value: false
+
+parameters:
   - name: useVSPreview
     type: boolean
     displayName: "Build Using Visual Studio Preview"
@@ -78,16 +54,17 @@ extends:
               variables:
                 IsPipeline: 1 # The installer uses this to detect whether it should pick up localizations
                 SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
-              buildPlatforms: ${{ parameters.buildPlatforms }}
-              enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
+              buildPlatforms: ${{ variables.buildPlatforms }}
+              enableMsBuildCaching: ${{ variables.enableMsBuildCaching }}
               publishArtifacts: false
-              runTests: ${{ parameters.runTests }}
+              runTests: ${{ variables.runTests }}
               useVSPreview: ${{ parameters.useVSPreview }}
+
       - stage: Fuzz
         dependsOn: Build
         jobs:
           - template: .pipelines/v2/templates/job-fuzz.yml@self
             parameters:
-              platform: "x64" #For fuzzing test use x64 platform only for now
+              platform: "x64"
               configuration: Release
               inputArtifactStem: ""
