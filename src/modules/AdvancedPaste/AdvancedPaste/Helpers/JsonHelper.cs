@@ -194,6 +194,11 @@ namespace AdvancedPaste.Helpers
             return string.IsNullOrEmpty(jsonText) ? text : jsonText;
         }
 
+        public static bool ValidateInteger(string someString)
+        {
+            return int.TryParse(someString, out _);
+        }
+
         private static void GetCsvDelimiter(in string[] csvLines, out char delimiter, out int delimiterCount)
         {
             delimiter = '\0'; // Unicode "null" character.

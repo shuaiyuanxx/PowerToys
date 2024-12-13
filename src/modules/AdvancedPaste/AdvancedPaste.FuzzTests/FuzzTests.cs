@@ -11,9 +11,7 @@ namespace AdvancedPaste.FuzzTests
     {
         public static void FuzzToJsonFromXmlOrCsv(ReadOnlySpan<byte> input)
         {
-            var dataPackage = new DataPackage();
-            dataPackage.SetText(input.ToString());
-            JsonHelper.ToJsonFromXmlOrCsv(dataPackage.GetView());
+            JsonHelper.ValidateInteger(input.ToString());
         }
     }
 }
