@@ -1,4 +1,3 @@
-
 trigger:
   batch: true
   branches:
@@ -36,7 +35,7 @@ parameters:
   - name: runTests
     type: boolean
     displayName: "Run Tests"
-    default: false
+    default: true
   - name: useVSPreview
     type: boolean
     displayName: "Build Using Visual Studio Preview"
@@ -49,7 +48,6 @@ extends:
     enableMsBuildCaching: ${{ parameters.enableMsBuildCaching }}
     runTests: ${{ parameters.runTests }}
     useVSPreview: ${{ parameters.useVSPreview }}
-
 # trigger: none
 # pr: none
 
