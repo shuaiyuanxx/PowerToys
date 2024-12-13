@@ -22,7 +22,6 @@ parameters:
     type: object
     default:
       - x64
-      - arm64
   - name: useVSPreview
     type: boolean
     displayName: "Build Using Visual Studio Preview"
