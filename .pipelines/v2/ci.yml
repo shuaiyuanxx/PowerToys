@@ -57,7 +57,7 @@ extends:
               variables:
                 IsPipeline: 1 # The installer uses this to detect whether it should pick up localizations
                 SkipCppCodeAnalysis: 1 # Skip the code analysis to speed up release CI. It runs on PR CI, anyway
-              buildPlatforms: ${{ variables.buildPlatforms }}
+              buildPlatforms: ${{ parameters.buildPlatforms }}
               enableMsBuildCaching: ${{ variables.enableMsBuildCaching }}
               publishArtifacts: false
               runTests: ${{ variables.runTests }}
