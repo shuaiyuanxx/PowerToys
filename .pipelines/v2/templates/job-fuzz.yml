@@ -1,7 +1,3 @@
-variables:
-  - name: ArtifactName
-    value: build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}
-
 parameters:
   - name: configuration
     type: string
@@ -17,7 +13,8 @@ jobs:
   - job: OneFuzz
     pool:
       vmImage: windows-2022
-
+    variables:
+      ArtifactName: build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}
     steps:
       - checkout: self
         submodules: false
