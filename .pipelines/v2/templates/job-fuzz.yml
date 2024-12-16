@@ -24,7 +24,7 @@ jobs:
 
       - download: current
         displayName: Download artifacts
-        artifact: $(variables.ArtifactName)
+        artifact: $(ArtifactName)
         patterns: |-
           **/tests/*.FuzzTests/**
 
@@ -32,5 +32,5 @@ jobs:
         inputs:
           onefuzzOSes: Windows
         env:
-          onefuzzDropDirectory: $(Pipeline.Workspace)\$(variables.ArtifactName)\x64\Release\x64\Release\tests
+          onefuzzDropDirectory: $(Pipeline.Workspace)\$(ArtifactName)\x64\Release\x64\Release\tests
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
