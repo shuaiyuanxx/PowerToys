@@ -1,3 +1,7 @@
+variables:
+  - name: ArtifactName
+    value: build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}
+
 parameters:
   - name: configuration
     type: string
@@ -8,10 +12,6 @@ parameters:
   - name: inputArtifactStem
     type: string
     default: ""
-
-variables:
-  - name: ArtifactName
-    value: build-${{ parameters.platform }}-${{ parameters.configuration }}${{ parameters.inputArtifactStem }}
 
 jobs:
   - job: OneFuzz
