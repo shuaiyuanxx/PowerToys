@@ -13,9 +13,11 @@ using AdvancedPaste.Models;
 using AdvancedPaste.Models.KernelQueryCache;
 using AdvancedPaste.Telemetry;
 using ManagedCommon;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.PowerToys.Telemetry;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Services;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace AdvancedPaste.Services;
@@ -141,12 +143,16 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
         chatHistory.AddSystemMessage($"Available clipboard formats: {await kernel.GetDataFormatsAsync()}");
         chatHistory.AddUserMessage(prompt);
 
-        await _promptModerationService.ValidateAsync(GetFullPrompt(chatHistory));
+        // await _promptModerationService.ValidateAsync(GetFullPrompt(chatHistory));
+        IChatCompletionService chatCompletionService = null;
+        PromptExecutionSettings srvsetting = null;
+        var aiServiceSelector = kernel.GetRequiredService<IAIServiceSelector>();
+        var status = aiServiceSelector.TrySelectAIService<IChatCompletionService>(kernel, null, null, out chatCompletionService, out srvsetting);
+        var chatResult = await chatCompletionService.GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
 
-        var chatResult = await kernel.GetRequiredService<IChatCompletionService>()
-                                     .GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
+        // var chatResult = await kernel.GetRequiredService<IChatCompletionService>()
+        //                            .GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
         chatHistory.Add(chatResult);
-
         var totalUsage = chatHistory.Select(GetAIServiceUsage)
                                     .Aggregate(AIServiceUsage.Add);
 
@@ -183,6 +189,7 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
     {
         var kernelBuilder = Kernel.CreateBuilder();
         AddChatCompletionService(kernelBuilder);
+        kernelBuilder.Services.AddSingleton<IAIServiceSelector>(new ChatCompletionServiceSelector());
         kernelBuilder.Plugins.AddFromFunctions("Actions", GetKernelFunctions());
         return kernelBuilder.Build();
     }

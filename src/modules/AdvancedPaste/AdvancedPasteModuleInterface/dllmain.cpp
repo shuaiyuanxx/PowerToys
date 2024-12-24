@@ -61,6 +61,9 @@ namespace
 
     const wchar_t OPENAI_VAULT_RESOURCE[] = L"https://platform.openai.com/api-keys";
     const wchar_t OPENAI_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_OpenAIKey";
+    const wchar_t AZURE_OPENAI_VAULT_RESOURCE[] = L"PowerToysAdvancedPasteAzureOpenAI";
+    const wchar_t AZURE_OPENAI_ENDPOINT_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_AzureOpenAIEndpoint";
+    const wchar_t AZURE_OPENAI_KEY_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_AzureOpenAIKey";
 }
 
 class AdvancedPaste : public PowertoyModuleIface
@@ -171,11 +174,33 @@ private:
         }
     }
 
+    static bool azure_open_ai_key_exists()
+    {
+        try
+        {
+            winrt::Windows::Security::Credentials::PasswordVault().Retrieve(AZURE_OPENAI_VAULT_RESOURCE, AZURE_OPENAI_KEY_VAULT_USERNAME);
+            winrt::Windows::Security::Credentials::PasswordVault().Retrieve(AZURE_OPENAI_VAULT_RESOURCE, AZURE_OPENAI_ENDPOINT_VAULT_USERNAME);
+            return true;
+        }
+        catch (const winrt::hresult_error& ex)
+        {
+            // Looks like the only way to access the PasswordVault is through an API that throws an exception in case the resource doesn't exist.
+            // If the debugger breaks here, just continue.
+            // If you want to disable breaking here in a more permanent way, just add a condition in Visual Studio's Exception Settings to not break on win::hresult_error, but that might make you not hit other exceptions you might want to catch.
+            if (ex.code() == HRESULT_FROM_WIN32(ERROR_NOT_FOUND))
+            {
+                return false; // Credential doesn't exist.
+            }
+            Logger::error("Unexpected error while retrieving OpenAI key from vault: {}", winrt::to_string(ex.message()));
+            return false;
+        }
+    }
+
     bool is_open_ai_enabled()
     {
         return gpo_policy_enabled_configuration() != powertoys_gpo::gpo_rule_configured_disabled &&
                powertoys_gpo::getAllowedAdvancedPasteOnlineAIModelsValue() != powertoys_gpo::gpo_rule_configured_disabled &&
-               open_ai_key_exists();
+               (open_ai_key_exists() || azure_open_ai_key_exists());
     }
 
     static std::wstring kebab_to_pascal_case(const std::wstring& kebab_str)

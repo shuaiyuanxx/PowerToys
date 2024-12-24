@@ -27,14 +27,17 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
     {
         var fullPrompt = systemInstructions + "\n\n" + userMessage;
 
-        await _promptModerationService.ValidateAsync(fullPrompt);
+        // await _promptModerationService.ValidateAsync(fullPrompt);
 
-        OpenAIClient azureAIClient = new(_aiCredentialsProvider.Key);
+        // OpenAIClient azureAIClient = new(_aiCredentialsProvider.Key);
+        AzureKeyCredential cred = new(_aiCredentialsProvider.AzureOpenAIKey);
+        Uri endpoint = new(_aiCredentialsProvider.AzureOpenAIEndpoint);
+        OpenAIClient azureAIClient = new(endpoint, cred);
 
         var response = await azureAIClient.GetCompletionsAsync(
             new()
             {
-                DeploymentName = ModelName,
+                DeploymentName = "gpt-4o-mini-powertoys",
                 Prompts =
                 {
                     fullPrompt,

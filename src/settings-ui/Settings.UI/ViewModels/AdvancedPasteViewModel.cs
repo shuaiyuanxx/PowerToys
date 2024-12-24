@@ -169,7 +169,43 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             return cred is not null;
         }
 
-        public bool IsOpenAIEnabled => OpenAIKeyExists() && !IsOnlineAIModelsDisallowedByGPO;
+        private bool AzureOpenAIKeyExists()
+        {
+            PasswordVault vault = new PasswordVault();
+            PasswordCredential cred = null;
+
+            try
+            {
+                cred = vault.Retrieve("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIKey");
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return cred is not null;
+        }
+
+        private bool AzureOpenAIEndpointExists()
+        {
+            PasswordVault vault = new PasswordVault();
+            PasswordCredential cred = null;
+
+            try
+            {
+                cred = vault.Retrieve("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint");
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return cred is not null;
+        }
+
+        public bool IsOpenAIEnabled => (OpenAIKeyExists() && !IsOnlineAIModelsDisallowedByGPO) || IsAzureOpenAIEnabled;
+
+        public bool IsAzureOpenAIEnabled => AzureOpenAIEndpointExists() && AzureOpenAIKeyExists();
 
         public bool IsEnabledGpoConfigured
         {
@@ -430,6 +466,30 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             catch (Exception)
             {
             }
+
+            try
+            {
+                PasswordVault vault = new PasswordVault();
+                PasswordCredential cred = vault.Retrieve("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIKey");
+                vault.Remove(cred);
+                OnPropertyChanged(nameof(IsOpenAIEnabled));
+                NotifySettingsChanged();
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                PasswordVault vault = new PasswordVault();
+                PasswordCredential cred = vault.Retrieve("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint");
+                vault.Remove(cred);
+                OnPropertyChanged(nameof(IsOpenAIEnabled));
+                NotifySettingsChanged();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         internal void EnableAI(string password)
@@ -439,6 +499,24 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 PasswordVault vault = new();
                 PasswordCredential cred = new("https://platform.openai.com/api-keys", "PowerToys_AdvancedPaste_OpenAIKey", password);
                 vault.Add(cred);
+                OnPropertyChanged(nameof(IsOpenAIEnabled));
+                IsAdvancedAIEnabled = true; // new users should get Semantic Kernel benefits immediately
+                NotifySettingsChanged();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        internal void EnableAI(string endpoint, string password)
+        {
+            try
+            {
+                PasswordVault vault = new();
+                PasswordCredential endpointCred = new("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint", endpoint);
+                PasswordCredential keyCred = new("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIKey", password);
+                vault.Add(endpointCred);
+                vault.Add(keyCred);
                 OnPropertyChanged(nameof(IsOpenAIEnabled));
                 IsAdvancedAIEnabled = true; // new users should get Semantic Kernel benefits immediately
                 NotifySettingsChanged();

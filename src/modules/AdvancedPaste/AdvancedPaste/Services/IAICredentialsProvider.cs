@@ -10,5 +10,9 @@ public interface IAICredentialsProvider
 
     string Key { get; }
 
+    string AzureOpenAIKey { get; }
+
+    string AzureOpenAIEndpoint { get; }
+
     bool Refresh();
 }

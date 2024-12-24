@@ -44,6 +44,14 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             {
                 ViewModel.EnableAI(AdvancedPaste_EnableAIDialogOpenAIApiKey.Text);
             }
+
+            if (!string.IsNullOrEmpty(AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text) &&
+                !string.IsNullOrEmpty(AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text))
+            {
+                ViewModel.EnableAI(
+                    AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text,
+                    AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text);
+            }
         }
 
         private async void AdvancedPaste_EnableAIButton_Click(object sender, RoutedEventArgs e)
@@ -54,7 +62,8 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             EnableAIDialog.PrimaryButtonCommand = SaveOpenAIKeyCommand;
 
             AdvancedPaste_EnableAIDialogOpenAIApiKey.Text = string.Empty;
-
+            AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text = string.Empty;
+            AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text = string.Empty;
             await ShowEnableDialogAsync();
         }
 
@@ -71,6 +80,12 @@ namespace Microsoft.PowerToys.Settings.UI.Views
         private void AdvancedPaste_EnableAIDialogOpenAIApiKey_TextChanged(object sender, TextChangedEventArgs e)
         {
             EnableAIDialog.IsPrimaryButtonEnabled = AdvancedPaste_EnableAIDialogOpenAIApiKey.Text.Length > 0;
+        }
+
+        private void AdvancedPaste_EnableAIDialogAzureOpenAIApiCredential_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            EnableAIDialog.IsPrimaryButtonEnabled = AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text.Length > 0 &&
+                AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text.Length > 0;
         }
 
         public async void DeleteCustomActionButton_Click(object sender, RoutedEventArgs e)
