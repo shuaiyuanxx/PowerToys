@@ -13,6 +13,7 @@ using Azure;
 using Azure.AI.OpenAI;
 using ManagedCommon;
 using Microsoft.PowerToys.Telemetry;
+using Microsoft.SemanticKernel;
 
 namespace AdvancedPaste.Services.OpenAI;
 
@@ -23,21 +24,20 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
     private readonly IAICredentialsProvider _aiCredentialsProvider = aiCredentialsProvider;
     private readonly IPromptModerationService _promptModerationService = promptModerationService;
 
-    private async Task<Completions> GetAICompletionAsync(string systemInstructions, string userMessage)
+    public Kernel Kernel_ { get; set; }
+
+    private async Task<FunctionResult> GetAICompletionAsync(string systemInstructions, string userMessage)
     {
         var fullPrompt = systemInstructions + "\n\n" + userMessage;
+        /*
+        await _promptModerationService.ValidateAsync(fullPrompt);
 
-        // await _promptModerationService.ValidateAsync(fullPrompt);
-
-        // OpenAIClient azureAIClient = new(_aiCredentialsProvider.Key);
-        AzureKeyCredential cred = new(_aiCredentialsProvider.AzureOpenAIKey);
-        Uri endpoint = new(_aiCredentialsProvider.AzureOpenAIEndpoint);
-        OpenAIClient azureAIClient = new(endpoint, cred);
+        OpenAIClient azureAIClient = new(_aiCredentialsProvider.Key);
 
         var response = await azureAIClient.GetCompletionsAsync(
             new()
             {
-                DeploymentName = "gpt-4o-mini-powertoys",
+                DeploymentName = ModelName,
                 Prompts =
                 {
                     fullPrompt,
@@ -51,7 +51,9 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
             Logger.LogDebug("Cut off due to length constraints");
         }
 
-        return response;
+        return response;*/
+
+        return await Kernel_.InvokePromptAsync(fullPrompt);
     }
 
     public async Task<string> TransformTextAsync(string prompt, string inputText)
@@ -84,7 +86,7 @@ Output:
         try
         {
             var response = await GetAICompletionAsync(systemInstructions, userMessage);
-
+            /*
             var usage = response.Usage;
             AdvancedPasteGenerateCustomFormatEvent telemetryEvent = new(usage.PromptTokens, usage.CompletionTokens, ModelName);
             PowerToysTelemetry.Log.WriteEvent(telemetryEvent);
@@ -92,7 +94,8 @@ Output:
             var logEvent = new { telemetryEvent.PromptTokens, telemetryEvent.CompletionTokens, telemetryEvent.ModelName };
             Logger.LogDebug($"{nameof(TransformTextAsync)} complete; {JsonSerializer.Serialize(logEvent)}");
 
-            return response.Choices[0].Text;
+            return response.Choices[0].Text;*/
+            return response.GetValue<string>();
         }
         catch (Exception ex)
         {

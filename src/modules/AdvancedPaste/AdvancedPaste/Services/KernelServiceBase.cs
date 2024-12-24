@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using AdvancedPaste.Helpers;
 using AdvancedPaste.Models;
 using AdvancedPaste.Models.KernelQueryCache;
+using AdvancedPaste.Services.OpenAI;
 using AdvancedPaste.Telemetry;
 using ManagedCommon;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,7 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
 
         var kernel = CreateKernel();
         kernel.SetDataPackageView(clipboardData);
+        _customTextTransformService.Kernel_ = kernel;
 
         CacheKey cacheKey = new() { Prompt = prompt, AvailableFormats = await clipboardData.GetAvailableFormatsAsync() };
         var maybeCacheValue = _queryCacheService.ReadOrNull(cacheKey);
