@@ -288,8 +288,6 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Image Margin="-24,-24,-24,0" Source="{ThemeResource DialogHeaderImage}" />
                     <TextBlock
@@ -306,9 +304,23 @@
                         </Hyperlink>
                     </TextBlock>
 
-                    <StackPanel Grid.Row="2" Orientation="Vertical">
+                    <ComboBox
+                        x:Name="AIProviderComboBox"
+                        Grid.Row="2"
+                        Header="AI provider"
+                        PlaceholderText="Select an AI provider"
+                        SelectionChanged="AIProviderComboBox_SelectionChanged">
+                        <ComboBoxItem Content="OpenAI" />
+                        <ComboBoxItem Content="Azure OpenAI" />
+                    </ComboBox>
+
+                    <StackPanel
+                        x:Name="OpenAISettingsPanel"
+                        Grid.Row="3"
+                        Orientation="Vertical"
+                        Visibility="Collapsed">
                         <TextBlock x:Uid="AdvancedPaste_EnableAIDialog_ConfigureOpenAIKey" FontWeight="SemiBold" />
-                        <TextBlock Grid.Row="2" TextWrapping="Wrap">
+                        <TextBlock Grid.Row="3" TextWrapping="Wrap">
                             <Run x:Uid="AdvancedPaste_EnableAIDialog_LoginIntoText" />
                             <Hyperlink NavigateUri="https://platform.openai.com/api-keys">
                                 <Run x:Uid="AdvancedPaste_EnableAIDialog_OpenAIApiKeysOverviewText" />
@@ -318,70 +330,72 @@
                             <LineBreak />
                             <Run x:Uid="AdvancedPaste_EnableAIDialog_NoteAICreditsText" />
                         </TextBlock>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                x:Uid="AdvancedPaste_EnableAIDialogOpenAIApiKey"
+                                VerticalAlignment="Center"
+                                TextWrapping="Wrap" />
+                            <TextBox
+                                x:Name="AdvancedPaste_EnableAIDialogOpenAIApiKey"
+                                Grid.Column="1"
+                                MinWidth="248"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                TextChanged="AdvancedPaste_EnableAIDialogOpenAIApiKey_TextChanged" />
+                        </Grid>
                     </StackPanel>
 
-                    <Grid Grid.Row="3" ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            x:Uid="AdvancedPaste_EnableAIDialogOpenAIApiKey"
-                            VerticalAlignment="Center"
-                            TextWrapping="Wrap" />
-                        <TextBox
-                            x:Name="AdvancedPaste_EnableAIDialogOpenAIApiKey"
-                            Grid.Column="1"
-                            MinWidth="248"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            TextChanged="AdvancedPaste_EnableAIDialogOpenAIApiKey_TextChanged" />
-                    </Grid>
-
-                    <StackPanel Grid.Row="4" Orientation="Vertical">
+                    <StackPanel
+                        x:Name="AzureOpenAISettingsPanel"
+                        Grid.Row="3"
+                        Orientation="Vertical"
+                        Visibility="Collapsed">
                         <TextBlock x:Uid="AdvancedPaste_EnableAzureAIDialog_ConfigureAzureOpenAIKey" FontWeight="SemiBold" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    x:Uid="AdvancedPaste_EnableAIDialogAzureOpenAIApiKey"
+                                    VerticalAlignment="Center"
+                                    TextWrapping="Wrap" />
+                                <TextBox
+                                    x:Name="AdvancedPaste_EnableAIDialogAzureOpenAIApiKey"
+                                    Grid.Column="1"
+                                    MinWidth="248"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    TextChanged="AdvancedPaste_EnableAIDialogAzureOpenAIApiCredential_TextChanged" />
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    x:Uid="AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint"
+                                    VerticalAlignment="Center"
+                                    TextWrapping="Wrap" />
+                                <TextBox
+                                    x:Name="AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint"
+                                    Grid.Column="1"
+                                    MinWidth="248"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    TextChanged="AdvancedPaste_EnableAIDialogAzureOpenAIApiCredential_TextChanged" />
+                            </Grid>
+                        </Grid>
                     </StackPanel>
-
-                    <Grid Grid.Row="5" ColumnSpacing="8">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                x:Uid="AdvancedPaste_EnableAIDialogAzureOpenAIApiKey"
-                                VerticalAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <TextBox
-                                x:Name="AdvancedPaste_EnableAIDialogAzureOpenAIApiKey"
-                                Grid.Column="1"
-                                MinWidth="248"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch"
-                                TextChanged="AdvancedPaste_EnableAIDialogAzureOpenAIApiCredential_TextChanged" />
-                        </Grid>
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                x:Uid="AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint"
-                                VerticalAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <TextBox
-                                x:Name="AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint"
-                                Grid.Column="1"
-                                MinWidth="248"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch"
-                                TextChanged="AdvancedPaste_EnableAIDialogAzureOpenAIApiCredential_TextChanged" />
-                        </Grid>
-                    </Grid>
                 </Grid>
             </ScrollViewer>
         </ContentDialog>

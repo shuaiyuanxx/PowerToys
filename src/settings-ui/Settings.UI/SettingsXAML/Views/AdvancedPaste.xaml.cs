@@ -67,6 +67,20 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             await ShowEnableDialogAsync();
         }
 
+        private void AIProviderComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AIProviderComboBox.SelectedIndex == 0)
+            {
+                OpenAISettingsPanel.Visibility = Visibility.Visible;
+                AzureOpenAISettingsPanel.Visibility = Visibility.Collapsed;
+            }
+            else if (AIProviderComboBox.SelectedIndex == 1)
+            {
+                OpenAISettingsPanel.Visibility = Visibility.Collapsed;
+                AzureOpenAISettingsPanel.Visibility = Visibility.Visible;
+            }
+        }
+
         private async Task ShowEnableDialogAsync()
         {
             await EnableAIDialog.ShowAsync();
