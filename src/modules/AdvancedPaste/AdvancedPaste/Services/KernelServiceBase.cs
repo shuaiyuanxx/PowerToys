@@ -146,14 +146,8 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
         chatHistory.AddUserMessage(prompt);
 
         // await _promptModerationService.ValidateAsync(GetFullPrompt(chatHistory));
-        IChatCompletionService chatCompletionService = null;
-        PromptExecutionSettings srvsetting = null;
-        var aiServiceSelector = kernel.GetRequiredService<IAIServiceSelector>();
-        var status = aiServiceSelector.TrySelectAIService<IChatCompletionService>(kernel, null, null, out chatCompletionService, out srvsetting);
-        var chatResult = await chatCompletionService.GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
-
-        // var chatResult = await kernel.GetRequiredService<IChatCompletionService>()
-        //                            .GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
+        var chatResult = await kernel.GetRequiredService<IChatCompletionService>()
+                                     .GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
         chatHistory.Add(chatResult);
         var totalUsage = chatHistory.Select(GetAIServiceUsage)
                                     .Aggregate(AIServiceUsage.Add);
