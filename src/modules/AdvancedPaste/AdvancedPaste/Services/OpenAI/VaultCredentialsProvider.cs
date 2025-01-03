@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-
+using System.Collections.Generic;
 using Windows.Security.Credentials;
 
 namespace AdvancedPaste.Services.OpenAI;
@@ -18,7 +18,9 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
 
     public string AzureOpenAIEndpoint { get; private set; }
 
-    public bool IsConfigured => !string.IsNullOrEmpty(Key);
+    public bool IsConfigured => AvailableAIModels.Count > 0;
+
+    private List<AIModelInfo> AvailableAIModels { get; set; } = new List<AIModelInfo>();
 
     public bool Refresh()
     {
@@ -33,6 +35,19 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
         return (oldKey != Key) ||
             (oldAzureOpenAIKey != AzureOpenAIKey ||
             oldAzureOpenAIEndpoint != AzureOpenAIEndpoint);
+    }
+
+    public AIModelInfo? GetModelInfo(AIModelInfo.AIModelProvider modelProvider, string modelName)
+    {
+        foreach (var aiModel in AvailableAIModels)
+        {
+            if (modelProvider == aiModel.ModelProvider && modelName == aiModel.ModelName)
+            {
+                return aiModel;
+            }
+        }
+
+        return null;
     }
 
     private static string LoadKey()
