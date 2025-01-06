@@ -460,6 +460,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         internal void DisableAI()
         {
+            _advancedPasteSettings.Properties.AIProviders.Clear();
+
             try
             {
                 PasswordVault vault = new PasswordVault();
