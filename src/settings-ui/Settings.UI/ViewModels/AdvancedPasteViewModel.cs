@@ -395,6 +395,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public List<AdvancedPasteAIProviderInfo> AIProviders
+        {
+            get => _advancedPasteSettings.Properties.AIProviders;
+        }
+
         public bool IsConflictingCopyShortcut =>
             _customActions.Select(customAction => customAction.Shortcut)
                           .Concat([PasteAsPlainTextShortcut, AdvancedPasteUIShortcut, PasteAsMarkdownShortcut, PasteAsJsonShortcut])
@@ -492,6 +497,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        // This is for OpenAI
         internal void EnableAI(string password)
         {
             try
@@ -500,6 +506,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 PasswordCredential cred = new("https://platform.openai.com/api-keys", "PowerToys_AdvancedPaste_OpenAIKey", password);
                 vault.Add(cred);
                 OnPropertyChanged(nameof(IsOpenAIEnabled));
+                AdvancedPasteAIProviderInfo openaiProvider = new AdvancedPasteAIProviderInfo();
+                openaiProvider.KeyCredentialName = "PowerToys_AdvancedPaste_OpenAIKey";
+                openaiProvider.ProviderName = "OpenAI";
+                _advancedPasteSettings.Properties.AIProviders.Add(openaiProvider);
                 IsAdvancedAIEnabled = true; // new users should get Semantic Kernel benefits immediately
                 NotifySettingsChanged();
             }
@@ -508,6 +518,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        // This is for Azure OpenAI
         internal void EnableAI(string endpoint, string password)
         {
             try
@@ -517,8 +528,16 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 PasswordCredential keyCred = new("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIKey", password);
                 vault.Add(endpointCred);
                 vault.Add(keyCred);
+                AdvancedPasteAIProviderInfo azureOpenAIProvider = new AdvancedPasteAIProviderInfo();
+                azureOpenAIProvider.ProviderName = "Azure OpenAI";
+                azureOpenAIProvider.EndPointCredentialName = "PowerToys_AdvancedPaste_AzureOpenAIEndpoint";
+                azureOpenAIProvider.KeyCredentialName = "PowerToys_AdvancedPaste_AzureOpenAIKey";
+                azureOpenAIProvider.DeployName = "gpt-4o-mini-powertoys";
+                azureOpenAIProvider.ModelName = "gpt-4o-mini";
+                _advancedPasteSettings.Properties.AIProviders.Add(azureOpenAIProvider);
                 OnPropertyChanged(nameof(IsOpenAIEnabled));
                 IsAdvancedAIEnabled = true; // new users should get Semantic Kernel benefits immediately
+
                 NotifySettingsChanged();
             }
             catch (Exception)

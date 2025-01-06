@@ -4,13 +4,20 @@
 
 using System;
 using System.Collections.Generic;
+using AdvancedPaste.Settings;
+using Microsoft.PowerToys.Settings.UI.Library;
 using Windows.Security.Credentials;
 
 namespace AdvancedPaste.Services.OpenAI;
 
 public sealed class VaultCredentialsProvider : IAICredentialsProvider
 {
-    public VaultCredentialsProvider() => Refresh();
+    public VaultCredentialsProvider(IUserSettings usersettings)
+    {
+        _userSettings = usersettings;
+        AIProviders = _userSettings.AIProviders;
+        Refresh();
+    }
 
     public string Key { get; private set; }
 
@@ -18,9 +25,13 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
 
     public string AzureOpenAIEndpoint { get; private set; }
 
-    public bool IsConfigured => AvailableAIModels.Count > 0;
+    public bool IsConfigured => AIProviders.Count > 0;
+
+    private readonly IUserSettings _userSettings;
 
     private List<AIModelInfo> AvailableAIModels { get; set; } = new List<AIModelInfo>();
+
+    public List<AdvancedPasteAIProviderInfo> AIProviders { get; set; }
 
     public bool Refresh()
     {
@@ -28,7 +39,7 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
         var oldAzureOpenAIKey = AzureOpenAIKey;
         var oldAzureOpenAIEndpoint = AzureOpenAIEndpoint;
 
-        Key = LoadKey();
+        Key = LoadOpenAIKey();
         AzureOpenAIKey = LoadAzureOpenAIKey();
         AzureOpenAIEndpoint = LoadAzureOpenAIEndpoint();
 
@@ -50,39 +61,78 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
         return null;
     }
 
-    private static string LoadKey()
+    private string LoadOpenAIKey()
     {
-        try
-        {
-            return new PasswordVault().Retrieve("https://platform.openai.com/api-keys", "PowerToys_AdvancedPaste_OpenAIKey")?.Password ?? string.Empty;
-        }
-        catch (Exception)
+        if (AIProviders.Count == 0)
         {
             return string.Empty;
         }
+
+        foreach (var provider in AIProviders)
+        {
+            if (provider.ProviderName == "OpenAI")
+            {
+                try
+                {
+                    return new PasswordVault().Retrieve("https://platform.openai.com/api-keys", provider.KeyCredentialName)?.Password ?? string.Empty;
+                }
+                catch (Exception)
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        return string.Empty;
     }
 
-    private static string LoadAzureOpenAIKey()
+    private string LoadAzureOpenAIKey()
     {
-        try
-        {
-            return new PasswordVault().Retrieve("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIKey")?.Password ?? string.Empty;
-        }
-        catch (Exception)
+        if (AIProviders.Count == 0)
         {
             return string.Empty;
         }
+
+        foreach (var provider in AIProviders)
+        {
+            if (provider.ProviderName == "Azure OpenAI")
+            {
+                try
+                {
+                    return new PasswordVault().Retrieve("PowerToysAdvancedPasteAzureOpenAI", provider.KeyCredentialName)?.Password ?? string.Empty;
+                }
+                catch (Exception)
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        return string.Empty;
     }
 
-    private static string LoadAzureOpenAIEndpoint()
+    private string LoadAzureOpenAIEndpoint()
     {
-        try
-        {
-            return new PasswordVault().Retrieve("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint")?.Password ?? string.Empty;
-        }
-        catch (Exception)
+        if (AIProviders.Count == 0)
         {
             return string.Empty;
         }
+
+        foreach (var provider in AIProviders)
+        {
+            if (provider.ProviderName == "Azure OpenAI")
+            {
+                try
+                {
+                    return new PasswordVault().Retrieve("PowerToysAdvancedPasteAzureOpenAI", provider.EndPointCredentialName)?.Password ?? string.Empty;
+                }
+                catch (Exception)
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        return string.Empty;
     }
 }
