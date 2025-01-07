@@ -179,5 +179,17 @@ namespace Microsoft.PowerToys.Settings.UI.Views
         }
 
         private static AdvancedPasteCustomAction GetBoundCustomAction(object sender) => (AdvancedPasteCustomAction)((FrameworkElement)sender).DataContext;
+
+        private void AIModelSelectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                var selectedProvider = e.AddedItems[0] as AdvancedPasteAIProviderInfo;
+                if (selectedProvider != null)
+                {
+                    ViewModel.SelectedAIProvider = selectedProvider;
+                }
+            }
+        }
     }
 }

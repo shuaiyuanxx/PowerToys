@@ -62,6 +62,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         [JsonPropertyName("ai-providers")]
         public List<AdvancedPasteAIProviderInfo> AIProviders { get; set; }
 
+        [JsonPropertyName("user-prefer-model")]
+        public AdvancedPasteAIProviderInfo UserPreferModel { get; set; }
+
         public override string ToString()
             => JsonSerializer.Serialize(this);
     }

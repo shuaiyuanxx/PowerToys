@@ -93,6 +93,18 @@
                             IsEnabled="{x:Bind ViewModel.IsOpenAIEnabled, Mode=OneWay}">
                             <ToggleSwitch IsOn="{x:Bind ViewModel.IsAdvancedAIEnabled, Mode=TwoWay}" />
                         </tkcontrols:SettingsCard>
+                        <tkcontrols:SettingsCard
+                            x:Uid="AdvancedPaste_AIModel_Selection"
+                            HeaderIcon="{ui:BitmapIcon Source=/Assets/Settings/Icons/AIModel.png}"
+                            IsEnabled="True">
+                            <ComboBox 
+                                x:Name="AIModelSelectionComboBox"
+                                ItemsSource="{x:Bind ViewModel.AIProviders, Mode=OneWay}"
+                                DisplayMemberPath="ProviderName"
+                                SelectedItem="{x:Bind ViewModel.SelectedAIProvider, Mode=TwoWay}"
+                                SelectionChanged="AIModelSelectionComboBox_SelectionChanged">
+                            </ComboBox>
+                        </tkcontrols:SettingsCard>
                     </controls:SettingsGroup>
 
                     <controls:SettingsGroup x:Uid="AdvancedPaste_BehaviorSettingsGroup" IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}">
