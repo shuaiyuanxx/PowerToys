@@ -15,6 +15,7 @@ public sealed class AdvancedPasteAIProviderInfo : Observable, INotifyPropertyCha
     private string _deployname = string.Empty;
     private string _endPointCredentialName = string.Empty;
     private string _keyCredentialName = string.Empty;
+    private string _resourceName = string.Empty;
 
     [JsonPropertyName("ProviderName")]
     public string ProviderName
@@ -49,5 +50,12 @@ public sealed class AdvancedPasteAIProviderInfo : Observable, INotifyPropertyCha
     {
         get => _keyCredentialName;
         set => Set(ref _keyCredentialName, value);
+    }
+
+    [JsonPropertyName("ResourceName")]
+    public string ResourceName
+    {
+        get => _resourceName;
+        set => Set(ref _resourceName, value);
     }
 }

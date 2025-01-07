@@ -524,6 +524,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 AdvancedPasteAIProviderInfo openaiProvider = new AdvancedPasteAIProviderInfo();
                 openaiProvider.KeyCredentialName = "PowerToys_AdvancedPaste_OpenAIKey";
                 openaiProvider.ProviderName = "OpenAI";
+                openaiProvider.ResourceName = "https://platform.openai.com/api-keys";
                 _advancedPasteSettings.Properties.AIProviders.Add(openaiProvider);
                 if (SelectedAIProvider == null)
                 {
@@ -546,8 +547,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             try
             {
                 PasswordVault vault = new();
-                PasswordCredential endpointCred = new("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint", endpoint);
-                PasswordCredential keyCred = new("PowerToysAdvancedPasteAzureOpenAI", "PowerToys_AdvancedPaste_AzureOpenAIKey", password);
+                PasswordCredential endpointCred = new("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint", endpoint);
+                PasswordCredential keyCred = new("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIKey", password);
                 vault.Add(endpointCred);
                 vault.Add(keyCred);
                 AdvancedPasteAIProviderInfo azureOpenAIProvider = new AdvancedPasteAIProviderInfo();
@@ -556,6 +557,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 azureOpenAIProvider.KeyCredentialName = "PowerToys_AdvancedPaste_AzureOpenAIKey";
                 azureOpenAIProvider.DeployName = "gpt-4o-mini-powertoys";
                 azureOpenAIProvider.ModelName = "gpt-4o-mini";
+                azureOpenAIProvider.ResourceName = "https://portal.azure.com/";
                 _advancedPasteSettings.Properties.AIProviders.Add(azureOpenAIProvider);
                 if (SelectedAIProvider == null)
                 {

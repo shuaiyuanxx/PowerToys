@@ -55,11 +55,7 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
 
         return response;*/
 
-        KernelArguments argument = new()
-        {
-            { "modelID", _usersettings.UserPreferModel.ModelName },
-        };
-        return await Kernel_.InvokePromptAsync(fullPrompt, argument);
+        return await Kernel_.InvokePromptAsync(fullPrompt);
     }
 
     public async Task<string> TransformTextAsync(string prompt, string inputText)

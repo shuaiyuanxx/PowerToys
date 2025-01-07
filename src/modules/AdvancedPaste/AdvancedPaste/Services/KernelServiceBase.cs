@@ -185,7 +185,6 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
     {
         var kernelBuilder = Kernel.CreateBuilder();
         AddChatCompletionService(kernelBuilder);
-        kernelBuilder.Services.AddSingleton<IAIServiceSelector>(new ChatCompletionServiceSelector());
         kernelBuilder.Plugins.AddFromFunctions("Actions", GetKernelFunctions());
         return kernelBuilder.Build();
     }

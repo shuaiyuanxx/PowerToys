@@ -15,124 +15,54 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
     public VaultCredentialsProvider(IUserSettings usersettings)
     {
         _userSettings = usersettings;
-        AIProviders = _userSettings.AIProviders;
         Refresh();
     }
 
     public string Key { get; private set; }
 
-    public string AzureOpenAIKey { get; private set; }
+    public string Endpoint { get; private set; }
 
-    public string AzureOpenAIEndpoint { get; private set; }
-
-    public bool IsConfigured => AIProviders.Count > 0;
+    public bool IsConfigured => _userSettings.UserPreferModel != null;
 
     private readonly IUserSettings _userSettings;
-
-    private List<AIModelInfo> AvailableAIModels { get; set; } = new List<AIModelInfo>();
-
-    public List<AdvancedPasteAIProviderInfo> AIProviders { get; set; }
 
     public bool Refresh()
     {
         var oldKey = Key;
-        var oldAzureOpenAIKey = AzureOpenAIKey;
-        var oldAzureOpenAIEndpoint = AzureOpenAIEndpoint;
+        var oldEndpoint = Endpoint;
 
-        Key = LoadOpenAIKey();
-        AzureOpenAIKey = LoadAzureOpenAIKey();
-        AzureOpenAIEndpoint = LoadAzureOpenAIEndpoint();
+        Key = LoadKey();
+        Endpoint = LoadEndpoint();
 
         return (oldKey != Key) ||
-            (oldAzureOpenAIKey != AzureOpenAIKey ||
-            oldAzureOpenAIEndpoint != AzureOpenAIEndpoint);
+            oldEndpoint != Endpoint;
     }
 
-    public AIModelInfo? GetModelInfo(AIModelInfo.AIModelProvider modelProvider, string modelName)
+    private string LoadKey()
     {
-        foreach (var aiModel in AvailableAIModels)
+        try
         {
-            if (modelProvider == aiModel.ModelProvider && modelName == aiModel.ModelName)
-            {
-                return aiModel;
-            }
+            string resource = _userSettings.UserPreferModel.ResourceName;
+            string userName = _userSettings.UserPreferModel.KeyCredentialName;
+            return new PasswordVault().Retrieve(resource, userName)?.Password ?? string.Empty;
         }
-
-        return null;
-    }
-
-    private string LoadOpenAIKey()
-    {
-        if (AIProviders.Count == 0)
+        catch (Exception)
         {
             return string.Empty;
         }
-
-        foreach (var provider in AIProviders)
-        {
-            if (provider.ProviderName == "OpenAI")
-            {
-                try
-                {
-                    return new PasswordVault().Retrieve("https://platform.openai.com/api-keys", provider.KeyCredentialName)?.Password ?? string.Empty;
-                }
-                catch (Exception)
-                {
-                    return string.Empty;
-                }
-            }
-        }
-
-        return string.Empty;
     }
 
-    private string LoadAzureOpenAIKey()
+    private string LoadEndpoint()
     {
-        if (AIProviders.Count == 0)
+        try
+        {
+            string resource = _userSettings.UserPreferModel.ResourceName;
+            string userName = _userSettings.UserPreferModel.EndPointCredentialName;
+            return new PasswordVault().Retrieve(resource, userName)?.Password ?? string.Empty;
+        }
+        catch (Exception)
         {
             return string.Empty;
         }
-
-        foreach (var provider in AIProviders)
-        {
-            if (provider.ProviderName == "Azure OpenAI")
-            {
-                try
-                {
-                    return new PasswordVault().Retrieve("PowerToysAdvancedPasteAzureOpenAI", provider.KeyCredentialName)?.Password ?? string.Empty;
-                }
-                catch (Exception)
-                {
-                    return string.Empty;
-                }
-            }
-        }
-
-        return string.Empty;
-    }
-
-    private string LoadAzureOpenAIEndpoint()
-    {
-        if (AIProviders.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        foreach (var provider in AIProviders)
-        {
-            if (provider.ProviderName == "Azure OpenAI")
-            {
-                try
-                {
-                    return new PasswordVault().Retrieve("PowerToysAdvancedPasteAzureOpenAI", provider.EndPointCredentialName)?.Password ?? string.Empty;
-                }
-                catch (Exception)
-                {
-                    return string.Empty;
-                }
-            }
-        }
-
-        return string.Empty;
     }
 }
