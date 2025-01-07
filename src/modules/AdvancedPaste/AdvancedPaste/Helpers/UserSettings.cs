@@ -41,6 +41,8 @@ namespace AdvancedPaste.Settings
 
         public List<AdvancedPasteAIProviderInfo> AIProviders { get; private set; }
 
+        public AdvancedPasteAIProviderInfo UserPreferModel { get; private set; }
+
         public IReadOnlyList<PasteFormats> AdditionalActions => _additionalActions;
 
         public IReadOnlyList<AdvancedPasteCustomAction> CustomActions => _customActions;
@@ -53,6 +55,7 @@ namespace AdvancedPaste.Settings
             ShowCustomPreview = true;
             CloseAfterLosingFocus = false;
             AIProviders = new List<AdvancedPasteAIProviderInfo>();
+            UserPreferModel = null;
             _additionalActions = [];
             _customActions = [];
             _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
@@ -105,6 +108,7 @@ namespace AdvancedPaste.Settings
                                 ShowCustomPreview = properties.ShowCustomPreview;
                                 CloseAfterLosingFocus = properties.CloseAfterLosingFocus;
                                 AIProviders = properties.AIProviders;
+                                UserPreferModel = properties.UserPreferModel;
 
                                 var sourceAdditionalActions = properties.AdditionalActions;
                                 (PasteFormats Format, IAdvancedPasteAction[] Actions)[] additionalActionFormats =

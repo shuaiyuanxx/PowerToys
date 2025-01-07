@@ -20,16 +20,19 @@ public sealed class ChatCompletionServiceSelector : IAIServiceSelector
         Kernel kernel, KernelFunction function, KernelArguments arguments, [NotNullWhen(true)] out T? service, out PromptExecutionSettings? serviceSettings)
         where T : class, IAIService
     {
-        foreach (var serviceToCheck in kernel.GetAllServices<T>())
+        if (arguments.TryGetValue("modelID", out object? modelIDObj) && modelIDObj is string modelID)
         {
-            var serviceModelId = serviceToCheck.GetModelId();
-            var endpoint = serviceToCheck.GetEndpoint();
-
-            if (!string.IsNullOrEmpty(serviceModelId) && serviceModelId.EndsWith("mini", StringComparison.OrdinalIgnoreCase))
+            foreach (var serviceToCheck in kernel.GetAllServices<T>())
             {
-                service = serviceToCheck;
-                serviceSettings = new OpenAIPromptExecutionSettings();
-                return true;
+                var serviceModelId = serviceToCheck.GetModelId();
+                var endpoint = serviceToCheck.GetEndpoint();
+
+                if (!string.IsNullOrEmpty(serviceModelId) && serviceModelId.Equals(modelID, StringComparison.OrdinalIgnoreCase))
+                {
+                    service = serviceToCheck;
+                    serviceSettings = new OpenAIPromptExecutionSettings();
+                    return true;
+                }
             }
         }
 

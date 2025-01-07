@@ -20,6 +20,8 @@ namespace AdvancedPaste.Settings
 
         public List<AdvancedPasteAIProviderInfo> AIProviders { get; }
 
+        public AdvancedPasteAIProviderInfo UserPreferModel { get; }
+
         public IReadOnlyList<AdvancedPasteCustomAction> CustomActions { get; }
 
         public IReadOnlyList<PasteFormats> AdditionalActions { get; }

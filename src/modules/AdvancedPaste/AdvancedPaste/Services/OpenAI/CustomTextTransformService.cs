@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using AdvancedPaste.Helpers;
 using AdvancedPaste.Models;
+using AdvancedPaste.Settings;
 using AdvancedPaste.Telemetry;
 using Azure;
 using Azure.AI.OpenAI;
@@ -17,12 +18,13 @@ using Microsoft.SemanticKernel;
 
 namespace AdvancedPaste.Services.OpenAI;
 
-public sealed class CustomTextTransformService(IAICredentialsProvider aiCredentialsProvider, IPromptModerationService promptModerationService) : ICustomTextTransformService
+public sealed class CustomTextTransformService(IAICredentialsProvider aiCredentialsProvider, IPromptModerationService promptModerationService, IUserSettings usersettings) : ICustomTextTransformService
 {
     private const string ModelName = "gpt-3.5-turbo-instruct";
 
     private readonly IAICredentialsProvider _aiCredentialsProvider = aiCredentialsProvider;
     private readonly IPromptModerationService _promptModerationService = promptModerationService;
+    private readonly IUserSettings _usersettings = usersettings;
 
     public Kernel Kernel_ { get; set; }
 
@@ -53,7 +55,11 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
 
         return response;*/
 
-        return await Kernel_.InvokePromptAsync(fullPrompt);
+        KernelArguments argument = new()
+        {
+            { "modelID", _usersettings.UserPreferModel.ModelName },
+        };
+        return await Kernel_.InvokePromptAsync(fullPrompt, argument);
     }
 
     public async Task<string> TransformTextAsync(string prompt, string inputText)
