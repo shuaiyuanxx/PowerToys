@@ -61,7 +61,7 @@ namespace
 
     const wchar_t OPENAI_VAULT_RESOURCE[] = L"https://platform.openai.com/api-keys";
     const wchar_t OPENAI_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_OpenAIKey";
-    const wchar_t AZURE_OPENAI_VAULT_RESOURCE[] = L"PowerToysAdvancedPasteAzureOpenAI";
+    const wchar_t AZURE_OPENAI_VAULT_RESOURCE[] = L"https://portal.azure.com/";
     const wchar_t AZURE_OPENAI_ENDPOINT_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_AzureOpenAIEndpoint";
     const wchar_t AZURE_OPENAI_KEY_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_AzureOpenAIKey";
 }
