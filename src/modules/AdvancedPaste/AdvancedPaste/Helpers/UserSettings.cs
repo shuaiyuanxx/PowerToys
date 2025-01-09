@@ -104,7 +104,7 @@ namespace AdvancedPaste.Settings
                                 IsAdvancedAIEnabled = properties.IsAdvancedAIEnabled;
                                 ShowCustomPreview = properties.ShowCustomPreview;
                                 CloseAfterLosingFocus = properties.CloseAfterLosingFocus;
-                                UserPreferModel = properties.UserPreferModel;
+                                UserPreferModel = properties.AIProviders[properties.UserPreferModelIdx];
 
                                 var sourceAdditionalActions = properties.AdditionalActions;
                                 (PasteFormats Format, IAdvancedPasteAction[] Actions)[] additionalActionFormats =
