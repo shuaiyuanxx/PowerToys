@@ -100,9 +100,9 @@
                             <ComboBox 
                                 x:Name="AIModelSelectionComboBox"
                                 ItemsSource="{x:Bind ViewModel.AIProviders, Mode=OneWay}"
+                                IsEnabled="{x:Bind ViewModel.IsOpenAIEnabled, Mode=OneWay}"
                                 DisplayMemberPath="ProviderName"
-                                SelectedItem="{x:Bind ViewModel.SelectedAIProvider, Mode=TwoWay}"
-                                SelectionChanged="AIModelSelectionComboBox_SelectionChanged">
+                                SelectedIndex="{x:Bind ViewModel.SelectedAiProviderIdx, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             </ComboBox>
                         </tkcontrols:SettingsCard>
                     </controls:SettingsGroup>
