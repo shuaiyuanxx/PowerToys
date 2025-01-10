@@ -28,7 +28,7 @@ public sealed class KernelService(IKernelQueryCacheService queryCacheService, IA
     protected override void AddChatCompletionService(IKernelBuilder kernelBuilder)
     {
         // If using Azure OpenAI
-        if (_aiCredentialsProvider.Endpoint != null)
+        if (_aiCredentialsProvider.AIProvider == "Azure OpenAI")
         {
             kernelBuilder.AddAzureOpenAIChatCompletion(
             deploymentName: "gpt-4o-mini-powertoys",
@@ -36,7 +36,7 @@ public sealed class KernelService(IKernelQueryCacheService queryCacheService, IA
             apiKey: _aiCredentialsProvider.Key,
             modelId: "gpt-4o-mini");
         }
-        else
+        else if (_aiCredentialsProvider.AIProvider == "OpenAI")
         {
             kernelBuilder.AddOpenAIChatCompletion(ModelName, _aiCredentialsProvider.Key);
         }

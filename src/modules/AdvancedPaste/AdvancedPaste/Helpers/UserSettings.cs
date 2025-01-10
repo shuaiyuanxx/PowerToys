@@ -39,7 +39,7 @@ namespace AdvancedPaste.Settings
 
         public bool CloseAfterLosingFocus { get; private set; }
 
-        public AdvancedPasteAIProviderInfo UserPreferModel { get; private set; }
+        public AdvancedPasteAIProviderInfo AIProvider { get; private set; }
 
         public IReadOnlyList<PasteFormats> AdditionalActions => _additionalActions;
 
@@ -52,7 +52,7 @@ namespace AdvancedPaste.Settings
             IsAdvancedAIEnabled = false;
             ShowCustomPreview = true;
             CloseAfterLosingFocus = false;
-            UserPreferModel = null;
+            AIProvider = null;
             _additionalActions = [];
             _customActions = [];
             _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
@@ -104,7 +104,7 @@ namespace AdvancedPaste.Settings
                                 IsAdvancedAIEnabled = properties.IsAdvancedAIEnabled;
                                 ShowCustomPreview = properties.ShowCustomPreview;
                                 CloseAfterLosingFocus = properties.CloseAfterLosingFocus;
-                                UserPreferModel = properties.AIProviders[properties.UserPreferModelIdx];
+                                AIProvider = properties.AIProvider;
 
                                 var sourceAdditionalActions = properties.AdditionalActions;
                                 (PasteFormats Format, IAdvancedPasteAction[] Actions)[] additionalActionFormats =

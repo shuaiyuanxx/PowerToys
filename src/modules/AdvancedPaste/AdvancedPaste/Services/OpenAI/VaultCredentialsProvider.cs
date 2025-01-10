@@ -22,7 +22,9 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
 
     public string Endpoint { get; private set; }
 
-    public bool IsConfigured => _userSettings.UserPreferModel != null;
+    public string AIProvider { get; private set; }
+
+    public bool IsConfigured => _userSettings.AIProvider != null;
 
     private readonly IUserSettings _userSettings;
 
@@ -30,9 +32,11 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
     {
         var oldKey = Key;
         var oldEndpoint = Endpoint;
+        var oldAIProvider = AIProvider;
 
         Key = LoadKey();
         Endpoint = LoadEndpoint();
+        AIProvider = _userSettings.AIProvider.ProviderName;
 
         return (oldKey != Key) ||
             oldEndpoint != Endpoint;
@@ -42,8 +46,8 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
     {
         try
         {
-            string resource = _userSettings.UserPreferModel.ResourceName;
-            string userName = _userSettings.UserPreferModel.KeyCredentialName;
+            string resource = _userSettings.AIProvider.ResourceName;
+            string userName = _userSettings.AIProvider.KeyCredentialName;
             return new PasswordVault().Retrieve(resource, userName)?.Password ?? string.Empty;
         }
         catch (Exception)
@@ -56,8 +60,8 @@ public sealed class VaultCredentialsProvider : IAICredentialsProvider
     {
         try
         {
-            string resource = _userSettings.UserPreferModel.ResourceName;
-            string userName = _userSettings.UserPreferModel.EndPointCredentialName;
+            string resource = _userSettings.AIProvider.ResourceName;
+            string userName = _userSettings.AIProvider.EndPointCredentialName;
             return new PasswordVault().Retrieve(resource, userName)?.Password ?? string.Empty;
         }
         catch (Exception)

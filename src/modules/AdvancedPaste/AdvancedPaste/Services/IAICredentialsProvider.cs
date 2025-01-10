@@ -12,5 +12,7 @@ public interface IAICredentialsProvider
 
     string Endpoint { get; }
 
+    string AIProvider { get; }
+
     bool Refresh();
 }

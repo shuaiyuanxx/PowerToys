@@ -27,7 +27,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             IsAdvancedAIEnabled = false;
             ShowCustomPreview = true;
             CloseAfterLosingFocus = false;
-            AIProviders = new List<AdvancedPasteAIProviderInfo>();
+            AIProvider = new AdvancedPasteAIProviderInfo();
         }
 
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
@@ -59,11 +59,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         [CmdConfigureIgnoreAttribute]
         public AdvancedPasteAdditionalActions AdditionalActions { get; init; }
 
-        [JsonPropertyName("ai-providers")]
-        public List<AdvancedPasteAIProviderInfo> AIProviders { get; set; }
-
-        [JsonPropertyName("user-prefer-model-idx")]
-        public int UserPreferModelIdx { get; set; }
+        [JsonPropertyName("ai-provider")]
+        public AdvancedPasteAIProviderInfo AIProvider { get; set; }
 
         public override string ToString()
             => JsonSerializer.Serialize(this);

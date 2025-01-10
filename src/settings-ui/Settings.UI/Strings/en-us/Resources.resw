@@ -2068,10 +2068,16 @@ Made with 💗 by Microsoft and the PowerToys community.</value>
     <value>OpenAI API key:</value>
   </data>
   <data name="AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text" xml:space="preserve">
-	<value>Azure OpenAI API key:</value>
+	<value>API key:</value>
   </data>
   <data name="AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text" xml:space="preserve">
-	<value>Azure OpenAI endpoint:</value>
+	<value>Endpoint:</value>
+  </data>
+	<data name="AdvancedPaste_EnableAIDialogAzureOpenAIDeployName.Text" xml:space="preserve">
+	<value>Deployment name:</value>
+  </data>
+	<data name="AdvancedPaste_EnableAIDialogAzureOpenAIModelName.Text" xml:space="preserve">
+	<value>Model name:</value>
   </data>
   <data name="EnableAIDialog_SaveBtnText" xml:space="preserve">
     <value>Save</value>

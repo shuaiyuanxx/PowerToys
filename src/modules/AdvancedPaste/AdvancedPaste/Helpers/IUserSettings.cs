@@ -18,7 +18,7 @@ namespace AdvancedPaste.Settings
 
         public bool CloseAfterLosingFocus { get; }
 
-        public AdvancedPasteAIProviderInfo UserPreferModel { get; }
+        public AdvancedPasteAIProviderInfo AIProvider { get; }
 
         public IReadOnlyList<AdvancedPasteCustomAction> CustomActions { get; }
 
