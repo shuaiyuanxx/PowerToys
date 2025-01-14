@@ -40,9 +40,17 @@ namespace Microsoft.PowerToys.Settings.UI.Views
 
         private void SaveOpenAIKey()
         {
-            if (!string.IsNullOrEmpty(AdvancedPaste_EnableAIDialogOpenAIApiKey.Text))
+            if (AIProviderSelectionComboBox.SelectedItem?.ToString() == "OpenAI")
             {
                 ViewModel.EnableAI(AdvancedPaste_EnableAIDialogOpenAIApiKey.Text);
+            }
+            else if (AIProviderSelectionComboBox.SelectedItem?.ToString() == "Azure OpenAI")
+            {
+                ViewModel.EnableAI(
+                    AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text,
+                    AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text,
+                    AdvancedPaste_EnableAIDialogAzureOpenAIDeployName.Text,
+                    AdvancedPaste_EnableAIDialogAzureOpenAIModelName.Text);
             }
         }
 
@@ -53,14 +61,26 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             EnableAIDialog.SecondaryButtonText = resourceLoader.GetString("EnableAIDialog_CancelBtnText");
             EnableAIDialog.PrimaryButtonCommand = SaveOpenAIKeyCommand;
 
-            AdvancedPaste_EnableAIDialogOpenAIApiKey.Text = string.Empty;
+            EnableAzureAIDialog.PrimaryButtonText = resourceLoader.GetString("EnableAIDialog_SaveBtnText");
+            EnableAzureAIDialog.SecondaryButtonText = resourceLoader.GetString("EnableAIDialog_CancelBtnText");
+            EnableAzureAIDialog.PrimaryButtonCommand = SaveOpenAIKeyCommand;
 
+            AdvancedPaste_EnableAIDialogOpenAIApiKey.Text = string.Empty;
+            AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text = string.Empty;
+            AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text = string.Empty;
             await ShowEnableDialogAsync();
         }
 
         private async Task ShowEnableDialogAsync()
         {
-            await EnableAIDialog.ShowAsync();
+            if (AIProviderSelectionComboBox.SelectedItem?.ToString() == "OpenAI")
+            {
+                await EnableAIDialog.ShowAsync();
+            }
+            else if (AIProviderSelectionComboBox.SelectedItem?.ToString() == "Azure OpenAI")
+            {
+                await EnableAzureAIDialog.ShowAsync();
+            }
         }
 
         private void AdvancedPaste_DisableAIButton_Click(object sender, RoutedEventArgs e)
@@ -71,6 +91,15 @@ namespace Microsoft.PowerToys.Settings.UI.Views
         private void AdvancedPaste_EnableAIDialogOpenAIApiKey_TextChanged(object sender, TextChangedEventArgs e)
         {
             EnableAIDialog.IsPrimaryButtonEnabled = AdvancedPaste_EnableAIDialogOpenAIApiKey.Text.Length > 0;
+        }
+
+        private void AdvancedPaste_EnableAIDialogAzureOpenAIApiCredential_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            EnableAzureAIDialog.IsPrimaryButtonEnabled =
+                AdvancedPaste_EnableAIDialogAzureOpenAIApiKey.Text.Length > 0 &&
+                AdvancedPaste_EnableAIDialogAzureOpenAIEndpoint.Text.Length > 0 &&
+                AdvancedPaste_EnableAIDialogAzureOpenAIDeployName.Text.Length > 0 &&
+                AdvancedPaste_EnableAIDialogAzureOpenAIModelName.Text.Length > 0;
         }
 
         public async void DeleteCustomActionButton_Click(object sender, RoutedEventArgs e)

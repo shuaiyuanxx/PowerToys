@@ -11,11 +11,14 @@ using System.Threading.Tasks;
 using AdvancedPaste.Helpers;
 using AdvancedPaste.Models;
 using AdvancedPaste.Models.KernelQueryCache;
+using AdvancedPaste.Services.OpenAI;
 using AdvancedPaste.Telemetry;
 using ManagedCommon;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.PowerToys.Telemetry;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Services;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace AdvancedPaste.Services;
@@ -42,6 +45,7 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
 
         var kernel = CreateKernel();
         kernel.SetDataPackageView(clipboardData);
+        _customTextTransformService.Kernel_ = kernel;
 
         CacheKey cacheKey = new() { Prompt = prompt, AvailableFormats = await clipboardData.GetAvailableFormatsAsync() };
         var maybeCacheValue = _queryCacheService.ReadOrNull(cacheKey);
@@ -142,11 +146,9 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
         chatHistory.AddUserMessage(prompt);
 
         await _promptModerationService.ValidateAsync(GetFullPrompt(chatHistory));
-
         var chatResult = await kernel.GetRequiredService<IChatCompletionService>()
                                      .GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
         chatHistory.Add(chatResult);
-
         var totalUsage = chatHistory.Select(GetAIServiceUsage)
                                     .Aggregate(AIServiceUsage.Add);
 

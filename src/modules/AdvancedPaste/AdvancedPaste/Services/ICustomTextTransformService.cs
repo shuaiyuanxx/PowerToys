@@ -3,10 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading.Tasks;
+using Microsoft.SemanticKernel;
 
 namespace AdvancedPaste.Services;
 
 public interface ICustomTextTransformService
 {
+    Kernel Kernel_ { get; set; }
+
     Task<string> TransformTextAsync(string prompt, string inputText);
 }

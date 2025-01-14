@@ -25,7 +25,22 @@ public sealed class KernelService(IKernelQueryCacheService queryCacheService, IA
             Temperature = 0.01,
         };
 
-    protected override void AddChatCompletionService(IKernelBuilder kernelBuilder) => kernelBuilder.AddOpenAIChatCompletion(ModelName, _aiCredentialsProvider.Key);
+    protected override void AddChatCompletionService(IKernelBuilder kernelBuilder)
+    {
+        // If using Azure OpenAI
+        if (_aiCredentialsProvider.AIProvider == "Azure OpenAI")
+        {
+            kernelBuilder.AddAzureOpenAIChatCompletion(
+            deploymentName: "gpt-4o-mini-powertoys",
+            endpoint: _aiCredentialsProvider.Endpoint,
+            apiKey: _aiCredentialsProvider.Key,
+            modelId: "gpt-4o-mini");
+        }
+        else if (_aiCredentialsProvider.AIProvider == "OpenAI")
+        {
+            kernelBuilder.AddOpenAIChatCompletion(ModelName, _aiCredentialsProvider.Key);
+        }
+    }
 
     protected override AIServiceUsage GetAIServiceUsage(ChatMessageContent chatMessage) =>
         chatMessage.Metadata?.GetValueOrDefault("Usage") is CompletionsUsage completionsUsage

@@ -40,6 +40,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private readonly AdvancedPasteSettings _advancedPasteSettings;
         private readonly AdvancedPasteAdditionalActions _additionalActions;
         private readonly ObservableCollection<AdvancedPasteCustomAction> _customActions;
+        private readonly ObservableCollection<string> _aiProviders = ["Azure OpenAI", "OpenAI"];
         private Timer _delayedTimer;
 
         private GpoRuleConfigured _enabledGpoRuleConfiguration;
@@ -169,7 +170,45 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             return cred is not null;
         }
 
+        private bool AzureOpenAIKeyExists()
+        {
+            PasswordVault vault = new PasswordVault();
+            PasswordCredential cred = null;
+
+            try
+            {
+                cred = vault.Retrieve("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIKey");
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return cred is not null;
+        }
+
+        private bool AzureOpenAIEndpointExists()
+        {
+            PasswordVault vault = new PasswordVault();
+            PasswordCredential cred = null;
+
+            try
+            {
+                cred = vault.Retrieve("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint");
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return cred is not null;
+        }
+
+        public bool IsAIEnabled => IsOpenAIEnabled || IsAzureOpenAIEnabled;
+
         public bool IsOpenAIEnabled => OpenAIKeyExists() && !IsOnlineAIModelsDisallowedByGPO;
+
+        public bool IsAzureOpenAIEnabled => AzureOpenAIEndpointExists() && AzureOpenAIKeyExists();
 
         public bool IsEnabledGpoConfigured
         {
@@ -359,6 +398,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public ObservableCollection<string> AIProviders
+        {
+            get => _aiProviders;
+        }
+
         public bool IsConflictingCopyShortcut =>
             _customActions.Select(customAction => customAction.Shortcut)
                           .Concat([PasteAsPlainTextShortcut, AdvancedPasteUIShortcut, PasteAsMarkdownShortcut, PasteAsJsonShortcut])
@@ -419,12 +463,38 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         internal void DisableAI()
         {
+            _advancedPasteSettings.Properties.AIProvider = null;
+
             try
             {
                 PasswordVault vault = new PasswordVault();
                 PasswordCredential cred = vault.Retrieve("https://platform.openai.com/api-keys", "PowerToys_AdvancedPaste_OpenAIKey");
                 vault.Remove(cred);
-                OnPropertyChanged(nameof(IsOpenAIEnabled));
+                OnPropertyChanged(nameof(IsAIEnabled));
+                NotifySettingsChanged();
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                PasswordVault vault = new PasswordVault();
+                PasswordCredential cred = vault.Retrieve("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIKey");
+                vault.Remove(cred);
+                OnPropertyChanged(nameof(IsAIEnabled));
+                NotifySettingsChanged();
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                PasswordVault vault = new PasswordVault();
+                PasswordCredential cred = vault.Retrieve("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint");
+                vault.Remove(cred);
+                OnPropertyChanged(nameof(IsAIEnabled));
                 NotifySettingsChanged();
             }
             catch (Exception)
@@ -432,6 +502,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        // This is for OpenAI
         internal void EnableAI(string password)
         {
             try
@@ -439,8 +510,43 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 PasswordVault vault = new();
                 PasswordCredential cred = new("https://platform.openai.com/api-keys", "PowerToys_AdvancedPaste_OpenAIKey", password);
                 vault.Add(cred);
-                OnPropertyChanged(nameof(IsOpenAIEnabled));
+                AdvancedPasteAIProviderInfo openaiProvider = new AdvancedPasteAIProviderInfo();
+                openaiProvider.KeyCredentialName = "PowerToys_AdvancedPaste_OpenAIKey";
+                openaiProvider.ProviderName = "OpenAI";
+                openaiProvider.ResourceName = "https://platform.openai.com/api-keys";
+                _advancedPasteSettings.Properties.AIProvider = openaiProvider;
+
+                OnPropertyChanged(nameof(IsAIEnabled));
                 IsAdvancedAIEnabled = true; // new users should get Semantic Kernel benefits immediately
+                NotifySettingsChanged();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        // This is for Azure OpenAI
+        internal void EnableAI(string endpoint, string password, string deployName, string modelname)
+        {
+            try
+            {
+                PasswordVault vault = new();
+                PasswordCredential endpointCred = new("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIEndpoint", endpoint);
+                PasswordCredential keyCred = new("https://portal.azure.com/", "PowerToys_AdvancedPaste_AzureOpenAIKey", password);
+                vault.Add(endpointCred);
+                vault.Add(keyCred);
+                AdvancedPasteAIProviderInfo azureOpenAIProvider = new AdvancedPasteAIProviderInfo();
+                azureOpenAIProvider.ProviderName = "Azure OpenAI";
+                azureOpenAIProvider.EndPointCredentialName = "PowerToys_AdvancedPaste_AzureOpenAIEndpoint";
+                azureOpenAIProvider.KeyCredentialName = "PowerToys_AdvancedPaste_AzureOpenAIKey";
+                azureOpenAIProvider.DeployName = deployName;
+                azureOpenAIProvider.ModelName = modelname;
+                azureOpenAIProvider.ResourceName = "https://portal.azure.com/";
+                _advancedPasteSettings.Properties.AIProvider = azureOpenAIProvider;
+
+                OnPropertyChanged(nameof(IsAIEnabled));
+                IsAdvancedAIEnabled = true; // new users should get Semantic Kernel benefits immediately
+
                 NotifySettingsChanged();
             }
             catch (Exception)

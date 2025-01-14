@@ -20,6 +20,13 @@ public sealed class PromptModerationService(IAICredentialsProvider aiCredentials
 
     public async Task ValidateAsync(string fullPrompt)
     {
+        // Azure OpenAI has already integrated with content filtering
+        // https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter?tabs=warning%2Cuser-prompt%2Cpython-new
+        if (_aiCredentialsProvider.AIProvider == "Azure OpenAI")
+        {
+            return;
+        }
+
         try
         {
             ModerationClient moderationClient = new(ModelName, _aiCredentialsProvider.Key);
