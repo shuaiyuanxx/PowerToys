@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 using AdvancedPaste.Helpers;
 using AdvancedPaste.Models;
 using AdvancedPaste.Services.OpenAI;
+using AdvancedPaste.Settings;
 using AdvancedPaste.UnitTests.Mocks;
 using ManagedCommon;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -129,9 +131,10 @@ public sealed class AIServiceBatchIntegrationTests
 
     private static async Task<DataPackage> GetOutputDataPackageAsync(BatchTestInput batchTestInput, PasteFormats format)
     {
-        VaultCredentialsProvider credentialsProvider = new();
+        UserSettings userSettings = new(new FileSystem());
+        VaultCredentialsProvider credentialsProvider = new(userSettings);
         PromptModerationService promptModerationService = new(credentialsProvider);
-        CustomTextTransformService customTextTransformService = new(credentialsProvider, promptModerationService);
+        CustomTextTransformService customTextTransformService = new(credentialsProvider, promptModerationService, userSettings);
 
         switch (format)
         {

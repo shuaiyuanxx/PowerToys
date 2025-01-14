@@ -28,14 +28,20 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
 
     public Kernel Kernel_ { get; set; }
 
-    private async Task<FunctionResult> GetAICompletionAsync(string systemInstructions, string userMessage)
+    private async Task<FunctionResult> GetAzureAICompletionAsync(string systemInstructions, string userMessage)
     {
         var fullPrompt = systemInstructions + "\n\n" + userMessage;
-        /*
+
+        return await Kernel_.InvokePromptAsync(fullPrompt);
+    }
+
+    private async Task<Completions> GetOpenAICompletionAsync(string systemInstructions, string userMessage)
+    {
+        var fullPrompt = systemInstructions + "\n\n" + userMessage;
+
         await _promptModerationService.ValidateAsync(fullPrompt);
 
         OpenAIClient azureAIClient = new(_aiCredentialsProvider.Key);
-
         var response = await azureAIClient.GetCompletionsAsync(
             new()
             {
@@ -47,15 +53,12 @@ public sealed class CustomTextTransformService(IAICredentialsProvider aiCredenti
                 Temperature = 0.01F,
                 MaxTokens = 2000,
             });
-
         if (response.Value.Choices[0].FinishReason == "length")
         {
             Logger.LogDebug("Cut off due to length constraints");
         }
 
-        return response;*/
-
-        return await Kernel_.InvokePromptAsync(fullPrompt);
+        return response;
     }
 
     public async Task<string> TransformTextAsync(string prompt, string inputText)
@@ -87,17 +90,25 @@ Output:
 
         try
         {
-            var response = await GetAICompletionAsync(systemInstructions, userMessage);
-            /*
-            var usage = response.Usage;
-            AdvancedPasteGenerateCustomFormatEvent telemetryEvent = new(usage.PromptTokens, usage.CompletionTokens, ModelName);
-            PowerToysTelemetry.Log.WriteEvent(telemetryEvent);
-
-            var logEvent = new { telemetryEvent.PromptTokens, telemetryEvent.CompletionTokens, telemetryEvent.ModelName };
-            Logger.LogDebug($"{nameof(TransformTextAsync)} complete; {JsonSerializer.Serialize(logEvent)}");
-
-            return response.Choices[0].Text;*/
-            return response.GetValue<string>();
+            if (_aiCredentialsProvider.AIProvider == "OpenAI")
+            {
+                var response = await GetOpenAICompletionAsync(systemInstructions, userMessage);
+                var usage = response.Usage;
+                AdvancedPasteGenerateCustomFormatEvent telemetryEvent = new(usage.PromptTokens, usage.CompletionTokens, ModelName);
+                PowerToysTelemetry.Log.WriteEvent(telemetryEvent);
+                var logEvent = new { telemetryEvent.PromptTokens, telemetryEvent.CompletionTokens, telemetryEvent.ModelName };
+                Logger.LogDebug($"{nameof(TransformTextAsync)} complete; {JsonSerializer.Serialize(logEvent)}");
+                return response.Choices[0].Text;
+            }
+            else if (_aiCredentialsProvider.AIProvider == "Azure OpenAI")
+            {
+                var response = await GetAzureAICompletionAsync(systemInstructions, userMessage);
+                return response.GetValue<string>();
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
         catch (Exception ex)
         {

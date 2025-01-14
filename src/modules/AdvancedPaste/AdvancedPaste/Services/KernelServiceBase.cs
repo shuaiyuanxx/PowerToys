@@ -145,7 +145,7 @@ public abstract class KernelServiceBase(IKernelQueryCacheService queryCacheServi
         chatHistory.AddSystemMessage($"Available clipboard formats: {await kernel.GetDataFormatsAsync()}");
         chatHistory.AddUserMessage(prompt);
 
-        // await _promptModerationService.ValidateAsync(GetFullPrompt(chatHistory));
+        await _promptModerationService.ValidateAsync(GetFullPrompt(chatHistory));
         var chatResult = await kernel.GetRequiredService<IChatCompletionService>()
                                      .GetChatMessageContentAsync(chatHistory, PromptExecutionSettings, kernel);
         chatHistory.Add(chatResult);

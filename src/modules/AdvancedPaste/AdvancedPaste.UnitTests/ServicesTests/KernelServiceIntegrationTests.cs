@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using AdvancedPaste.Helpers;
 using AdvancedPaste.Models;
 using AdvancedPaste.Services.OpenAI;
+using AdvancedPaste.Settings;
 using AdvancedPaste.Telemetry;
 using AdvancedPaste.UnitTests.Mocks;
 using AdvancedPaste.UnitTests.Utils;
@@ -32,10 +34,11 @@ public sealed class KernelServiceIntegrationTests : IDisposable
     [TestInitialize]
     public void TestInitialize()
     {
-        VaultCredentialsProvider credentialsProvider = new();
+        UserSettings userSettings = new(new FileSystem());
+        VaultCredentialsProvider credentialsProvider = new(userSettings);
         PromptModerationService promptModerationService = new(credentialsProvider);
 
-        _kernelService = new KernelService(new NoOpKernelQueryCacheService(), credentialsProvider, promptModerationService, new CustomTextTransformService(credentialsProvider, promptModerationService));
+        _kernelService = new KernelService(new NoOpKernelQueryCacheService(), credentialsProvider, promptModerationService, new CustomTextTransformService(credentialsProvider, promptModerationService, userSettings));
         _eventListener = new();
     }
 
