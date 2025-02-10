@@ -41,6 +41,10 @@ namespace CommonSharedConstants
 
     const wchar_t ADVANCED_PASTE_TERMINATE_APP_MESSAGE[] = L"TerminateApp";
 
+    const wchar_t SHOW_DEMO_AI_MODULE_SHARED_EVENT[] = L"Local\\ShowDemoAIModuleEvent-714eee6b-fa59-454f-9360-16d0a00fdbdf";
+    
+    const wchar_t TERMINATE_DEMO_AI_MODULE_SHARED_EVENT[] = L"Local\\TerminateDemoAIModuleEvent-3901e417-6432-4ae0-9400-78b3d276dd61";
+    
     // Path to the event used to show Color Picker
     const wchar_t SHOW_COLOR_PICKER_SHARED_EVENT[] = L"Local\\ShowColorPickerEvent-8c46be2a-3e05-4186-b56b-4ae986ef2525";
 

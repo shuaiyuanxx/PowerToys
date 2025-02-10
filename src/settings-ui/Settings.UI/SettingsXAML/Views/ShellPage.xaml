@@ -261,6 +261,10 @@
                             x:Uid="Shell_RegistryPreview"
                             helpers:NavHelper.NavigateTo="views:RegistryPreviewPage"
                             Icon="{ui:BitmapIcon Source=/Assets/Settings/Icons/RegistryPreview.png}" />
+                        <NavigationViewItem
+                            x:Uid="Shell_DemoAIModule"
+                            helpers:NavHelper.NavigateTo="views:DemoAIModulePage"
+                            Icon="{ui:BitmapIcon Source=/Assets/Settings/Icons/DemoAIModule.png}" />
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
             </NavigationView.MenuItems>

@@ -3970,6 +3970,16 @@ Activate by holding the key for the character you want to add an accent to, then
     <value>Registry Preview</value>
     <comment>Product name: Navigation view item name for Registry Preview</comment>
   </data>
+  <data name="Shell_DemoAIModule.Content" xml:space="preserve">
+    <value>Demo AI Module</value>
+    <comment>This is just a demo of how to add new module to PT.</comment>
+  </data>
+  <data name="DemoAIModule_EnableToggle.Header" xml:space="preserve">
+	<value>Enable Demo AI Module</value>
+  </data>
+  <data name="DemoAIModule_Keys.Header" xml:space="preserve">
+	<value>Demo AI Module shortcut</value>
+  </data>
   <data name="RegistryPreview_Enable_RegistryPreview.Header" xml:space="preserve">
     <value>Enable Registry Preview</value>
     <comment>Registry Preview is the name of the utility</comment>
