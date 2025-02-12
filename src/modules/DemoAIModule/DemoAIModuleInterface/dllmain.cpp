@@ -70,10 +70,20 @@ private:
     void parse_hotkey(PowerToysSettings::PowerToyValues& settings)
     {
         auto settingsObject = settings.get_raw_json();
+
+        Logger::info("DemoAIModule is going to use default shortcut");
+        m_hotkey.win = false;
+        m_hotkey.alt = true;
+        m_hotkey.shift = false;
+        m_hotkey.ctrl = true;
+        m_hotkey.key = 'D';
+
+        /*
         if (settingsObject.GetView().Size())
         {
             try
             {
+                Logger::info("DemoAIModule parse_hotkey --> going to use the hotkey from settings file.");
                 auto jsonHotkeyObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_ACTIVATION_SHORTCUT);
                 m_hotkey.win = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_WIN);
                 m_hotkey.alt = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_ALT);
@@ -99,7 +109,7 @@ private:
             m_hotkey.shift = true;
             m_hotkey.ctrl = false;
             m_hotkey.key = 'D';
-        }
+        }*/
     }
 
     bool is_process_running()
@@ -117,12 +127,12 @@ private:
 
         SHELLEXECUTEINFOW sei{ sizeof(sei) };
         sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
-        sei.lpFile = L"WinUI3Apps\\PowerToys.DemoAIModuleUI.exe";
+        sei.lpFile = L"PowerToys.DemoAIModuleUI.exe";
         sei.nShow = SW_SHOWNORMAL;
         sei.lpParameters = executable_args.data();
         if (ShellExecuteExW(&sei))
         {
-            Logger::trace("Successfully started the Color Picker process");
+            Logger::trace("Successfully started the Demo AI Module process");
         }
         else
         {
@@ -264,6 +274,7 @@ public:
 
     virtual bool on_hotkey(size_t /*hotkeyId*/) override
     {
+        Logger::trace(L"DemoAIModule on_hotkey executing");
         if (m_enabled)
         {
             Logger::trace(L"DemoAIModule hotkey pressed");
@@ -281,17 +292,19 @@ public:
 
     virtual size_t get_hotkeys(Hotkey* hotkeys, size_t buffer_size) override
     {
+        Logger::trace(L"DemoAIModule get_hotkeys called");
         if (m_hotkey.key)
         {
             if (hotkeys && buffer_size >= 1)
             {
                 hotkeys[0] = m_hotkey;
             }
-
+            Logger::info(L"get_hotkeys return 1");
             return 1;
         }
         else
         {
+            Logger::error(L"get_hotkeys return 0");
             return 0;
         }
     }

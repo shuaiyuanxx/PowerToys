@@ -16,6 +16,7 @@ namespace winrt::PowerToys::Interop::implementation
         static hstring FZEToggleEvent();
         static hstring ColorPickerSendSettingsTelemetryEvent();
         static hstring ShowColorPickerSharedEvent();
+        static hstring ShowDemoAIModuleSharedEvent();
         static hstring TerminateColorPickerSharedEvent();
         static hstring AdvancedPasteShowUIMessage();
         static hstring AdvancedPasteMarkdownMessage();

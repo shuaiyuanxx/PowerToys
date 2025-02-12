@@ -3977,7 +3977,7 @@ Activate by holding the key for the character you want to add an accent to, then
   <data name="DemoAIModule_EnableToggle.Header" xml:space="preserve">
 	<value>Enable Demo AI Module</value>
   </data>
-  <data name="DemoAIModule_Keys.Header" xml:space="preserve">
+  <data name="DemoAIModule_Shortcut.Header" xml:space="preserve">
 	<value>Demo AI Module shortcut</value>
   </data>
   <data name="RegistryPreview_Enable_RegistryPreview.Header" xml:space="preserve">

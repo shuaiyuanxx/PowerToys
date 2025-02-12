@@ -1,0 +1,48 @@
+﻿<UserControl
+    x:Class="DemoAIModule.Views.MainView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:DemoAIModule.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModel="clr-namespace:DemoAIModule.ViewModels"
+    d:DataContext="{d:DesignInstance viewModel:MainViewModel,
+                                 IsDesignTimeCreatable=True}"
+    d:DesignHeight="64"
+    mc:Ignorable="d">
+    <Grid Background="Transparent">
+
+        <Border
+            BorderThickness="1"
+            CornerRadius="8">
+            <!--  Disabled due to the poor performance of drawing shadows in WPF  -->
+            <!--<Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="16"
+                    Opacity="0.28"
+                    ShadowDepth="1" />
+            </Border.Effect>-->
+
+            <!--  only color format - one line  -->
+            <Grid Margin="2" Visibility="Visible">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="36" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"/>
+
+                <TextBlock
+                    x:Name="ColorTextBlock"
+                    Grid.Column="1"
+                    Margin="8,5,8,8"
+                    AutomationProperties.LiveSetting="Assertive"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Hello World!" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,50 +1,116 @@
 ﻿// Copyright (c) Microsoft Corporation
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-#nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.ComponentModel.Composition;
+using System.Globalization;
+using System.Threading;
+using System.Windows;
 
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using ManagedCommon;
+using Microsoft.PowerToys.Telemetry;
 
 namespace DemoAIModuleUI
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
-    public partial class App : Application
+    public partial class App : Application, IDisposable
     {
-        public App()
+        public ETWTrace EtwTrace { get; private set; } = new ETWTrace();
+
+        private Mutex _instanceMutex;
+        private static string[] _args;
+        private int _powerToysRunnerPid;
+        private bool disposedValue;
+
+        private CancellationTokenSource NativeThreadCTS { get; set; }
+
+        [Export]
+        private static CancellationToken ExitToken { get; set; }
+
+        protected override void OnStartup(StartupEventArgs e)
         {
-            this.InitializeComponent();
+            try
+            {
+                string appLanguage = LanguageHelper.LoadLanguage();
+                if (!string.IsNullOrEmpty(appLanguage))
+                {
+                    System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(appLanguage);
+                }
+            }
+            catch (CultureNotFoundException ex)
+            {
+                Logger.LogError("CultureNotFoundException: " + ex.Message);
+            }
+
+            NativeThreadCTS = new CancellationTokenSource();
+            ExitToken = NativeThreadCTS.Token;
+
+            _args = e?.Args;
+
+            // allow only one instance of DemoAIModule
+            _instanceMutex = new Mutex(true, @"Local\PowerToys_DemoAIModule_InstanceMutex", out bool createdNew);
+            if (!createdNew)
+            {
+                Logger.LogWarning("There is DemoAIModule instance running. Exiting DemoAIModule");
+                _instanceMutex = null;
+                Shutdown(0);
+                return;
+            }
+
+            if (_args?.Length > 0)
+            {
+                _ = int.TryParse(_args[0], out _powerToysRunnerPid);
+
+                Logger.LogInfo($"DemoAIModule started from the PowerToys Runner. Runner pid={_powerToysRunnerPid}");
+                RunnerHelper.WaitForPowerToysRunner(_powerToysRunnerPid, () =>
+                {
+                    Logger.LogInfo("PowerToys Runner exited. Exiting DemoAIModule");
+                    NativeThreadCTS.Cancel();
+                    Dispatcher.Invoke(Shutdown);
+                });
+            }
+            else
+            {
+                _powerToysRunnerPid = -1;
+            }
+
+            base.OnStartup(e);
         }
 
-        /// <summary>
-        /// Invoked when the application is launched.
-        /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnExit(ExitEventArgs e)
         {
-            mwindow = new MainWindow();
-            mwindow.Activate();
+            if (_instanceMutex != null)
+            {
+                _instanceMutex.ReleaseMutex();
+            }
+
+            base.OnExit(e);
         }
 
-        private Window? mwindow;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _instanceMutex?.Dispose();
+                    EtwTrace?.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public bool IsRunningDetachedFromPowerToys()
+        {
+            return _powerToysRunnerPid == -1;
+        }
     }
 }

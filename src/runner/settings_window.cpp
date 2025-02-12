@@ -658,6 +658,8 @@ std::string ESettingsWindowNames_to_string(ESettingsWindowNames value)
         return "Awake";
     case ESettingsWindowNames::ColorPicker:
         return "ColorPicker";
+    case ESettingsWindowNames::DemoAIModule:
+        return "DemoAIModule";
     case ESettingsWindowNames::FancyZones:
         return "FancyZones";
     case ESettingsWindowNames::Run:
@@ -718,6 +720,10 @@ ESettingsWindowNames ESettingsWindowNames_from_string(std::string value)
     else if (value == "ColorPicker")
     {
         return ESettingsWindowNames::ColorPicker;
+    }
+    else if (value == "DemoAIModule")
+    {
+        return ESettingsWindowNames::DemoAIModule;
     }
     else if (value == "FancyZones")
     {

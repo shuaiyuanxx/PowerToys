@@ -1,38 +1,45 @@
-// Copyright (c) Microsoft Corporation
+﻿// Copyright (c) Microsoft Corporation
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
+using System.ComponentModel.Composition;
+using System.Windows;
+using System.Windows.Interop;
 
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using DemoAIModule.ViewModelContracts;
+using Wpf.Ui.Controls;
 
-namespace DemoAIModuleUI
+namespace DemoAIModule
 {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public partial class MainWindow : Window
     {
         public MainWindow()
         {
-            this.InitializeComponent();
+            Closing += MainWindow_Closing;
+            Bootstrapper.InitializeContainer(this);
+            Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this, WindowBackdropType.None);
+            InitializeComponent();
+            DataContext = this;
+            Show(); // Call show just to make sure source is initialized at startup.
+
+            Hide();
         }
 
-        private void MyButton_Click(object sender, RoutedEventArgs e)
+        [Import]
+        public IMainViewModel MainViewModel { get; set; }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            myButton.Content = "Clicked";
+            Closing -= MainWindow_Closing;
+            Bootstrapper.Dispose();
+        }
+
+        private void MainWindowSourceInitialized(object sender, System.EventArgs e)
+        {
+            this.MainViewModel.RegisterWindowHandle(HwndSource.FromHwnd(new WindowInteropHelper(this).Handle));
         }
     }
 }

@@ -13,6 +13,7 @@ namespace PowerToys
             static String FZEToggleEvent();
             static String ColorPickerSendSettingsTelemetryEvent();
             static String ShowColorPickerSharedEvent();
+            static String ShowDemoAIModuleSharedEvent();
             static String TerminateColorPickerSharedEvent();
             static String AdvancedPasteShowUIMessage();
             static String AdvancedPasteMarkdownMessage();
