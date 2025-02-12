@@ -51,6 +51,10 @@ namespace winrt::PowerToys::Interop::implementation
     {
         return CommonSharedConstants::SHOW_COLOR_PICKER_SHARED_EVENT;
     }
+    hstring Constants::ShowDemoAIModuleSharedEvent()
+    {
+        return CommonSharedConstants::SHOW_DEMO_AI_MODULE_SHARED_EVENT;
+    }
     hstring Constants::TerminateColorPickerSharedEvent()
     {
         return CommonSharedConstants::TERMINATE_COLOR_PICKER_SHARED_EVENT;
