@@ -104,6 +104,8 @@ namespace DemoAIModule.Helpers
             {
                 _demoWindow.Hide();
             }
+
+            _demoAIModuleShown = false;
         }
 
         public bool IsDemoAIModuleVisible()
