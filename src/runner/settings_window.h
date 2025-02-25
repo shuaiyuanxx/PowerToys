@@ -8,6 +8,7 @@ enum class ESettingsWindowNames
     Overview,
     Awake,
     ColorPicker,
+    DemoAIModule,
     FancyZones,
     Run,
     ImageResizer,
