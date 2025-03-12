@@ -35,6 +35,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                 {
                     CustomTrayTimes = Properties.CustomTrayTimes.ToDictionary(entry => entry.Key, entry => entry.Value),
                     Mode = Properties.Mode,
+                    IntelligentAwakeOn = Properties.IntelligentAwakeOn,
                     KeepDisplayOn = Properties.KeepDisplayOn,
                     IntervalMinutes = Properties.IntervalMinutes,
                     IntervalHours = Properties.IntervalHours,

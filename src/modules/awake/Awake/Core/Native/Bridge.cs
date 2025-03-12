@@ -109,5 +109,8 @@ namespace Awake.Core.Native
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         internal static extern int RegisterWindowMessage(string lpString);
+
+        [DllImport("user32.dll")]
+        public static extern bool LockWorkStation();
     }
 }

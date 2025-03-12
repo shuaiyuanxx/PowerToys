@@ -15,6 +15,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public AwakeProperties()
         {
             KeepDisplayOn = false;
+            IntelligentAwakeOn = false;
             Mode = AwakeMode.PASSIVE;
             IntervalHours = 0;
             IntervalMinutes = 1;
@@ -24,6 +25,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         [JsonPropertyName("keepDisplayOn")]
         public bool KeepDisplayOn { get; set; }
+
+        [JsonPropertyName("intelligentAwakeOn")]
+        public bool IntelligentAwakeOn { get; set; }
 
         [JsonPropertyName("mode")]
         public AwakeMode Mode { get; set; }

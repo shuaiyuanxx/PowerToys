@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Awake.Core;
 using Awake.Core.Models;
 using Awake.Core.Native;
+using Awake.Helpers;
 using Awake.Properties;
 using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
@@ -211,6 +212,7 @@ namespace Awake
 
         private static void Exit(string message, int exitCode)
         {
+            Awake.Helpers.NamedPipeServer.StopServer();
             _etwTrace?.Dispose();
             Logger.LogInfo(message);
             Manager.CompleteExit(exitCode);
@@ -238,6 +240,9 @@ namespace Awake
 
             // Start the monitor thread that will be used to track the current state.
             Manager.StartMonitor();
+
+            // Start named pipe server to receive external commands
+            Awake.Helpers.NamedPipeServer.StartServer();
 
             EventWaitHandle eventHandle = new(false, EventResetMode.ManualReset, PowerToys.Interop.Constants.AwakeExitEvent());
             new Thread(() =>
@@ -452,6 +457,17 @@ namespace Awake
                     default:
                         Logger.LogError("Unknown mode of operation. Check config file.");
                         break;
+                }
+
+                if (settings.Properties.IntelligentAwakeOn)
+                {
+                    NamedPipeServer.EnableIntelligentAwake();
+                    Logger.LogInfo("Intelligent awake enabled.");
+                }
+                else
+                {
+                    NamedPipeServer.DisableIntelligentAwake();
+                    Logger.LogInfo("Intelligent awake disabled.");
                 }
 
                 TrayHelper.SetTray(settings, _startedFromPowerToys);

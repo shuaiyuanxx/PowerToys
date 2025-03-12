@@ -147,6 +147,19 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public bool IntelligentAwakeOn
+        {
+            get => ModuleSettings.Properties.IntelligentAwakeOn;
+            set
+            {
+                if (ModuleSettings.Properties.IntelligentAwakeOn != value)
+                {
+                    ModuleSettings.Properties.IntelligentAwakeOn = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
         public uint IntervalHours
         {
             get => ModuleSettings.Properties.IntervalHours;
