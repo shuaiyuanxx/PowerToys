@@ -12,6 +12,7 @@ using System.Windows.Input;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Services;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
@@ -32,6 +33,20 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private ICommand loadedCommand;
         private ICommand itemInvokedCommand;
         private NavigationViewItem[] _fullListOfNavViewItems;
+        private Visibility _navigationViewVisible;
+
+        public Visibility NavigationViewVisible
+        {
+            get => _navigationViewVisible;
+            set
+            {
+                if (_navigationViewVisible != value)
+                {
+                    _navigationViewVisible = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public bool IsBackEnabled
         {

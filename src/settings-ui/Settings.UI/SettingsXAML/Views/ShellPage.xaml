@@ -85,6 +85,14 @@
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                 <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
             </NavigationView.Resources>
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox
+                    x:Name="NavViewSearchBox"
+                    PlaceholderText="Search"
+                    QueryIcon="Find"
+                    TextChanged="NavViewSearchBox_TextChanged"
+                    SuggestionChosen="NavViewSearchBox_SuggestionChosen" />
+            </NavigationView.AutoSuggestBox>
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Uid="Shell_Dashboard"
