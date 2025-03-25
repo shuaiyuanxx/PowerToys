@@ -125,6 +125,10 @@ namespace Microsoft.PowerToys.Settings.UI.Views
 
         private Dictionary<Type, NavigationViewItem> _navViewParentLookup = new Dictionary<Type, NavigationViewItem>();
 
+        private Dictionary<string, NavigationViewItem> _pageKeyToNavViewItem = new Dictionary<string, NavigationViewItem>();
+
+        private List<(string Tag, string Name)> _allNavItems = new List<(string, string)>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellPage"/> class.
         /// Shell page constructor.
@@ -155,6 +159,65 @@ namespace Microsoft.PowerToys.Settings.UI.Views
                 {
                     _navViewParentLookup.TryAdd(child.GetValue(NavHelper.NavigateToProperty) as Type, parent);
                 }
+            }
+        }
+
+        private void InitializeSearchItems()
+        {
+            var allItems = GetAllNavigationViewItems(navigationView);
+            foreach (var item in allItems)
+            {
+                if (item.GetValue(NavHelper.NavigateToProperty) != null)
+                {
+                    string tag = item.GetValue(NavHelper.NavigateToProperty).ToString();
+                }
+            }
+        }
+
+        private IEnumerable<NavigationViewItem> GetAllNavigationViewItems(NavigationView navView)
+        {
+            List<NavigationViewItem> result = new List<NavigationViewItem>();
+
+            var topItems = navView.MenuItems.OfType<NavigationViewItem>().ToList();
+            result.AddRange(topItems);
+
+            foreach (var item in topItems)
+            {
+                result.AddRange(item.MenuItems.OfType<NavigationViewItem>());
+            }
+
+            if (navView.PaneFooter is FrameworkElement footer)
+            {
+                var footerItems = FindVisualChildren<NavigationViewItem>(footer);
+                result.AddRange(footerItems);
+            }
+
+            return result;
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent)
+            where T : DependencyObject
+        {
+            List<T> result = new List<T>();
+
+            return result;
+        }
+
+        private void NavViewSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            {
+                var suggestions = new List<string>();
+
+                sender.ItemsSource = suggestions;
+            }
+        }
+
+        private void NavViewSearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+        {
+            string selectedName = args.SelectedItem as string;
+            if (!string.IsNullOrEmpty(selectedName))
+            {
             }
         }
 
@@ -435,6 +498,7 @@ namespace Microsoft.PowerToys.Settings.UI.Views
         private void ShellPage_Loaded(object sender, RoutedEventArgs e)
         {
             SetTitleBar();
+            InitializeSearchItems();
         }
 
         private void NavigationView_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
