@@ -164,12 +164,23 @@ namespace Microsoft.PowerToys.Settings.UI.Views
 
         private void InitializeSearchItems()
         {
+            _allNavItems.Clear();
+            _pageKeyToNavViewItem.Clear();
+
             var allItems = GetAllNavigationViewItems(navigationView);
             foreach (var item in allItems)
             {
                 if (item.GetValue(NavHelper.NavigateToProperty) != null)
                 {
-                    string tag = item.GetValue(NavHelper.NavigateToProperty).ToString();
+                    var navigateTo = item.GetValue(NavHelper.NavigateToProperty) as Type;
+                    string tag = navigateTo?.FullName ?? string.Empty;
+                    string name = item.Content?.ToString() ?? string.Empty;
+
+                    if (!string.IsNullOrEmpty(tag) && !string.IsNullOrEmpty(name))
+                    {
+                        _allNavItems.Add((tag, name));
+                        _pageKeyToNavViewItem[tag] = item;
+                    }
                 }
             }
         }
@@ -186,19 +197,13 @@ namespace Microsoft.PowerToys.Settings.UI.Views
                 result.AddRange(item.MenuItems.OfType<NavigationViewItem>());
             }
 
-            if (navView.PaneFooter is FrameworkElement footer)
+            if (navView.PaneFooter is StackPanel footerPanel)
             {
-                var footerItems = FindVisualChildren<NavigationViewItem>(footer);
-                result.AddRange(footerItems);
+                foreach (var child in footerPanel.Children.OfType<NavigationViewItem>())
+                {
+                    result.Add(child);
+                }
             }
-
-            return result;
-        }
-
-        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent)
-            where T : DependencyObject
-        {
-            List<T> result = new List<T>();
 
             return result;
         }
@@ -208,9 +213,158 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
             {
                 var suggestions = new List<string>();
+                string searchText = sender.Text?.Trim() ?? string.Empty;
 
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    // Convert to lowercase for case-insensitive search using CurrentCultureIgnoreCase
+                    string searchTextLower = searchText.ToLowerInvariant();
+
+                    // Initialize lists for different match qualities
+                    var exactMatches = new List<(string Name, int Score)>();
+                    var startsWithMatches = new List<(string Name, int Score)>();
+                    var containsMatches = new List<(string Name, int Score)>();
+                    var fuzzyMatches = new List<(string Name, int Score)>();
+
+                    foreach (var item in _allNavItems)
+                    {
+                        string nameLower = item.Name.ToLowerInvariant();
+
+                        // Exact match (highest priority)
+                        if (string.Equals(nameLower, searchTextLower, StringComparison.OrdinalIgnoreCase))
+                        {
+                            exactMatches.Add((item.Name, 100));
+                        }
+
+                        // Starts with match (high priority)
+                        else if (nameLower.StartsWith(searchTextLower, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Higher score for shorter names (more precise match)
+                            int score = 90 - Math.Min(40, nameLower.Length - searchTextLower.Length);
+                            startsWithMatches.Add((item.Name, score));
+                        }
+
+                        // Contains match (medium priority)
+                        else if (nameLower.Contains(searchTextLower, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Score based on position (earlier is better) and length of item name
+                            int position = nameLower.IndexOf(searchTextLower, StringComparison.OrdinalIgnoreCase);
+                            int score = 70 - Math.Min(40, position) - Math.Min(20, nameLower.Length - searchTextLower.Length);
+                            containsMatches.Add((item.Name, score));
+                        }
+
+                        // Fuzzy match (lowest priority)
+                        else if (IsFuzzyMatch(nameLower, searchTextLower, out int fuzzyScore) && fuzzyScore > 40)
+                        {
+                            fuzzyMatches.Add((item.Name, fuzzyScore));
+                        }
+                    }
+
+                    // Sort each category by score (descending)
+                    var sortedExactMatches = exactMatches.OrderByDescending(m => m.Score);
+                    var sortedStartsWithMatches = startsWithMatches.OrderByDescending(m => m.Score);
+                    var sortedContainsMatches = containsMatches.OrderByDescending(m => m.Score);
+                    var sortedFuzzyMatches = fuzzyMatches.OrderByDescending(m => m.Score);
+
+                    // Add items to suggestions in order of relevance
+                    suggestions.AddRange(sortedExactMatches.Select(m => m.Name));
+                    suggestions.AddRange(sortedStartsWithMatches.Select(m => m.Name));
+                    suggestions.AddRange(sortedContainsMatches.Select(m => m.Name));
+                    suggestions.AddRange(sortedFuzzyMatches.Select(m => m.Name));
+                }
+
+                // Update the suggestion list
                 sender.ItemsSource = suggestions;
             }
+        }
+
+        /// <summary>
+        /// Determines if there's a fuzzy match between the text and pattern using a modified Levenshtein Distance algorithm.
+        /// </summary>
+        /// <param name="text">The text to search within.</param>
+        /// <param name="pattern">The pattern to search for.</param>
+        /// <param name="score">Output score between 0-100, higher means better match.</param>
+        /// <returns>True if a fuzzy match is found with score > threshold, otherwise false.</returns>
+        private bool IsFuzzyMatch(string text, string pattern, out int score)
+        {
+            score = 0;
+
+            // Handle empty inputs
+            if (string.IsNullOrEmpty(pattern))
+            {
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+
+            // Quick check if pattern is too long
+            if (pattern.Length > text.Length * 2)
+            {
+                return false;
+            }
+
+            int textLength = text.Length;
+            int patternLength = pattern.Length;
+
+            // Initialize tracking variables
+            int textIndex = 0;
+            int patternIndex = 0;
+            int matchingChars = 0;
+            int consecutiveMatches = 0;
+            int maxConsecutiveMatches = 0;
+            int firstMatchPosition = int.MaxValue;
+
+            // Track character positions
+            while (textIndex < textLength && patternIndex < patternLength)
+            {
+                if (char.ToLowerInvariant(text[textIndex]) == char.ToLowerInvariant(pattern[patternIndex]))
+                {
+                    // Record first match position (earlier is better)
+                    if (matchingChars == 0)
+                    {
+                        firstMatchPosition = textIndex;
+                    }
+
+                    matchingChars++;
+                    consecutiveMatches++;
+                    maxConsecutiveMatches = Math.Max(maxConsecutiveMatches, consecutiveMatches);
+                    patternIndex++;
+                }
+                else
+                {
+                    consecutiveMatches = 0;
+                }
+
+                textIndex++;
+            }
+
+            // If we didn't match all characters in the pattern
+            if (patternIndex < patternLength)
+            {
+                return false;
+            }
+
+            // Calculate score factors
+            double matchRatio = (double)matchingChars / patternLength; // How much of pattern matched
+            double consecutiveBonus = (double)maxConsecutiveMatches / patternLength; // Consecutive matches bonus
+            double positionPenalty = (double)firstMatchPosition / textLength; // Penalty for late first match
+            double lengthPenalty = (double)(textLength - patternLength) / textLength; // Penalty for extra length
+
+            // Compute final score (0-100)
+            score = (int)(100 * (
+                (matchRatio * 0.4) + // 40% weight for match ratio
+                (consecutiveBonus * 0.3) - // 30% weight for consecutive matches
+                (positionPenalty * 0.2) - // 20% penalty for late position
+                (lengthPenalty * 0.1) // 10% penalty for length difference
+            ));
+
+            // Ensure score is in valid range
+            score = Math.Max(1, Math.Min(100, score));
+
+            return true;
         }
 
         private void NavViewSearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
@@ -218,6 +372,35 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             string selectedName = args.SelectedItem as string;
             if (!string.IsNullOrEmpty(selectedName))
             {
+                // Find the matching item by name (using direct comparison since we're not modifying the display names)
+                var matchingItem = _allNavItems.FirstOrDefault(item =>
+                    string.Equals(item.Name, selectedName, StringComparison.OrdinalIgnoreCase));
+
+                if (!string.IsNullOrEmpty(matchingItem.Tag))
+                {
+                    // If found, get the NavigationViewItem and navigate to its destination
+                    if (_pageKeyToNavViewItem.TryGetValue(matchingItem.Tag, out NavigationViewItem navItem))
+                    {
+                        Type pageType = navItem.GetValue(NavHelper.NavigateToProperty) as Type;
+                        if (pageType != null)
+                        {
+                            // Expand parent item if needed
+                            if (_navViewParentLookup.TryGetValue(pageType, out var parentItem) && !parentItem.IsExpanded)
+                            {
+                                parentItem.IsExpanded = true;
+                            }
+
+                            // Select the item in the navigation view
+                            navigationView.SelectedItem = navItem;
+
+                            // Navigate to the selected page
+                            NavigationService.Navigate(pageType);
+
+                            // Clear the search box after navigation
+                            sender.Text = string.Empty;
+                        }
+                    }
+                }
             }
         }
 

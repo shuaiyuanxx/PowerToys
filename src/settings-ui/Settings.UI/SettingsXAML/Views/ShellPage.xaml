@@ -88,10 +88,41 @@
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox
                     x:Name="NavViewSearchBox"
+                    Margin="4,0,4,0"
                     PlaceholderText="Search"
                     QueryIcon="Find"
-                    TextChanged="NavViewSearchBox_TextChanged"
-                    SuggestionChosen="NavViewSearchBox_SuggestionChosen" />
+                    SuggestionChosen="NavViewSearchBox_SuggestionChosen"
+                    TextChanged="NavViewSearchBox_TextChanged">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="12,6,12,6" ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Style="{ThemeResource BodyTextBlockStyle}"
+                                    Text="{Binding}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
+                            </Grid>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                    <AutoSuggestBox.Resources>
+                        <!--  Override the popup style to provide better padding and alignment  -->
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="MinHeight" Value="36" />
+                        </Style>
+                        <!--  Override suggestion list to ensure enough width  -->
+                        <Style TargetType="ListView">
+                            <Setter Property="MinWidth" Value="{Binding ActualWidth, ElementName=NavViewSearchBox}" />
+                        </Style>
+                    </AutoSuggestBox.Resources>
+                </AutoSuggestBox>
             </NavigationView.AutoSuggestBox>
             <NavigationView.MenuItems>
                 <NavigationViewItem
