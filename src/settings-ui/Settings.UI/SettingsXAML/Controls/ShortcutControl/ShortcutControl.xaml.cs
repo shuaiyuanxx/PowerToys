@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-
 using CommunityToolkit.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
@@ -11,6 +10,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using PowerToys.Interop;
 using Windows.System;
 
 namespace Microsoft.PowerToys.Settings.UI.Controls
@@ -26,6 +26,16 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         private HotkeySettingsControlHook hook;
         private bool _isActive;
         private bool disposedValue;
+        private string _conflictToolTipText = string.Empty;
+
+        public string ConflictToolTipText
+        {
+            get => _conflictToolTipText;
+            private set
+            {
+                _conflictToolTipText = value;
+            }
+        }
 
         public string Header { get; set; }
 
@@ -35,6 +45,26 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), null);
 
         public static readonly DependencyProperty AllowDisableProperty = DependencyProperty.Register("AllowDisable", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnAllowDisableChanged));
+
+        public void ShowConflicts(string conflictInfo)
+        {
+            if (conflictInfo == string.Empty)
+            {
+                ConflictIcon.Visibility = Visibility.Collapsed;
+                ConflictToolTipText = AutomationProperties.GetHelpText(EditButton);
+            }
+            else
+            {
+                ConflictIcon.Visibility = Visibility.Visible;
+
+                // var resourceLoader = Helpers.ResourceLoaderInstance.ResourceLoader;
+                // var sb = new System.Text.StringBuilder();
+                // sb.AppendLine(resourceLoader.GetString("Shortcut_Conflict_Warning") ?? "Shortcut conflict detected with:");
+                ConflictToolTipText = conflictInfo;
+
+                AutomationProperties.SetHelpText(EditButton, ConflictToolTipText);
+            }
+        }
 
         private static void OnAllowDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -106,7 +136,49 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                     PreviewKeysControl.ItemsSource = HotkeySettings.GetKeysList();
                     AutomationProperties.SetHelpText(EditButton, HotkeySettings.ToString());
                     c.Keys = HotkeySettings.GetKeysList();
+
+                    if (hotkeySettings != null && hotkeySettings.IsValid() && App.GlobalHotkeyManager != null)
+                    {
+                        CheckHotkeyConflicts();
+                    }
                 }
+            }
+        }
+
+        public void CheckHotkeyConflicts()
+        {
+            if (hotkeySettings == null || !hotkeySettings.IsValid() || App.GlobalHotkeyManager == null)
+            {
+                ShowConflicts(string.Empty);
+                return;
+            }
+
+            var interopHotkey = new Hotkey
+            {
+                Win = hotkeySettings.Win,
+                Ctrl = hotkeySettings.Ctrl,
+                Alt = hotkeySettings.Alt,
+                Shift = hotkeySettings.Shift,
+                Key = (byte)hotkeySettings.Code,
+            };
+
+            var conflicts = App.GlobalHotkeyManager.GetConflicts(interopHotkey, "moduleName", "Test Hotkey Name");
+
+            if (conflicts != null && conflicts.Count > 0)
+            {
+                var resourceLoader = Helpers.ResourceLoaderInstance.ResourceLoader;
+
+                for (int i = 0; i < conflicts.Count; i++)
+                {
+                    var conflict = conflicts[i];
+                }
+
+                ShowConflicts("Conflict");
+            }
+            else
+            {
+                ShowConflicts(string.Empty);
+                App.GlobalHotkeyManager.RegisterHotkeyWithMetadata(interopHotkey, null, "moduleName", "hotkeyname");
             }
         }
 
