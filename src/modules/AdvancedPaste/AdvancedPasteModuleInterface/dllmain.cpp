@@ -16,6 +16,7 @@
 #include <common/utils/winapi_error.h>
 #include <common/utils/gpo.h>
 
+#include <common/interop/HotkeyConflictManager.h>
 #include <winrt/Windows.Security.Credentials.h>
 #include <vector>
 
@@ -67,6 +68,7 @@ class AdvancedPaste : public PowertoyModuleIface
 private:
     
     AdvancedPasteProcessManager m_process_manager;
+    winrt::PowerToys::Interop::HotkeyConflictManager hkmng = winrt::PowerToys::Interop::HotkeyConflictManager();
     bool m_enabled = false;
 
     std::wstring app_name;
@@ -254,6 +256,7 @@ private:
             };
 
             m_additional_actions.push_back(additionalAction);
+            // TODO: check hotkey is valid or not
         }
         else
         {
@@ -695,6 +698,10 @@ public:
 
             // If you don't need to do any custom processing of the settings, proceed
             // to persists the values calling:
+
+            // TODO: Check hotkey conflict here before saving
+
+
             values.save_to_settings_file();
             // Otherwise call a custom function to process the settings before saving them to disk:
             // save_settings();

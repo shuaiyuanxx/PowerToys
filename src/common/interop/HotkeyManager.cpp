@@ -50,7 +50,7 @@ namespace winrt::PowerToys::Interop::implementation
         auto pressedKeysHandle = GetHotkeyHandle(pressedKeys);
 
         // Check if any hotkey matches the pressed keys if the current key event is a key down event
-        if ((ev.message == WM_KEYDOWN || ev.message == WM_SYSKEYDOWN) && hotkeys.find(pressedKeysHandle)!=hotkeys.end())
+        if ((ev.message == WM_KEYDOWN || ev.message == WM_SYSKEYDOWN) && hotkeys.find(pressedKeysHandle) != hotkeys.end())
         {
             return true;
         }
@@ -67,82 +67,11 @@ namespace winrt::PowerToys::Interop::implementation
 
     void HotkeyManager::UnregisterHotkey(uint16_t _handle)
     {
-        // Clean up metadata when a hotkey is unregistered
-        auto metadataIt = hotkeyMetadata.find(_handle);
-        if (metadataIt != hotkeyMetadata.end())
-        {
-            hotkeyMetadata.erase(metadataIt);
-        }
-
         auto iter = hotkeys.find(_handle);
-        if (iter != hotkeys.end()) {
+        if (iter != hotkeys.end())
+        {
             hotkeys.erase(iter);
         }
-    }
-
-    bool HotkeyManager::HasConflict(winrt::PowerToys::Interop::Hotkey const& _hotkey, hstring const& _currentModuleName, hstring const& _currentHotkeyName)
-    {
-        auto conflicts = GetConflicts(_hotkey, _currentModuleName, _currentHotkeyName);
-        return conflicts.Size() > 0;
-    }
-
-    winrt::Windows::Foundation::Collections::IVector<winrt::PowerToys::Interop::HotkeyConflict> HotkeyManager::GetConflicts(winrt::PowerToys::Interop::Hotkey const& _hotkey, hstring const& _currentModuleName, hstring const& _currentHotkeyName)
-    {
-        auto result = winrt::single_threaded_vector<PowerToys::Interop::HotkeyConflict>();
-
-        std::wstring currentModule = _currentModuleName.c_str();
-        std::wstring currentHotkeyName = _currentHotkeyName.c_str();
-
-        // Check for conflicts with all registered hotkeys
-        for (const auto& [id, metadata] : hotkeyMetadata)
-        {
-            if (DoHotkeysConflict(_hotkey, metadata.hotkey))
-            {
-                PowerToys::Interop::HotkeyConflict conflict;
-                conflict.ModuleName = metadata.moduleName;
-                conflict.HotkeyName = metadata.hotkeyName;
-                conflict.ConflictingHotkey = metadata.hotkey;
-                result.Append(conflict);
-            }
-        }
-
-        return result;
-    }
-
-    bool HotkeyManager::RegisterHotkeyWithMetadata(winrt::PowerToys::Interop::Hotkey const& _hotkey, winrt::PowerToys::Interop::HotkeyCallback const& _callback, hstring const& _moduleName, hstring const& _hotkeyName)
-    {
-        // Register the hotkey normally first
-        uint16_t id = RegisterHotkey(_hotkey, _callback);
-        if (id == 0)
-        {
-            return false;
-        }
-
-        // Store metadata
-        HotkeyMetadata metadata{};
-        metadata.hotkey = _hotkey;
-        metadata.moduleName = _moduleName.c_str();
-        metadata.hotkeyName = _hotkeyName.c_str();
-
-        hotkeyMetadata[id] = metadata;
-        return true;
-    }
-
-    bool HotkeyManager::DoHotkeysConflict(const Hotkey& first, const Hotkey& second)
-    {
-        // Basic case: exact match of all modifiers and key
-        if (first.Win == second.Win &&
-            first.Ctrl == second.Ctrl &&
-            first.Shift == second.Shift &&
-            first.Alt == second.Alt &&
-            first.Key == second.Key)
-        {
-            return true;
-        }
-
-        // TODO: Additional conflict logic could be added here
-
-        return false;
     }
 
     void HotkeyManager::Close()

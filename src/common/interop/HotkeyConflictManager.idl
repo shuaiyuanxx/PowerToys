@@ -1,0 +1,24 @@
+import "HotkeyManager.idl";
+
+namespace PowerToys
+{
+    namespace Interop
+    {
+        struct HotkeyConflict
+        {
+            String ModuleName;
+            Hotkey ConflictingHotkey;
+        };
+
+        [default_interface] runtimeclass HotkeyConflictManager : Windows.Foundation.IClosable
+        {
+            HotkeyConflictManager();
+
+            // Conflict detection methods
+            Boolean HasConflict(Hotkey _hotkey);
+            HotkeyConflict GetConflict(Hotkey _hotkey, String _currentModuleName);
+            Boolean AddHotkey(Hotkey _hotkey, String _moduleName);
+            Boolean RemoveHotkey(Hotkey _hotkey);
+        }
+    }
+}

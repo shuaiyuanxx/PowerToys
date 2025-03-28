@@ -51,7 +51,7 @@
                         FontSize="16"
                         Foreground="Red"
                         Glyph="&#xE7BA;"
-                        Visibility="Collapsed" />
+                        Visibility="{x:Bind ConflictIconVisibility, Mode=OneWay}" />
 
                     <FontIcon
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"

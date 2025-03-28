@@ -32,7 +32,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>EXAMPLEPOWERTOY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\common\inc;..\..\..\common\Telemetry;..\..\;..\..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\common\inc;..\..\..\common\Telemetry;..\..\;..\..\..\;..\..\..\common\interop;..\..\..\common\interop\Generated Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
@@ -62,6 +62,7 @@
     <ProjectReference Include="..\..\..\common\SettingsAPI\SettingsAPI.vcxproj">
       <Project>{6955446d-23f7-4023-9bb3-8657f904af99}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\common\interop\PowerToys.Interop.vcxproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AdvancedPaste.base.rc" />

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using AllExperiments;
 using CommunityToolkit.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
@@ -45,26 +46,7 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), null);
 
         public static readonly DependencyProperty AllowDisableProperty = DependencyProperty.Register("AllowDisable", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnAllowDisableChanged));
-
-        public void ShowConflicts(string conflictInfo)
-        {
-            if (conflictInfo == string.Empty)
-            {
-                ConflictIcon.Visibility = Visibility.Collapsed;
-                ConflictToolTipText = AutomationProperties.GetHelpText(EditButton);
-            }
-            else
-            {
-                ConflictIcon.Visibility = Visibility.Visible;
-
-                // var resourceLoader = Helpers.ResourceLoaderInstance.ResourceLoader;
-                // var sb = new System.Text.StringBuilder();
-                // sb.AppendLine(resourceLoader.GetString("Shortcut_Conflict_Warning") ?? "Shortcut conflict detected with:");
-                ConflictToolTipText = conflictInfo;
-
-                AutomationProperties.SetHelpText(EditButton, ConflictToolTipText);
-            }
-        }
+        public static readonly DependencyProperty ConflictIconVisibilityProperty = DependencyProperty.Register("ConflictIconVisibility", typeof(Visibility), typeof(ShortcutControl), new PropertyMetadata(Visibility.Collapsed));
 
         private static void OnAllowDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -136,50 +118,14 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                     PreviewKeysControl.ItemsSource = HotkeySettings.GetKeysList();
                     AutomationProperties.SetHelpText(EditButton, HotkeySettings.ToString());
                     c.Keys = HotkeySettings.GetKeysList();
-
-                    if (hotkeySettings != null && hotkeySettings.IsValid() && App.GlobalHotkeyManager != null)
-                    {
-                        CheckHotkeyConflicts();
-                    }
                 }
             }
         }
 
-        public void CheckHotkeyConflicts()
+        public Visibility ConflictIconVisibility
         {
-            if (hotkeySettings == null || !hotkeySettings.IsValid() || App.GlobalHotkeyManager == null)
-            {
-                ShowConflicts(string.Empty);
-                return;
-            }
-
-            var interopHotkey = new Hotkey
-            {
-                Win = hotkeySettings.Win,
-                Ctrl = hotkeySettings.Ctrl,
-                Alt = hotkeySettings.Alt,
-                Shift = hotkeySettings.Shift,
-                Key = (byte)hotkeySettings.Code,
-            };
-
-            var conflicts = App.GlobalHotkeyManager.GetConflicts(interopHotkey, "moduleName", "Test Hotkey Name");
-
-            if (conflicts != null && conflicts.Count > 0)
-            {
-                var resourceLoader = Helpers.ResourceLoaderInstance.ResourceLoader;
-
-                for (int i = 0; i < conflicts.Count; i++)
-                {
-                    var conflict = conflicts[i];
-                }
-
-                ShowConflicts("Conflict");
-            }
-            else
-            {
-                ShowConflicts(string.Empty);
-                App.GlobalHotkeyManager.RegisterHotkeyWithMetadata(interopHotkey, null, "moduleName", "hotkeyname");
-            }
+            get { return (Visibility)GetValue(ConflictIconVisibilityProperty); }
+            set { SetValue(ConflictIconVisibilityProperty, value); }
         }
 
         public ShortcutControl()

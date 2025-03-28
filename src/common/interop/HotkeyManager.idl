@@ -10,14 +10,6 @@ namespace PowerToys
             Boolean Alt;
             UInt8 Key;
         };
-
-        struct HotkeyConflict
-        {
-            String ModuleName;
-            String HotkeyName;
-            Hotkey ConflictingHotkey;
-        };
-
         delegate void HotkeyCallback();
 
         [default_interface] runtimeclass HotkeyManager : Windows.Foundation.IClosable
@@ -25,11 +17,6 @@ namespace PowerToys
             HotkeyManager();
             UInt16 RegisterHotkey(Hotkey _hotkey, HotkeyCallback _callback);
             void UnregisterHotkey(UInt16 _handle);
-            
-            // Conflict detection methods
-            Boolean HasConflict(Hotkey _hotkey, String _currentModuleName, String _currentHotkeyName);
-            Windows.Foundation.Collections.IVector<HotkeyConflict> GetConflicts(Hotkey _hotkey, String _currentModuleName, String _currentHotkeyName);
-            Boolean RegisterHotkeyWithMetadata(Hotkey _hotkey, HotkeyCallback _callback, String _moduleName, String _hotkeyName);
         }
 
     }

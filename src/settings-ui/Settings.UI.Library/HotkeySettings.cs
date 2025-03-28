@@ -23,6 +23,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             Alt = false;
             Shift = false;
             Code = 0;
+
+            HasConflict = false;
         }
 
         /// <summary>
@@ -33,13 +35,14 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         /// <param name="alt">Should Alt key be used</param>
         /// <param name="shift">Should Shift key be used</param>
         /// <param name="code">Go to https://learn.microsoft.com/windows/win32/inputdev/virtual-key-codes to see list of v-keys</param>
-        public HotkeySettings(bool win, bool ctrl, bool alt, bool shift, int code)
+        public HotkeySettings(bool win, bool ctrl, bool alt, bool shift, int code, bool hasConflict = false)
         {
             Win = win;
             Ctrl = ctrl;
             Alt = alt;
             Shift = shift;
             Code = code;
+            HasConflict = hasConflict;
         }
 
         [JsonPropertyName("win")]
@@ -56,6 +59,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         [JsonPropertyName("code")]
         public int Code { get; set; }
+
+        [JsonPropertyName("hasConflict")]
+        public bool HasConflict { get; set; }
 
         // This is currently needed for FancyZones, we need to unify these two objects
         // see src\common\settings_objects.h
