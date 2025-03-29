@@ -62,7 +62,9 @@
     <ProjectReference Include="..\..\..\common\SettingsAPI\SettingsAPI.vcxproj">
       <Project>{6955446d-23f7-4023-9bb3-8657f904af99}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\common\interop\PowerToys.Interop.vcxproj" />
+    <ProjectReference Include="..\..\..\common\HotkeyConflictManager\HotkeyConflictManager.vcxproj">
+      <Project>{e4931b59-6ecd-4206-9859-bd8f1b1a4af5}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="AdvancedPaste.base.rc" />

@@ -16,7 +16,7 @@
 #include <common/utils/winapi_error.h>
 #include <common/utils/gpo.h>
 
-#include <common/interop/HotkeyConflictManager.h>
+#include <common/HotkeyConflictManager/HotkeyConflictManager.h>
 #include <winrt/Windows.Security.Credentials.h>
 #include <vector>
 
@@ -68,7 +68,7 @@ class AdvancedPaste : public PowertoyModuleIface
 private:
     
     AdvancedPasteProcessManager m_process_manager;
-    winrt::PowerToys::Interop::HotkeyConflictManager hkmng = winrt::PowerToys::Interop::HotkeyConflictManager();
+    
     bool m_enabled = false;
 
     std::wstring app_name;
@@ -616,6 +616,19 @@ public:
         app_name = GET_RESOURCE_STRING(IDS_ADVANCED_PASTE_NAME);
         app_key = AdvancedPasteConstants::ModuleKey;
         LoggerHelpers::init_logger(app_key, L"ModuleInterface", "AdvancedPaste");
+
+        {
+            auto& hkManager = HotkeyConflict::HotkeyConflictManager::GetInstance();
+            HotkeyConflict::Hotkey hotkey{
+                .Win = true,
+                .Ctrl = false,
+                .Shift = false,
+                .Alt = false,
+                .Key = 87,
+            };
+            hkManager.HasConflict(hotkey);
+        }
+
         init_settings();
     }
 
