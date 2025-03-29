@@ -54,6 +54,9 @@
     <ClInclude Include="Constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HotkeyConflictManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="keyboard_layout.cpp">
@@ -81,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Constants.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HotkeyConflictManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -113,6 +119,9 @@
       <Filter>Source Files</Filter>
     </Midl>
     <Midl Include="TwoWayPipeMessageIPCManaged.idl">
+      <Filter>Source Files</Filter>
+    </Midl>
+    <Midl Include="HotkeyConflictManager.idl">
       <Filter>Source Files</Filter>
     </Midl>
   </ItemGroup>

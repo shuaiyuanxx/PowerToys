@@ -100,6 +100,7 @@
     <ClInclude Include="Constants.h">
       <DependentUpon>KeyboardListener.idl</DependentUpon>
     </ClInclude>
+    <ClInclude Include="HotkeyConflictManager.h" />
     <ClInclude Include="HotkeyManager.h">
       <DependentUpon>HotkeyManager.idl</DependentUpon>
     </ClInclude>
@@ -127,6 +128,7 @@
     <ClCompile Include="Constants.cpp">
       <DependentUpon>KeyboardListener.idl</DependentUpon>
     </ClCompile>
+    <ClCompile Include="HotkeyConflictManager.cpp" />
     <ClCompile Include="HotkeyManager.cpp">
       <DependentUpon>HotkeyManager.idl</DependentUpon>
     </ClCompile>
@@ -159,6 +161,7 @@
   <ItemGroup>
     <Midl Include="CommonManaged.idl" />
     <Midl Include="Constants.idl" />
+    <Midl Include="HotkeyConflictManager.idl" />
     <Midl Include="HotkeyManager.idl" />
     <Midl Include="KeyboardHook.idl" />
     <Midl Include="LayoutMapManaged.idl" />

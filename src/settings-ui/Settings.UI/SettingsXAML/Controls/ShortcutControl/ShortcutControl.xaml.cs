@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-
+using AllExperiments;
 using CommunityToolkit.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using PowerToys.Interop;
 using Windows.System;
 
 namespace Microsoft.PowerToys.Settings.UI.Controls
@@ -26,6 +27,16 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         private HotkeySettingsControlHook hook;
         private bool _isActive;
         private bool disposedValue;
+        private string _conflictToolTipText = string.Empty;
+
+        public string ConflictToolTipText
+        {
+            get => _conflictToolTipText;
+            private set
+            {
+                _conflictToolTipText = value;
+            }
+        }
 
         public string Header { get; set; }
 
@@ -35,6 +46,7 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), null);
 
         public static readonly DependencyProperty AllowDisableProperty = DependencyProperty.Register("AllowDisable", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnAllowDisableChanged));
+        public static readonly DependencyProperty ConflictIconVisibilityProperty = DependencyProperty.Register("ConflictIconVisibility", typeof(Visibility), typeof(ShortcutControl), new PropertyMetadata(Visibility.Collapsed));
 
         private static void OnAllowDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -108,6 +120,12 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                     c.Keys = HotkeySettings.GetKeysList();
                 }
             }
+        }
+
+        public Visibility ConflictIconVisibility
+        {
+            get { return (Visibility)GetValue(ConflictIconVisibilityProperty); }
+            set { SetValue(ConflictIconVisibilityProperty, value); }
         }
 
         public ShortcutControl()
