@@ -1,6 +1,7 @@
 #include "HotkeyConflictManager.h"
 #include <windows.h>
 #include <unordered_map>
+#include <cwchar>
 
 namespace HotkeyConflict
 {
@@ -10,6 +11,7 @@ namespace HotkeyConflict
 	struct HotkeyConflictInfoImpl
 	{
         std::wstring moduleName;
+        std::wstring hotkeyName;
 	};
 
 	HotkeyConflictInfo::HotkeyConflictInfo() :
@@ -53,9 +55,23 @@ namespace HotkeyConflict
         pImpl->moduleName = name ? name : L"";
 	}
 
+	void HotkeyConflictInfo::SetHotkeyName(const wchar_t* name)
+	{
+        if (!pImpl)
+        {
+            pImpl = std::make_unique<HotkeyConflictInfoImpl>();
+        }
+        pImpl->hotkeyName = name ? name : L"";
+	}
+
 	const wchar_t* HotkeyConflictInfo::GetModuleName() const
 	{
         return pImpl ? pImpl->moduleName.c_str() : L"";
+	}
+
+	const wchar_t* HotkeyConflictInfo::GetHotkeyName() const
+	{
+        return pImpl ? pImpl->hotkeyName.c_str() : L"";
 	}
 
 	HotkeyConflictManager& HotkeyConflictManager::GetInstance()
@@ -75,13 +91,26 @@ namespace HotkeyConflict
         std::mutex hotkey_mutex;
     };
 
-	bool HotkeyConflictManager::HasConflict(Hotkey const& _hotkey)
+	bool HotkeyConflictManager::HasConflict(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
 	{
 		uint16_t handle = GetHotkeyHandle(_hotkey);
-		return (pImpl->hotkeyMetadata.find(handle) != pImpl->hotkeyMetadata.end() || HasConflictWithSystemHotkey(_hotkey));
+
+		auto it = pImpl->hotkeyMetadata.find(handle);
+
+		if (it == pImpl->hotkeyMetadata.end())
+        {
+            return HasConflictWithSystemHotkey(_hotkey);
+		}
+        if (wcscmp(it->second.GetModuleName(), _moduleName) == 0 && wcscmp(it->second.GetHotkeyName(), _hotkeyName) == 0)
+		{
+            // A shortcut matching its own assignment is not considered a conflict.
+            return false;
+		}
+
+        return true;
 	}
 
-	HotkeyConflictInfo HotkeyConflictManager::GetConflict(Hotkey const& _hotkey, std::wstring const& _currentModuleName)
+	HotkeyConflictInfo HotkeyConflictManager::GetConflict(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
 	{
 		HotkeyConflictInfo conflictHotkeyInfo;
 
@@ -102,19 +131,20 @@ namespace HotkeyConflict
 		return conflictHotkeyInfo;
 	}
 
-	bool HotkeyConflictManager::AddHotkey(Hotkey const& _hotkey, std::wstring const& _moduleName)
+	bool HotkeyConflictManager::AddHotkey(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
 	{
 		std::lock_guard<std::mutex> lock(pImpl->hotkey_mutex);
 
 		uint16_t handle = GetHotkeyHandle(_hotkey);
 
-		if (HasConflict(_hotkey))
+		if (HasConflict(_hotkey, _moduleName, _hotkeyName))
 		{
 			return false;
 		}
 
 		HotkeyConflictInfo hotkeyInfo;
-        hotkeyInfo.SetModuleName(_moduleName.c_str());
+        hotkeyInfo.SetModuleName(_moduleName);
+        hotkeyInfo.SetHotkeyName(_hotkeyName);
 		hotkeyInfo.hotkey = _hotkey;
 		pImpl->hotkeyMetadata[handle] = hotkeyInfo;
 

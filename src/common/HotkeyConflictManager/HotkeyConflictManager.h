@@ -31,7 +31,9 @@ namespace HotkeyConflict
         Hotkey hotkey;
 
         void SetModuleName(const wchar_t* name);
+        void SetHotkeyName(const wchar_t* name);
         const wchar_t* GetModuleName() const;
+        const wchar_t* GetHotkeyName() const;
 
     private:
         std::unique_ptr<HotkeyConflictInfoImpl> pImpl;
@@ -42,9 +44,9 @@ namespace HotkeyConflict
 	public:
         static HotkeyConflictManager& GetInstance();
 
-        bool HasConflict(const Hotkey& hotkey);
-        HotkeyConflictInfo GetConflict(const Hotkey& hotkey, const std::wstring& currentModuleName);
-        bool AddHotkey(const Hotkey& hotkey, const std::wstring& moduleName);
+        bool HasConflict(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
+        HotkeyConflictInfo GetConflict(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
+        bool AddHotkey(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
         bool RemoveHotkey(const Hotkey& hotkey);
 
 	private:
