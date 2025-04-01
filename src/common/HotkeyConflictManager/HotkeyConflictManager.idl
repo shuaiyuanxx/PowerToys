@@ -1,0 +1,57 @@
+// HotkeyConflictManager.idl : IDL source for HotkeyConflictManager
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (HotkeyConflictManager.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+typedef struct Hotkey {
+	VARIANT_BOOL Win;
+	VARIANT_BOOL Ctrl;
+	VARIANT_BOOL Shift;
+	VARIANT_BOOL Alt;
+	BYTE Key;
+} Hotkey;
+
+typedef struct HotkeyConflictInfo {
+	struct Hotkey hotkey;
+	BSTR moduleName;
+	BSTR hotkeyName;
+} HotkeyConflictInfo;
+
+[
+	object,
+	uuid(e3aec145-c6d2-4f6e-90aa-397418c06a66),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IHotkeyManager : IDispatch
+{
+	HRESULT HasConflict([in] Hotkey hotkey, [in] BSTR moduleName, [in] BSTR hotkeyName, [out, retval] VARIANT_BOOL* result);
+
+	HRESULT GetConflictInfo([in] Hotkey hotkey, [in] BSTR moduleName, [in] BSTR hotkeyName, [out] HotkeyConflictInfo* pConflictInfo);
+
+	HRESULT AddHotkey([in] Hotkey hotkey, [in] BSTR moduleName, [in] BSTR hotkeyName, [out, retval] VARIANT_BOOL* result);
+
+	HRESULT RemoveHotkey([in] Hotkey hotkey, [out, retval] VARIANT_BOOL* result);
+};
+[
+	uuid(46908bd3-00ee-4716-a32f-bae116bf4382),
+	version(1.0),
+]
+library HotkeyConflictManagerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(35e406a0-eddd-476a-aa3b-46c1ee21d009)
+	]
+	coclass HotkeyManager
+	{
+		[default] interface IHotkeyManager;
+	};
+};
+
+import "shobjidl.idl";

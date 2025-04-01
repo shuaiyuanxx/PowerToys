@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {35e406a0-eddd-476a-aa3b-46c1ee21d009} = s 'HotkeyManager class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Free'
+			}
+			TypeLib = s '{46908bd3-00ee-4716-a32f-bae116bf4382}'
+			Version = s '1.0'
+		}
+	}
+}

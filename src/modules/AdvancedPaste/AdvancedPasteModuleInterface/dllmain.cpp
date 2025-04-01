@@ -3,6 +3,10 @@
 
 #include "AdvancedPasteConstants.h"
 #include "AdvancedPasteProcessManager.h"
+#include <atlbase.h>
+#include <atlcom.h>
+#include <atlctl.h>
+#include <comdef.h>
 #include <interface/powertoy_module_interface.h>
 #include "trace.h"
 #include "Generated Files/resource.h"
@@ -16,6 +20,9 @@
 #include <common/utils/winapi_error.h>
 #include <common/utils/gpo.h>
 
+//#include <common/HotkeyConflictManager/HotkeyManager.h>
+#include <common/HotkeyConflictManager/HotkeyConflictManager_i.h>
+#include <common/HotkeyConflictManager/HotkeyConflictManager_i.c>
 #include <winrt/Windows.Security.Credentials.h>
 #include <vector>
 
@@ -68,7 +75,7 @@ private:
     
     AdvancedPasteProcessManager m_process_manager;
     bool m_enabled = false;
-
+    IHotkeyManager* pHotkeyManager = nullptr;
     std::wstring app_name;
 
     //contains the non localized key of the powertoy
@@ -613,6 +620,25 @@ public:
         app_name = GET_RESOURCE_STRING(IDS_ADVANCED_PASTE_NAME);
         app_key = AdvancedPasteConstants::ModuleKey;
         LoggerHelpers::init_logger(app_key, L"ModuleInterface", "AdvancedPaste");
+        HRESULT hr = CoCreateInstance(CLSID_HotkeyManager, NULL, CLSCTX_INPROC_SERVER, IID_IHotkeyManager, reinterpret_cast<void**>(&pHotkeyManager));
+        if (SUCCEEDED(hr))
+        {
+            VARIANT_BOOL result;
+            hr = pHotkeyManager->HasConflict({true, true, true, true, 87}, _bstr_t(L"MyModule"), _bstr_t(L"MyHotkey"), &result);
+            if (SUCCEEDED(hr))
+            {
+                if (result == VARIANT_TRUE)
+                {
+                    printf("Hotkey conflict detected.\n");
+                }
+                else
+                {
+                    printf("No hotkey conflict.\n");
+                }
+            }
+
+            pHotkeyManager->Release();
+        }
         init_settings();
     }
 
