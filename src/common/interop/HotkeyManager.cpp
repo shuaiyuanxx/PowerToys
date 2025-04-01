@@ -50,7 +50,7 @@ namespace winrt::PowerToys::Interop::implementation
         auto pressedKeysHandle = GetHotkeyHandle(pressedKeys);
 
         // Check if any hotkey matches the pressed keys if the current key event is a key down event
-        if ((ev.message == WM_KEYDOWN || ev.message == WM_SYSKEYDOWN) && hotkeys.find(pressedKeysHandle)!=hotkeys.end())
+        if ((ev.message == WM_KEYDOWN || ev.message == WM_SYSKEYDOWN) && hotkeys.find(pressedKeysHandle) != hotkeys.end())
         {
             return true;
         }
@@ -68,7 +68,8 @@ namespace winrt::PowerToys::Interop::implementation
     void HotkeyManager::UnregisterHotkey(uint16_t _handle)
     {
         auto iter = hotkeys.find(_handle);
-        if (iter != hotkeys.end()) {
+        if (iter != hotkeys.end())
+        {
             hotkeys.erase(iter);
         }
     }

@@ -46,6 +46,8 @@ public:
         bool alt = false;
         unsigned char key = 0;
 
+        bool hasConflict = false;
+
         std::strong_ordering operator<=>(const Hotkey&) const = default;
     };
 
@@ -53,6 +55,8 @@ public:
     {
         WORD modifiersMask = 0;
         WORD vkCode = 0;
+
+        bool hasConflict = false;
     };
 
     /* Returns the localized name of the PowerToy*/

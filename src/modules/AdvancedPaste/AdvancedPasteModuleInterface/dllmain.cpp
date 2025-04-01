@@ -16,6 +16,7 @@
 #include <common/utils/winapi_error.h>
 #include <common/utils/gpo.h>
 
+#include <common/HotkeyConflictManager/HotkeyConflictManager.h>
 #include <winrt/Windows.Security.Credentials.h>
 #include <vector>
 
@@ -65,8 +66,9 @@ namespace
 class AdvancedPaste : public PowertoyModuleIface
 {
 private:
-    
     AdvancedPasteProcessManager m_process_manager;
+    HotkeyConflict::HotkeyConflictManager& hotkeyConflictManager = HotkeyConflict::HotkeyConflictManager::GetInstance();
+    
     bool m_enabled = false;
 
     std::wstring app_name;
@@ -102,8 +104,8 @@ private:
         try
         {
             const auto jsonHotkeyObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(keyName);
-            return parse_single_hotkey(jsonHotkeyObject);
-        }
+            return parse_single_hotkey(jsonHotkeyObject, keyName);
+            }
         catch (...)
         {
             Logger::error("Failed to initialize AdvancedPaste shortcut from settings. Value will keep unchanged.");
@@ -112,7 +114,7 @@ private:
         return {};
     }
 
-    static Hotkey parse_single_hotkey(const winrt::Windows::Data::Json::JsonObject& jsonHotkeyObject)
+    Hotkey parse_single_hotkey(const winrt::Windows::Data::Json::JsonObject& jsonHotkeyObject, const wchar_t* keyName)
     {
         try
         {
@@ -122,6 +124,21 @@ private:
             hotkey.shift = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_SHIFT);
             hotkey.ctrl = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_CTRL);
             hotkey.key = static_cast<unsigned char>(jsonHotkeyObject.GetNamedNumber(JSON_KEY_CODE));
+
+            HotkeyConflict::Hotkey hotkeyToCheck;
+            hotkeyToCheck.Win = hotkey.win;
+            hotkeyToCheck.Alt = hotkey.alt;
+            hotkeyToCheck.Shift = hotkey.shift;
+            hotkeyToCheck.Ctrl = hotkey.ctrl;
+            hotkeyToCheck.Key = hotkey.key;
+
+            bool conflictCheckResult = hotkeyConflictManager.HasConflict(hotkeyToCheck, app_name.c_str(), keyName);
+            if (conflictCheckResult == false)
+            {
+                hotkeyConflictManager.AddHotkey(hotkeyToCheck, app_name.c_str(), keyName);
+            }
+            hotkey.hasConflict = conflictCheckResult;
+            
             return hotkey;
         }
         catch (...)
@@ -250,10 +267,11 @@ private:
             const AdditionalAction additionalAction
             {
                 actionName.c_str(),
-                parse_single_hotkey(action.GetNamedObject(JSON_KEY_SHORTCUT))
+                parse_single_hotkey(action.GetNamedObject(JSON_KEY_SHORTCUT), actionName.c_str())
             };
 
             m_additional_actions.push_back(additionalAction);
+            // TODO: check hotkey is valid or not
         }
         else
         {
@@ -337,7 +355,7 @@ private:
                                     const CustomAction customActionData
                                     {
                                         static_cast<int>(object.GetNamedNumber(JSON_KEY_ID)),
-                                        parse_single_hotkey(object.GetNamedObject(JSON_KEY_SHORTCUT))
+                                        parse_single_hotkey(object.GetNamedObject(JSON_KEY_SHORTCUT), object.GetNamedString(JSON_KEY_ID).c_str())
                                     };
 
                                     m_custom_actions.push_back(customActionData);
@@ -668,6 +686,11 @@ public:
     {
     }
 
+    //void check_hotkey_conflict(PowerToysSettings::PowerToyValues& values)
+    //{
+
+    //}
+
     virtual void set_config(const wchar_t* config) override
     {
         try
@@ -695,6 +718,10 @@ public:
 
             // If you don't need to do any custom processing of the settings, proceed
             // to persists the values calling:
+
+            // TODO: Check hotkey conflict here before saving
+
+
             values.save_to_settings_file();
             // Otherwise call a custom function to process the settings before saving them to disk:
             // save_settings();

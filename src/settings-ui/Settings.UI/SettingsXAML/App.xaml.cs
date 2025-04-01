@@ -73,6 +73,8 @@ namespace Microsoft.PowerToys.Settings.UI
 
         public ETWTrace EtwTrace { get; private set; } = new ETWTrace();
 
+        public static HotkeyManager GlobalHotkeyManager { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="App"/> class.
         /// Initializes the singleton application object. This is the first line of authored code
@@ -87,6 +89,8 @@ namespace Microsoft.PowerToys.Settings.UI
             {
                 Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = appLanguage;
             }
+
+            GlobalHotkeyManager = new HotkeyManager();
 
             InitializeComponent();
 

@@ -14,7 +14,7 @@ namespace winrt::PowerToys::Interop::implementation
     private:
         KeyboardHook keyboardHook{ nullptr };
         std::map<uint16_t, HotkeyCallback> hotkeys;
-        Hotkey pressedKeys{ };
+        Hotkey pressedKeys{};
         KeyboardEventCallback keyboardEventCallback;
         IsActiveCallback isActiveCallback;
         FilterKeyboardEvent filterKeyboardCallback;

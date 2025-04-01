@@ -23,6 +23,7 @@
         <ProjectReference Include="..\..\common\ManagedCommon\ManagedCommon.csproj" />
         <ProjectReference Include="..\..\common\ManagedTelemetry\Telemetry\ManagedTelemetry.csproj" />
         <ProjectReference Include="..\..\modules\MouseUtils\MouseJump.Common\MouseJump.Common.csproj" />
+		<ProjectReference Include="..\..\common\HotkeyConflictManager\HotkeyConflictManager.vcxproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -40,5 +41,9 @@
             <Generator>PublicResXFileCodeGenerator</Generator>
         </EmbeddedResource>
     </ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Platform)'=='x64'">
+		<Exec Command="xcopy /y /d &quot;$(SolutionDir)x64\$(Configuration)\HotkeyConflictManager.dll&quot; &quot;$(TargetDir)&quot;" />
+	</Target>
 
 </Project>

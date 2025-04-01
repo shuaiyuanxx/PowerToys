@@ -264,6 +264,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.AdvancedPasteUIShortcut != value)
                 {
                     _advancedPasteSettings.Properties.AdvancedPasteUIShortcut = value ?? AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut;
+                    bool hasconflict = HotkeyConflictManagerWrapper.HasConflict(_advancedPasteSettings.Properties.AdvancedPasteUIShortcut, "AdvancedPaste", "advanced-paste-ui-hotkey");
+                    _advancedPasteSettings.Properties.AdvancedPasteUIShortcut.HasConflict = hasconflict;
                     OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
@@ -280,6 +282,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsPlainTextShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsPlainTextShortcut = value ?? AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut;
+                    bool hasconflict = HotkeyConflictManagerWrapper.HasConflict(_advancedPasteSettings.Properties.PasteAsPlainTextShortcut, "AdvancedPaste", "paste-as-plain-hotkey");
+                    _advancedPasteSettings.Properties.PasteAsPlainTextShortcut.HasConflict = hasconflict;
                     OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
@@ -296,6 +300,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsMarkdownShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings();
+                    bool hasconflict = HotkeyConflictManagerWrapper.HasConflict(_advancedPasteSettings.Properties.PasteAsMarkdownShortcut, "AdvancedPaste", "paste-as-markdown-hotkey");
+                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut.HasConflict = hasconflict;
                     OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
@@ -312,6 +318,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsJsonShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings();
+                    bool hasconflict = HotkeyConflictManagerWrapper.HasConflict(_advancedPasteSettings.Properties.PasteAsJsonShortcut, "AdvancedPaste", "paste-as-json-hotkey");
+                    _advancedPasteSettings.Properties.PasteAsJsonShortcut.HasConflict = hasconflict;
                     OnPropertyChanged(nameof(PasteAsJsonShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
