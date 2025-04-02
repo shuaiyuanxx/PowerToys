@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Timers;
 
@@ -50,6 +51,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private bool _isEnabled;
 
         private Func<string, int> SendConfigMSG { get; }
+
+        public delegate void HotkeyConflictCheckCallback(bool hasConflict, string conflictModuleName, string conflictHotkeyName);
+
+        private Dictionary<string, HotkeyConflictCheckCallback> _pendingHotkeyConflictChecks = new Dictionary<string, HotkeyConflictCheckCallback>();
+
+        private string GenerateRequestId() => Guid.NewGuid().ToString();
 
         public AdvancedPasteViewModel(
             ISettingsUtils settingsUtils,
@@ -283,6 +290,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
+                    CheckHotkeyConflict(value, "AdvancedPaste", string.Empty, null);
                     SaveAndNotifySettings();
                 }
             }
@@ -389,6 +397,35 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     "{{ \"powertoys\": {{ \"{0}\": {1} }} }}",
                     AdvancedPasteSettings.ModuleName,
                     JsonSerializer.Serialize(_advancedPasteSettings, SourceGenerationContextContext.Default.AdvancedPasteSettings)));
+        }
+
+        public void CheckHotkeyConflict(HotkeySettings hotkey, string moduleName, string hotkeyName, HotkeyConflictCheckCallback callback)
+        {
+            string requestId = GenerateRequestId();
+
+            lock (_pendingHotkeyConflictChecks)
+            {
+                _pendingHotkeyConflictChecks[requestId] = callback;
+            }
+
+            var hotkeyObj = new JsonObject
+            {
+                ["request_id"] = requestId,
+                ["win"] = hotkey.Win,
+                ["ctrl"] = hotkey.Ctrl,
+                ["shift"] = hotkey.Shift,
+                ["alt"] = hotkey.Alt,
+                ["key"] = hotkey.Code,
+                ["moduleName"] = moduleName,
+                ["hotkeyName"] = hotkeyName,
+            };
+
+            var requestObject = new JsonObject
+            {
+                ["check_hotkey_conflict"] = hotkeyObj,
+            };
+
+            SendConfigMSG(requestObject.ToString());
         }
 
         public void RefreshEnabledState()

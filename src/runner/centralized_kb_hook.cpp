@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "centralized_kb_hook.h"
+#include "hotkey_conflict_detector.h"
 #include <common/debug_control.h>
 #include <common/utils/winapi_error.h>
 #include <common/logger/logger.h>
@@ -191,7 +192,14 @@ namespace CentralizedKeyboardHook
     {
         Logger::trace(L"Register hotkey action for {}", moduleName);
         std::unique_lock lock{ mutex };
-        hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .action = std::move(action) });
+
+        HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
+        bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), L"");
+        if (!hasConflict)
+        {
+            hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .action = std::move(action) });
+            hkmng.AddHotkey(hotkey, moduleName.c_str(), L"");
+        }
     }
 
     void AddPressedKeyAction(const std::wstring& moduleName, const DWORD vk, const UINT milliseconds, std::function<bool()>&& action) noexcept
@@ -238,6 +246,8 @@ namespace CentralizedKeyboardHook
                 }
             }
         }
+        HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
+        hkmng.RemoveHotkeyByModule(moduleName);
     }
 
     void Start() noexcept

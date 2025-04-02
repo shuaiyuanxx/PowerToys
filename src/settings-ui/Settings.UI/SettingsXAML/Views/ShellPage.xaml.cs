@@ -406,6 +406,46 @@ namespace Microsoft.PowerToys.Settings.UI.Views
                         OpenMainWindowCallback(App.GetPage(whatToShowJson.GetString()));
                     }
                 }
+
+                IJsonValue responseTypeJson;
+                if (json.TryGetValue("response_type", out responseTypeJson) &&
+                    responseTypeJson.ValueType == JsonValueType.String &&
+                    responseTypeJson.GetString().Equals("hotkey_conflict_result", StringComparison.Ordinal))
+                {
+                    IJsonValue hasConflictJson;
+
+                    if (json.TryGetValue("has_conflict", out hasConflictJson))
+                    {
+                        bool hasConflict = hasConflictJson.GetBoolean();
+
+                        string conflictModuleName = string.Empty;
+                        string conflictHotkeyName = string.Empty;
+
+                        if (hasConflict)
+                        {
+                            IJsonValue conflictModuleJson;
+                            IJsonValue conflictHotkeyJson;
+
+                            if (json.TryGetValue("conflict_module", out conflictModuleJson))
+                            {
+                                conflictModuleName = conflictModuleJson.GetString();
+                            }
+
+                            if (json.TryGetValue("conflict_hotkey_name", out conflictHotkeyJson))
+                            {
+                                conflictHotkeyName = conflictHotkeyJson.GetString();
+                            }
+                        }
+
+                        /*HotkeyConflictResponseReceived?.Invoke(this, new HotkeyConflictResponseEventArgs
+                        {
+                            RequestId = requestId,
+                            HasConflict = hasConflict,
+                            ConflictModuleName = conflictModuleName,
+                            ConflictHotkeyName = conflictHotkeyName
+                        });*/
+                    }
+                }
             }
         }
 
