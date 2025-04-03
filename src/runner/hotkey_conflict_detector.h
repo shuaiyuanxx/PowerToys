@@ -4,10 +4,13 @@
 #include <string>
 
 #include "../modules/interface/powertoy_module_interface.h"
+#include "centralized_hotkeys.h"
 
 namespace HotkeyConflictDetector
 {
     using Hotkey = PowertoyModuleIface::Hotkey;
+    using HotkeyEx = PowertoyModuleIface::HotkeyEx;
+    using Shortcut = CentralizedHotkeys::Shortcut;
 
     struct HotkeyConflictInfo
     {
@@ -15,6 +18,10 @@ namespace HotkeyConflictDetector
         std::wstring moduleName;
         std::wstring hotkeyName;
     };
+
+    Hotkey HotkeyExToHotkey(const HotkeyEx& hotkeyEx);
+
+    Hotkey ShortcutToHotkey(const CentralizedHotkeys::Shortcut& shortcut);
 
     class HotkeyConflictManager
     {

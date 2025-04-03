@@ -15,8 +15,10 @@
             <Button
                 x:Name="EditButton"
                 Padding="0"
+                AutomationProperties.Name="{x:Bind ConflictToolTipText, Mode=OneWay}"
                 Click="OpenDialogButton_Click"
-                CornerRadius="8">
+                CornerRadius="8"
+                ToolTipService.ToolTip="{x:Bind ConflictToolTipText, Mode=OneWay}">
                 <StackPanel
                     Margin="12,6,12,6"
                     Orientation="Horizontal"
@@ -42,6 +44,15 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <FontIcon
+                        x:Name="ConflictIcon"
+                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                        FontSize="16"
+                        Foreground="Red"
+                        Glyph="&#xE7BA;"
+                        Visibility="{x:Bind ConflictIconVisibility, Mode=OneWay}" />
+                    
                     <FontIcon
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         FontSize="16"

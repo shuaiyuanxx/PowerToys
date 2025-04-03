@@ -35,7 +35,7 @@ namespace CentralizedHotkeys
 
     std::wstring ToWstring(const Shortcut& shortcut);
 
-    bool AddHotkeyAction(Shortcut shortcut, Action action);
+    bool AddHotkeyAction(Shortcut shortcut, Action action, std::wstring moduleName);
 
     void UnregisterHotkeysForModule(std::wstring moduleName);
 

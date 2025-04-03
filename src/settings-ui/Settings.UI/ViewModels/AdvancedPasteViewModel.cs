@@ -7,15 +7,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Timers;
-
+using AllExperiments;
 using global::PowerToys.GPOWrapper;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -263,6 +266,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             get => IsClipboardHistoryDisabledByGPO() && _isEnabled;
         }
 
+        public bool PasteAsMarkdownShortcutHasConflict => _advancedPasteSettings.Properties.PasteAsMarkdownShortcut?.HasConflict ?? false;
+
+        public bool AdvancedPasteUIShortcutHasConflict => _advancedPasteSettings.Properties.AdvancedPasteUIShortcut?.HasConflict ?? false;
+
+        public bool PasteAsPlainTextShortcutHasConflict => _advancedPasteSettings.Properties.PasteAsPlainTextShortcut?.HasConflict ?? false;
+
+        public bool PasteAsJsonShortcutHasConflict => _advancedPasteSettings.Properties.PasteAsJsonShortcut?.HasConflict ?? false;
+
         public HotkeySettings AdvancedPasteUIShortcut
         {
             get => _advancedPasteSettings.Properties.AdvancedPasteUIShortcut;
@@ -271,10 +282,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.AdvancedPasteUIShortcut != value)
                 {
                     _advancedPasteSettings.Properties.AdvancedPasteUIShortcut = value ?? AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut;
-                    OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
-                    SaveAndNotifySettings();
+                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
+                    {
+                        _advancedPasteSettings.Properties.AdvancedPasteUIShortcut.HasConflict = hasConflict;
+                        OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
+                        SaveAndNotifySettings();
+                    });
                 }
             }
         }
@@ -287,11 +302,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsPlainTextShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsPlainTextShortcut = value ?? AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut;
-                    OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
-                    CheckHotkeyConflict(value, "AdvancedPaste", string.Empty, null);
-                    SaveAndNotifySettings();
+                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
+                    {
+                        _advancedPasteSettings.Properties.PasteAsPlainTextShortcut.HasConflict = hasConflict;
+                        OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
+                        SaveAndNotifySettings();
+                    });
                 }
             }
         }
@@ -304,10 +322,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsMarkdownShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings();
-                    OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
-                    SaveAndNotifySettings();
+                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
+                    {
+                        _advancedPasteSettings.Properties.PasteAsMarkdownShortcut.HasConflict = hasConflict;
+                        OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
+                        SaveAndNotifySettings();
+                    });
                 }
             }
         }
@@ -320,10 +342,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsJsonShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings();
-                    OnPropertyChanged(nameof(PasteAsJsonShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
 
-                    SaveAndNotifySettings();
+                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
+                    {
+                        _advancedPasteSettings.Properties.PasteAsJsonShortcut.HasConflict = hasConflict;
+                        OnPropertyChanged(nameof(PasteAsJsonShortcut));
+                        SaveAndNotifySettings();
+                    });
                 }
             }
         }
@@ -397,35 +423,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     "{{ \"powertoys\": {{ \"{0}\": {1} }} }}",
                     AdvancedPasteSettings.ModuleName,
                     JsonSerializer.Serialize(_advancedPasteSettings, SourceGenerationContextContext.Default.AdvancedPasteSettings)));
-        }
-
-        public void CheckHotkeyConflict(HotkeySettings hotkey, string moduleName, string hotkeyName, HotkeyConflictCheckCallback callback)
-        {
-            string requestId = GenerateRequestId();
-
-            lock (_pendingHotkeyConflictChecks)
-            {
-                _pendingHotkeyConflictChecks[requestId] = callback;
-            }
-
-            var hotkeyObj = new JsonObject
-            {
-                ["request_id"] = requestId,
-                ["win"] = hotkey.Win,
-                ["ctrl"] = hotkey.Ctrl,
-                ["shift"] = hotkey.Shift,
-                ["alt"] = hotkey.Alt,
-                ["key"] = hotkey.Code,
-                ["moduleName"] = moduleName,
-                ["hotkeyName"] = hotkeyName,
-            };
-
-            var requestObject = new JsonObject
-            {
-                ["check_hotkey_conflict"] = hotkeyObj,
-            };
-
-            SendConfigMSG(requestObject.ToString());
         }
 
         public void RefreshEnabledState()

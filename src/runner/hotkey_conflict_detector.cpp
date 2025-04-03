@@ -6,6 +6,34 @@
 
 namespace HotkeyConflictDetector
 {
+    Hotkey HotkeyExToHotkey(const HotkeyEx& hotkeyEx)
+    {
+        Hotkey hotkey;
+
+        hotkey.win = (hotkeyEx.modifiersMask & MOD_WIN) != 0;
+        hotkey.ctrl = (hotkeyEx.modifiersMask & MOD_CONTROL) != 0;
+        hotkey.shift = (hotkeyEx.modifiersMask & MOD_SHIFT) != 0;
+        hotkey.alt = (hotkeyEx.modifiersMask & MOD_ALT) != 0;
+
+        hotkey.key = hotkeyEx.vkCode > 255 ? 0 : static_cast<unsigned char>(hotkeyEx.vkCode);
+
+        return hotkey;
+    }
+
+    Hotkey ShortcutToHotkey(const CentralizedHotkeys::Shortcut& shortcut)
+    {
+        Hotkey hotkey;
+
+        hotkey.win = (shortcut.modifiersMask & MOD_WIN) != 0;
+        hotkey.ctrl = (shortcut.modifiersMask & MOD_CONTROL) != 0;
+        hotkey.shift = (shortcut.modifiersMask & MOD_SHIFT) != 0;
+        hotkey.alt = (shortcut.modifiersMask & MOD_ALT) != 0;
+
+        hotkey.key = shortcut.vkCode > 255 ? 0 : static_cast<unsigned char>(shortcut.vkCode);
+
+        return hotkey;
+    }
+
     HotkeyConflictManager* HotkeyConflictManager::instance = nullptr;
     std::mutex HotkeyConflictManager::instanceMutex;
 
