@@ -308,6 +308,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     {
                         _advancedPasteSettings.Properties.PasteAsPlainTextShortcut.HasConflict = hasConflict;
                         OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
+                        OnPropertyChanged(nameof(PasteAsPlainTextShortcutHasConflict));
                         SaveAndNotifySettings();
                     });
                 }

@@ -13,6 +13,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition MinHeight="110" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" />
@@ -71,6 +72,13 @@
                 Background="Transparent"
                 FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" 
+                    Visibility="{x:Bind HasConflict, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock Foreground="Red" 
+               Text="{x:Bind ConflictMessage, Mode=OneWay}" 
+               TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
 </UserControl>
