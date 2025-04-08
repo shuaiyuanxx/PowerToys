@@ -16,7 +16,20 @@ namespace Microsoft.PowerToys.Settings.UI.Library
     {
         private const int VKTAB = 0x09;
 
-        public HotkeySettings(string hotkeyName = "", string ownerModuleName = "")
+        public HotkeySettings()
+        {
+            Win = false;
+            Ctrl = false;
+            Alt = false;
+            Shift = false;
+            Code = 0;
+
+            HasConflict = false;
+            HotkeyName = string.Empty;
+            OwnerModuleName = string.Empty;
+        }
+
+        public HotkeySettings(string hotkeyName, string ownerModuleName)
         {
             Win = false;
             Ctrl = false;
