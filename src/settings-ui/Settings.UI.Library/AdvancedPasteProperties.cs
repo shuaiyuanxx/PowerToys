@@ -11,9 +11,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 {
     public class AdvancedPasteProperties
     {
-        public static readonly HotkeySettings DefaultAdvancedPasteUIShortcut = new HotkeySettings(true, false, false, true, 0x56); // Win+Shift+V
+        public static readonly HotkeySettings DefaultAdvancedPasteUIShortcut = new HotkeySettings(true, false, false, true, 0x56, "AdvancedPasteUIShortcut", AdvancedPasteSettings.ModuleName); // Win+Shift+V
 
-        public static readonly HotkeySettings DefaultPasteAsPlainTextShortcut = new HotkeySettings(true, true, true, false, 0x56); // Ctrl+Win+Alt+V
+        public static readonly HotkeySettings DefaultPasteAsPlainTextShortcut = new HotkeySettings(true, true, true, false, 0x56, "PasteAsPlainTextShortcut", AdvancedPasteSettings.ModuleName); // Ctrl+Win+Alt+V
 
         public AdvancedPasteProperties()
         {

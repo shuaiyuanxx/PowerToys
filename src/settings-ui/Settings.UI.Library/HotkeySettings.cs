@@ -16,7 +16,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
     {
         private const int VKTAB = 0x09;
 
-        public HotkeySettings()
+        public HotkeySettings(string hotkeyName = "", string ownerModuleName = "")
         {
             Win = false;
             Ctrl = false;
@@ -25,8 +25,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             Code = 0;
 
             HasConflict = false;
-            HotkeyName = string.Empty;
-            OwnerModuleName = string.Empty;
+            HotkeyName = hotkeyName;
+            OwnerModuleName = ownerModuleName;
         }
 
         /// <summary>
