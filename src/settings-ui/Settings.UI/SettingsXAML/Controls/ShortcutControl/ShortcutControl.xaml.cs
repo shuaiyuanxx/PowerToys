@@ -206,6 +206,42 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             {
                 App.GetSettingsWindow().Activated += ShortcutDialog_SettingsWindow_Activated;
             }
+
+            if (hotkeySettings != null && hotkeySettings.IsValid())
+            {
+                CheckForConflictsAndUpdateVisibility(hotkeySettings);
+            }
+        }
+
+        private void CheckForConflictsAndUpdateVisibility(HotkeySettings settings)
+        {
+            void UpdateUIForConflict(bool hasConflict, string conflictModule, string conflictHotkeyName)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    _lastHasConflict = hasConflict;
+
+                    if (hasConflict)
+                    {
+                        _conflictToolTipText = $"Conflict detected with {conflictModule}: {conflictHotkeyName}";
+
+                        // Only show conflict if module is active
+                        // CheckModuleStateAndUpdateVisibility(settings, conflictModule);
+                        ConflictIconVisibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        _conflictToolTipText = string.Empty;
+                        ConflictIconVisibility = Visibility.Collapsed;
+                        settings.HasConflict = false;
+                    }
+                });
+            }
+
+            HotkeyConflictHelper.CheckHotkeyConflict(
+                settings,
+                ShellPage.SendDefaultIPCMessage,
+                UpdateUIForConflict);
         }
 
         private void KeyEventHandler(int key, bool matchValue, int matchValueCode)

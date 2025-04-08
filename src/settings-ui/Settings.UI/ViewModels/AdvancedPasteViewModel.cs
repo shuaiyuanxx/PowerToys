@@ -283,13 +283,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     _advancedPasteSettings.Properties.AdvancedPasteUIShortcut = value ?? AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut;
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
-                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
-                    {
-                        _advancedPasteSettings.Properties.AdvancedPasteUIShortcut.HasConflict = hasConflict;
-                        OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
-                        SaveAndNotifySettings();
-                    });
+                    OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
+                    SaveAndNotifySettings();
                 }
             }
         }
@@ -303,14 +298,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     _advancedPasteSettings.Properties.PasteAsPlainTextShortcut = value ?? AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut;
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
-                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
-                    {
-                        _advancedPasteSettings.Properties.PasteAsPlainTextShortcut.HasConflict = hasConflict;
-                        OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
-                        OnPropertyChanged(nameof(PasteAsPlainTextShortcutHasConflict));
-                        SaveAndNotifySettings();
-                    });
+                    OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
+                    SaveAndNotifySettings();
                 }
             }
         }
@@ -322,15 +311,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_advancedPasteSettings.Properties.PasteAsMarkdownShortcut != value)
                 {
-                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings();
+                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings("PasteAsMarkdownShortcut", AdvancedPasteSettings.ModuleName);
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
-                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
-                    {
-                        _advancedPasteSettings.Properties.PasteAsMarkdownShortcut.HasConflict = hasConflict;
-                        OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
-                        SaveAndNotifySettings();
-                    });
+                    OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
+                    SaveAndNotifySettings();
                 }
             }
         }
@@ -342,15 +326,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_advancedPasteSettings.Properties.PasteAsJsonShortcut != value)
                 {
-                    _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings();
+                    _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings("PasteAsJsonShortcut", AdvancedPasteSettings.ModuleName);
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
-                    HotkeyConflictHelper.CheckHotkeyConflict(value, SendConfigMSG, (hasConflict, conflictModule, conflictHotkeyName) =>
-                    {
-                        _advancedPasteSettings.Properties.PasteAsJsonShortcut.HasConflict = hasConflict;
-                        OnPropertyChanged(nameof(PasteAsJsonShortcut));
-                        SaveAndNotifySettings();
-                    });
+                    OnPropertyChanged(nameof(PasteAsJsonShortcut));
+                    SaveAndNotifySettings();
                 }
             }
         }
