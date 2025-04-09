@@ -194,11 +194,11 @@ namespace CentralizedKeyboardHook
         std::unique_lock lock{ mutex };
 
         HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-        bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), L"");
+        bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), hotkey.name);
         if (!hasConflict)
         {
             hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .action = std::move(action) });
-            hkmng.AddHotkey(hotkey, moduleName.c_str(), L"");
+            hkmng.AddHotkey(hotkey, moduleName.c_str(), hotkey.name);
         }
     }
 

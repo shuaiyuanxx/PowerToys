@@ -30,15 +30,6 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         private string _conflictToolTipText = string.Empty;
         private bool _lastHasConflict;
 
-        public string ConflictToolTipText
-        {
-            get => _conflictToolTipText;
-            private set
-            {
-                _conflictToolTipText = value;
-            }
-        }
-
         public string Header { get; set; }
 
         public string Keys { get; set; }
@@ -47,6 +38,7 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), new PropertyMetadata(null, OnHotkeySettingsChanged));
         public static readonly DependencyProperty AllowDisableProperty = DependencyProperty.Register("AllowDisable", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnAllowDisableChanged));
         public static readonly DependencyProperty ConflictIconVisibilityProperty = DependencyProperty.Register("ConflictIconVisibility", typeof(Visibility), typeof(ShortcutControl), new PropertyMetadata(Visibility.Collapsed));
+        public static readonly DependencyProperty ConflictToolTipTextProperty = DependencyProperty.Register("ConflictToolTipText", typeof(string), typeof(ShortcutControl), new PropertyMetadata(string.Empty));
 
         private static void OnAllowDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -138,6 +130,12 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             set { SetValue(ConflictIconVisibilityProperty, value); }
         }
 
+        public string ConflictToolTipText
+        {
+            get => (string)GetValue(ConflictToolTipTextProperty);
+            set => SetValue(ConflictToolTipTextProperty, value);
+        }
+
         public ShortcutControl()
         {
             InitializeComponent();
@@ -223,15 +221,12 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 
                     if (hasConflict)
                     {
-                        _conflictToolTipText = $"Conflict detected with {conflictModule}: {conflictHotkeyName}";
-
-                        // Only show conflict if module is active
-                        // CheckModuleStateAndUpdateVisibility(settings, conflictModule);
+                        ConflictToolTipText = $"Conflict detected with {conflictModule}: {conflictHotkeyName}";
                         ConflictIconVisibility = Visibility.Visible;
                     }
                     else
                     {
-                        _conflictToolTipText = string.Empty;
+                        ConflictToolTipText = string.Empty;
                         ConflictIconVisibility = Visibility.Collapsed;
                         settings.HasConflict = false;
                     }

@@ -84,6 +84,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _additionalActions = _advancedPasteSettings.Properties.AdditionalActions;
             _customActions = _advancedPasteSettings.Properties.CustomActions.Value;
 
+            CheckAndUpdateHotkeyName();
+
             InitializeEnabledValue();
 
             // set the callback functions value to handle outgoing IPC message.
@@ -265,14 +267,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             get => IsClipboardHistoryDisabledByGPO() && _isEnabled;
         }
-
-        public bool PasteAsMarkdownShortcutHasConflict => _advancedPasteSettings.Properties.PasteAsMarkdownShortcut?.HasConflict ?? false;
-
-        public bool AdvancedPasteUIShortcutHasConflict => _advancedPasteSettings.Properties.AdvancedPasteUIShortcut?.HasConflict ?? false;
-
-        public bool PasteAsPlainTextShortcutHasConflict => _advancedPasteSettings.Properties.PasteAsPlainTextShortcut?.HasConflict ?? false;
-
-        public bool PasteAsJsonShortcutHasConflict => _advancedPasteSettings.Properties.PasteAsJsonShortcut?.HasConflict ?? false;
 
         public HotkeySettings AdvancedPasteUIShortcut
         {
@@ -579,6 +573,43 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 var customAction = _customActions[index];
                 customAction.CanMoveUp = index != 0;
                 customAction.CanMoveDown = index != _customActions.Count - 1;
+            }
+        }
+
+        private void CheckAndUpdateHotkeyName()
+        {
+            bool updated = false;
+            if (PasteAsJsonShortcut.HotkeyName == string.Empty)
+            {
+                PasteAsJsonShortcut.HotkeyName = "PasteAsJsonShortcut";
+                PasteAsJsonShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+                updated = true;
+            }
+
+            if (PasteAsMarkdownShortcut.HotkeyName == string.Empty)
+            {
+                PasteAsMarkdownShortcut.HotkeyName = "PasteAsMarkdownShortcut";
+                PasteAsMarkdownShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+                updated = true;
+            }
+
+            if (AdvancedPasteUIShortcut.HotkeyName == string.Empty)
+            {
+                AdvancedPasteUIShortcut.HotkeyName = AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut.HotkeyName;
+                AdvancedPasteUIShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+                updated = true;
+            }
+
+            if (PasteAsPlainTextShortcut.HotkeyName == string.Empty)
+            {
+                PasteAsPlainTextShortcut.HotkeyName = AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut.HotkeyName;
+                PasteAsPlainTextShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+                updated = true;
+            }
+
+            if (updated)
+            {
+                _settingsUtils.SaveSettings(_advancedPasteSettings.ToJsonString(), AdvancedPasteSettings.ModuleName);
             }
         }
     }

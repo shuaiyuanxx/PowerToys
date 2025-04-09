@@ -50,6 +50,7 @@ namespace
     const wchar_t JSON_KEY_CTRL[] = L"ctrl";
     const wchar_t JSON_KEY_SHIFT[] = L"shift";
     const wchar_t JSON_KEY_CODE[] = L"code";
+    const wchar_t JSON_KEY_NAME[] = L"hotkeyName";
     const wchar_t JSON_KEY_PASTE_AS_PLAIN_HOTKEY[] = L"paste-as-plain-hotkey";
     const wchar_t JSON_KEY_ADVANCED_PASTE_UI_HOTKEY[] = L"advanced-paste-ui-hotkey";
     const wchar_t JSON_KEY_PASTE_AS_MARKDOWN_HOTKEY[] = L"paste-as-markdown-hotkey";
@@ -60,6 +61,11 @@ namespace
 
     const wchar_t OPENAI_VAULT_RESOURCE[] = L"https://platform.openai.com/api-keys";
     const wchar_t OPENAI_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_OpenAIKey";
+
+    const wchar_t PASTE_AS_PLAIN_HOTKEY_NAME[] = L"PasteAsPlainTextShortcut";
+    const wchar_t ADVANCED_PASTE_UI_HOTKEY_NAME[] = L"AdvancedPasteUIShortcut";
+    const wchar_t PASTE_AS_MARKDOWN_HOTKEY_NAME[] = L"PasteAsMarkdownShortcut";
+    const wchar_t PASTE_AS_JSON_HOTKEY_NAME[] = L"PasteAsJsonShortcut";
 }
 
 class AdvancedPaste : public PowertoyModuleIface
@@ -76,10 +82,10 @@ private:
 
     static const constexpr int NUM_DEFAULT_HOTKEYS = 4;
 
-    Hotkey m_paste_as_plain_hotkey = { .win = true, .ctrl = true, .shift = false, .alt = true, .key = 'V' };
-    Hotkey m_advanced_paste_ui_hotkey = { .win = true, .ctrl = false, .shift = true, .alt = false, .key = 'V' };
-    Hotkey m_paste_as_markdown_hotkey{};
-    Hotkey m_paste_as_json_hotkey{};
+    Hotkey m_paste_as_plain_hotkey = { .win = true, .ctrl = true, .shift = false, .alt = true, .key = 'V', .name = PASTE_AS_PLAIN_HOTKEY_NAME };
+    Hotkey m_advanced_paste_ui_hotkey = { .win = true, .ctrl = false, .shift = true, .alt = false, .key = 'V', .name = ADVANCED_PASTE_UI_HOTKEY_NAME };
+    Hotkey m_paste_as_markdown_hotkey{ .name = PASTE_AS_MARKDOWN_HOTKEY_NAME };
+    Hotkey m_paste_as_json_hotkey{ .name = PASTE_AS_JSON_HOTKEY_NAME };
 
     template<class Id>
     struct ActionData
@@ -102,7 +108,9 @@ private:
         try
         {
             const auto jsonHotkeyObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(keyName);
-            return parse_single_hotkey(jsonHotkeyObject);
+            Hotkey hotkey = parse_single_hotkey(jsonHotkeyObject);
+            hotkey.name = get_hotkey_name(keyName);
+            return hotkey;
         }
         catch (...)
         {
@@ -110,6 +118,19 @@ private:
         }
 
         return {};
+    }
+
+    const wchar_t* get_hotkey_name(const wchar_t* name)
+    {
+        if (wcscmp(name, JSON_KEY_PASTE_AS_PLAIN_HOTKEY) == 0)
+            return PASTE_AS_PLAIN_HOTKEY_NAME;
+        if (wcscmp(name, JSON_KEY_ADVANCED_PASTE_UI_HOTKEY) == 0)
+            return ADVANCED_PASTE_UI_HOTKEY_NAME;
+        if (wcscmp(name, JSON_KEY_PASTE_AS_MARKDOWN_HOTKEY) == 0)
+            return PASTE_AS_MARKDOWN_HOTKEY_NAME;
+        if (wcscmp(name, JSON_KEY_PASTE_AS_JSON_HOTKEY) == 0)
+            return PASTE_AS_JSON_HOTKEY_NAME;
+        return nullptr;
     }
 
     static Hotkey parse_single_hotkey(const winrt::Windows::Data::Json::JsonObject& jsonHotkeyObject)
@@ -122,6 +143,7 @@ private:
             hotkey.shift = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_SHIFT);
             hotkey.ctrl = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_CTRL);
             hotkey.key = static_cast<unsigned char>(jsonHotkeyObject.GetNamedNumber(JSON_KEY_CODE));
+            hotkey.name = jsonHotkeyObject.GetNamedString(JSON_KEY_NAME).c_str();
             return hotkey;
         }
         catch (...)
@@ -140,6 +162,7 @@ private:
         jsonObject.SetNamedValue(JSON_KEY_SHIFT, json::value(hotkey.shift));
         jsonObject.SetNamedValue(JSON_KEY_CTRL, json::value(hotkey.ctrl));
         jsonObject.SetNamedValue(JSON_KEY_CODE, json::value(hotkey.key));
+        jsonObject.SetNamedValue(JSON_KEY_NAME, json::value(hotkey.name));
 
         return jsonObject;
     }

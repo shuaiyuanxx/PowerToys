@@ -19,8 +19,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         {
             AdvancedPasteUIShortcut = DefaultAdvancedPasteUIShortcut;
             PasteAsPlainTextShortcut = DefaultPasteAsPlainTextShortcut;
-            PasteAsMarkdownShortcut = new();
-            PasteAsJsonShortcut = new();
+            PasteAsMarkdownShortcut = new("PasteAsMarkdownShortcut", AdvancedPasteSettings.ModuleName);
+            PasteAsJsonShortcut = new("PasteAsJsonShortcut", AdvancedPasteSettings.ModuleName);
             CustomActions = new();
             AdditionalActions = new();
             IsAdvancedAIEnabled = false;

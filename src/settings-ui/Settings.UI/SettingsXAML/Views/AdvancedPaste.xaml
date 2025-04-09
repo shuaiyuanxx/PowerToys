@@ -143,27 +143,23 @@
                         </tkcontrols:SettingsCard>
                         <tkcontrols:SettingsCard x:Uid="AdvancedPasteUI_Shortcut" HeaderIcon="{ui:FontIcon Glyph=&#xEDA7;}">
                             <controls:ShortcutControl MinWidth="{StaticResource SettingActionControlMinWidth}" 
-                                                      HotkeySettings="{x:Bind Path=ViewModel.AdvancedPasteUIShortcut, Mode=TwoWay}" 
-                                                      ConflictIconVisibility="{x:Bind Path=ViewModel.AdvancedPasteUIShortcutHasConflict, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                      HotkeySettings="{x:Bind Path=ViewModel.AdvancedPasteUIShortcut, Mode=TwoWay}" />
                         </tkcontrols:SettingsCard>
                         <tkcontrols:SettingsCard x:Uid="PasteAsPlainText_Shortcut">
                             <controls:ShortcutControl MinWidth="{StaticResource SettingActionControlMinWidth}" 
-                                                      HotkeySettings="{x:Bind Path=ViewModel.PasteAsPlainTextShortcut, Mode=TwoWay}"
-                                                      ConflictIconVisibility="{x:Bind Path=ViewModel.PasteAsPlainTextShortcutHasConflict, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                      HotkeySettings="{x:Bind Path=ViewModel.PasteAsPlainTextShortcut, Mode=TwoWay}" />
                         </tkcontrols:SettingsCard>
                         <tkcontrols:SettingsCard x:Uid="PasteAsMarkdown_Shortcut">
                             <controls:ShortcutControl
                                 MinWidth="{StaticResource SettingActionControlMinWidth}"
                                 AllowDisable="True"
-                                HotkeySettings="{x:Bind Path=ViewModel.PasteAsMarkdownShortcut, Mode=TwoWay}"
-                                ConflictIconVisibility="{x:Bind Path=ViewModel.PasteAsMarkdownShortcutHasConflict, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                HotkeySettings="{x:Bind Path=ViewModel.PasteAsMarkdownShortcut, Mode=TwoWay}" />
                         </tkcontrols:SettingsCard>
                         <tkcontrols:SettingsCard x:Uid="PasteAsJson_Shortcut">
                             <controls:ShortcutControl
                                 MinWidth="{StaticResource SettingActionControlMinWidth}"
                                 AllowDisable="True"
-                                HotkeySettings="{x:Bind Path=ViewModel.PasteAsJsonShortcut, Mode=TwoWay}"
-                                ConflictIconVisibility="{x:Bind Path=ViewModel.PasteAsJsonShortcutHasConflict, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                HotkeySettings="{x:Bind Path=ViewModel.PasteAsJsonShortcut, Mode=TwoWay}" />
                         </tkcontrols:SettingsCard>
 
                         <ItemsControl
