@@ -51,6 +51,12 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                     {
                         Hotkey = DefaultHotkeyValue;
                     }
+
+                    if (Hotkey.HotkeyName == string.Empty)
+                    {
+                        Hotkey.HotkeyName = DefaultHotkeyValue.HotkeyName;
+                        Hotkey.OwnerModuleName = DefaultHotkeyValue.OwnerModuleName;
+                    }
                 }
             }
             catch (Exception)
