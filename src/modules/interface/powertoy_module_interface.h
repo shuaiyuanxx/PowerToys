@@ -45,6 +45,7 @@ public:
         bool shift = false;
         bool alt = false;
         unsigned char key = 0;
+        const wchar_t* name = nullptr;
 
         std::strong_ordering operator<=>(const Hotkey&) const = default;
     };
@@ -53,6 +54,7 @@ public:
     {
         WORD modifiersMask = 0;
         WORD vkCode = 0;
+        const wchar_t* name = nullptr;
     };
 
     /* Returns the localized name of the PowerToy*/

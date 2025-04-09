@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "centralized_hotkeys.h"
+#include "hotkey_conflict_detector.h"
 
 #include <map>
 #include <common/logger/logger.h>
@@ -40,7 +41,7 @@ namespace CentralizedHotkeys
         return res;
     }
 
-    bool AddHotkeyAction(Shortcut shortcut, Action action)
+    bool AddHotkeyAction(Shortcut shortcut, Action action, std::wstring moduleName)
     {
         if (!actions[shortcut].empty())
         {
@@ -57,6 +58,16 @@ namespace CentralizedHotkeys
                 static int nextId = 0;
                 ids[shortcut] = nextId++;
             }
+
+            HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
+            HotkeyConflictDetector::Hotkey hotkey = HotkeyConflictDetector::ShortcutToHotkey(shortcut);
+            bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), L"");
+            if (hasConflict)
+            {
+                Logger::warn(L"Hotkey conflict detected. Shortcut: {}, from module: {}", ToWstring(shortcut), moduleName);
+                return false;
+            }
+            hkmng.AddHotkey(hotkey, moduleName.c_str(), L"");
 
             if (!RegisterHotKey(runnerWindow, ids[shortcut], shortcut.modifiersMask, shortcut.vkCode))
             {
@@ -82,6 +93,9 @@ namespace CentralizedHotkeys
 
                 if (it->second.empty())
                 {
+                    HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
+                    hkmng.RemoveHotkey(HotkeyConflictDetector::ShortcutToHotkey(it->first));
+
                     if (!UnregisterHotKey(runnerWindow, ids[it->first]))
                     {
                         Logger::warn(L"Failed to unregister {} shortcut. {}", ToWstring(it->first), get_last_error_or_default(GetLastError()));

@@ -27,6 +27,7 @@ namespace
     const wchar_t JSON_KEY_SHAKING_INTERVAL_MS[] = L"shaking_interval_ms";
     const wchar_t JSON_KEY_SHAKING_FACTOR[] = L"shaking_factor";
     const wchar_t JSON_KEY_ACTIVATION_SHORTCUT[] = L"activation_shortcut";
+    const wchar_t JSON_KEY_NAME[] = L"hotkeyName";
 }
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
