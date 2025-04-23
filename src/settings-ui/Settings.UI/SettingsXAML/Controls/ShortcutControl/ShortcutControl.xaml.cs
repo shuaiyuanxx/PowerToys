@@ -7,6 +7,7 @@ using System;
 using CommunityToolkit.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
+using Microsoft.PowerToys.Settings.UI.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -26,15 +27,18 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         private HotkeySettingsControlHook hook;
         private bool _isActive;
         private bool disposedValue;
+        private string _conflictToolTipText = string.Empty;
+        private bool _lastHasConflict;
 
         public string Header { get; set; }
 
         public string Keys { get; set; }
 
         public static readonly DependencyProperty IsActiveProperty = DependencyProperty.Register("Enabled", typeof(bool), typeof(ShortcutControl), null);
-        public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), null);
-
+        public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), new PropertyMetadata(null, OnHotkeySettingsChanged));
         public static readonly DependencyProperty AllowDisableProperty = DependencyProperty.Register("AllowDisable", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnAllowDisableChanged));
+        public static readonly DependencyProperty ConflictIconVisibilityProperty = DependencyProperty.Register("ConflictIconVisibility", typeof(Visibility), typeof(ShortcutControl), new PropertyMetadata(Visibility.Collapsed));
+        public static readonly DependencyProperty ConflictToolTipTextProperty = DependencyProperty.Register("ConflictToolTipText", typeof(string), typeof(ShortcutControl), new PropertyMetadata(string.Empty));
 
         private static void OnAllowDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -56,6 +60,14 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 
             var text = newValue ? resourceLoader.GetString("Activation_Shortcut_With_Disable_Description") : resourceLoader.GetString("Activation_Shortcut_Description");
             description.Text = text;
+        }
+
+        private static void OnHotkeySettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ShortcutControl control)
+            {
+                control.UpdateConflictVisibility();
+            }
         }
 
         private ShortcutDialogContentControl c = new ShortcutDialogContentControl();
@@ -106,8 +118,22 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                     PreviewKeysControl.ItemsSource = HotkeySettings.GetKeysList();
                     AutomationProperties.SetHelpText(EditButton, HotkeySettings.ToString());
                     c.Keys = HotkeySettings.GetKeysList();
+
+                    UpdateConflictVisibility();
                 }
             }
+        }
+
+        public Visibility ConflictIconVisibility
+        {
+            get { return (Visibility)GetValue(ConflictIconVisibilityProperty); }
+            set { SetValue(ConflictIconVisibilityProperty, value); }
+        }
+
+        public string ConflictToolTipText
+        {
+            get => (string)GetValue(ConflictToolTipTextProperty);
+            set => SetValue(ConflictToolTipTextProperty, value);
         }
 
         public ShortcutControl()
@@ -137,6 +163,13 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             AutomationProperties.SetName(EditButton, resourceLoader.GetString("Activation_Shortcut_Title"));
 
             OnAllowDisableChanged(this, null);
+        }
+
+        private void UpdateConflictVisibility()
+        {
+            ConflictIconVisibility = (hotkeySettings?.HasConflict == true)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void ShortcutControl_Unloaded(object sender, RoutedEventArgs e)
@@ -171,6 +204,39 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             {
                 App.GetSettingsWindow().Activated += ShortcutDialog_SettingsWindow_Activated;
             }
+
+            if (hotkeySettings != null && hotkeySettings.IsValid())
+            {
+                CheckForConflictsAndUpdateVisibility(hotkeySettings);
+            }
+        }
+
+        private void CheckForConflictsAndUpdateVisibility(HotkeySettings settings)
+        {
+            void UpdateUIForConflict(bool hasConflict, string conflictModule, string conflictHotkeyName)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    _lastHasConflict = hasConflict;
+
+                    if (hasConflict)
+                    {
+                        ConflictToolTipText = $"Conflict detected with {conflictModule}: {conflictHotkeyName}";
+                        ConflictIconVisibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        ConflictToolTipText = string.Empty;
+                        ConflictIconVisibility = Visibility.Collapsed;
+                        settings.HasConflict = false;
+                    }
+                });
+            }
+
+            HotkeyConflictHelper.CheckHotkeyConflict(
+                settings,
+                ShellPage.SendDefaultIPCMessage,
+                UpdateUIForConflict);
         }
 
         private void KeyEventHandler(int key, bool matchValue, int matchValueCode)
@@ -339,10 +405,42 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                 else
                 {
                     EnableKeys();
+
+                    if (lastValidSettings.IsValid())
+                    {
+                        CheckForConflicts(lastValidSettings);
+                    }
                 }
             }
 
             c.IsWarningAltGr = internalSettings.Ctrl && internalSettings.Alt && !internalSettings.Win && (internalSettings.Code > 0);
+        }
+
+        private void CheckForConflicts(HotkeySettings settings)
+        {
+            void UpdateUIForConflict(bool hasConflict, string conflictModule, string conflictHotkeyName)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    _lastHasConflict = hasConflict;
+
+                    if (hasConflict)
+                    {
+                        c.ConflictMessage = $"Conflict detected with {conflictModule}, current settings: {settings}";
+                        c.HasConflict = true;
+                    }
+                    else
+                    {
+                        c.ConflictMessage = string.Empty;
+                        c.HasConflict = false;
+                    }
+                });
+            }
+
+            HotkeyConflictHelper.CheckHotkeyConflict(
+                settings,
+                ShellPage.SendDefaultIPCMessage,
+                UpdateUIForConflict);
         }
 
         private void EnableKeys()
@@ -445,7 +543,16 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         {
             if (ComboIsValid(lastValidSettings))
             {
-                HotkeySettings = lastValidSettings with { };
+                if (c.HasConflict)
+                {
+                    lastValidSettings = lastValidSettings with { HasConflict = true };
+                }
+                else
+                {
+                    lastValidSettings = lastValidSettings with { HasConflict = false };
+                }
+
+                HotkeySettings = lastValidSettings;
             }
 
             PreviewKeysControl.ItemsSource = hotkeySettings.GetKeysList();

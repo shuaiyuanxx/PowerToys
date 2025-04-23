@@ -128,6 +128,7 @@ public sealed class AdvancedPasteCustomAction : Observable, IAdvancedPasteAction
             _ = HotkeySettings.TryParseFromCmd(shortcutString, out shortcut);
         }
 
+        // TODO: How to set hotkey name for custom actions?
         return (shortcut as HotkeySettings) ?? new HotkeySettings();
     }
 

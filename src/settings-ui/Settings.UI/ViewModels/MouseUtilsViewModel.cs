@@ -78,6 +78,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _highlightFadeDurationMs = MouseHighlighterSettingsConfig.Properties.HighlightFadeDurationMs.Value;
             _highlighterAutoActivate = MouseHighlighterSettingsConfig.Properties.AutoActivate.Value;
 
+            if (MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyName == string.Empty)
+            {
+                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = MouseHighlighterSettings.ModuleName;
+                SettingsUtils.SaveSettings(MouseHighlighterSettingsConfig.ToJsonString(), MouseHighlighterSettings.ModuleName);
+            }
+
             this.InitializeMouseJumpSettings(mouseJumpSettingsRepository);
 
             ArgumentNullException.ThrowIfNull(mousePointerCrosshairsSettingsRepository);

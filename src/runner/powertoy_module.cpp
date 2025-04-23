@@ -83,7 +83,7 @@ void PowertoyModule::UpdateHotkeyEx()
             modulePtr->OnHotkeyEx();
         };
 
-        CentralizedHotkeys::AddHotkeyAction({ hotkey.modifiersMask, hotkey.vkCode }, { pt_module->get_key(), action });
+        CentralizedHotkeys::AddHotkeyAction({ hotkey.modifiersMask, hotkey.vkCode }, { pt_module->get_key(), action }, pt_module->get_name());
     }
 
     // HACK:
