@@ -4,9 +4,7 @@
 
 using System;
 using System.IO;
-using System.IO.Abstractions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
 {
@@ -61,8 +59,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
             catch (Exception)
             {
-                Hotkey = DefaultHotkeyValue;
             }
+
+            Hotkey ??= DefaultHotkeyValue;
         }
     }
 }
