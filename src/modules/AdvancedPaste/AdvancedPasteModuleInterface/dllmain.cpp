@@ -114,6 +114,7 @@ private:
 
     using CustomAction = ActionData<int>;
     std::vector<CustomAction> m_custom_actions;
+    std::vector<std::wstring> m_custom_action_hotkey_names;
 
     bool m_is_advanced_ai_enabled = false;
     bool m_preview_custom_format_output = true;
@@ -392,12 +393,14 @@ private:
 
                                 if (object.GetNamedBoolean(JSON_KEY_IS_SHOWN, false))
                                 {
-                                    const CustomAction customActionData
+                                    CustomAction customActionData
                                     {
                                         static_cast<int>(object.GetNamedNumber(JSON_KEY_ID)),
                                         parse_single_hotkey(object.GetNamedObject(JSON_KEY_SHORTCUT))
                                     };
 
+                                    m_custom_action_hotkey_names.push_back(L"CustomAction_" + std::to_wstring(customActionData.id));
+                                    customActionData.hotkey.name = m_custom_action_hotkey_names.back().c_str();
                                     m_custom_actions.push_back(customActionData);
                                 }
                             }
