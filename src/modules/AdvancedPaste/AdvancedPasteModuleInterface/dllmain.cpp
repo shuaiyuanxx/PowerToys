@@ -58,6 +58,12 @@ namespace
     const wchar_t JSON_KEY_IS_ADVANCED_AI_ENABLED[] = L"IsAdvancedAIEnabled";
     const wchar_t JSON_KEY_SHOW_CUSTOM_PREVIEW[] = L"ShowCustomPreview";
     const wchar_t JSON_KEY_VALUE[] = L"value";
+    const wchar_t JSON_KEY_IMAGE_TO_TEXT_HOTKEY[] = L"image-to-text";
+    const wchar_t JSON_KEY_PASTE_AS_TXT_FILE_HOTKEY[] = L"paste-as-txt-file";
+    const wchar_t JSON_KEY_PASTE_AS_PNG_FILE_HOTKEY[] = L"paste-as-png-file";
+    const wchar_t JSON_KEY_PASTE_AS_HTML_FILE_HOTKEY[] = L"paste-as-html-file";
+    const wchar_t JSON_KEY_TRANSCODE_TO_MP3_HOTKEY[] = L"transcode-to-mp3";
+    const wchar_t JSON_KEY_TRANSCODE_TO_MP4_HOTKEY[] = L"transcode-to-mp4";
 
     const wchar_t OPENAI_VAULT_RESOURCE[] = L"https://platform.openai.com/api-keys";
     const wchar_t OPENAI_VAULT_USERNAME[] = L"PowerToys_AdvancedPaste_OpenAIKey";
@@ -66,6 +72,15 @@ namespace
     const wchar_t ADVANCED_PASTE_UI_HOTKEY_NAME[] = L"AdvancedPasteUIShortcut";
     const wchar_t PASTE_AS_MARKDOWN_HOTKEY_NAME[] = L"PasteAsMarkdownShortcut";
     const wchar_t PASTE_AS_JSON_HOTKEY_NAME[] = L"PasteAsJsonShortcut";
+    // additional actions hotkeys
+    const wchar_t IMAGE_TO_TEXT_HOTKEY_NAME[] = L"ImageToTextShortcut";
+    const wchar_t PASTE_AS_TXT_FILE_HOTKEY_NAME[] = L"PasteAsTxtFileShortcut";
+    const wchar_t PASTE_AS_PNG_FILE_HOTKEY_NAME[] = L"PasteAsPngFileShortcut";
+    const wchar_t PASTE_AS_HTML_FILE_HOTKEY_NAME[] = L"PasteAsHtmlFileShortcut";
+    const wchar_t TRANSCODE_TO_MP3_HOTKEY_NAME[] = L"TranscodeToMp3Shortcut";
+    const wchar_t TRANSCODE_TO_MP4_HOTKEY_NAME[] = L"TranscodeToMp4Shortcut";
+
+    
 }
 
 class AdvancedPaste : public PowertoyModuleIface
@@ -130,6 +145,25 @@ private:
             return PASTE_AS_MARKDOWN_HOTKEY_NAME;
         if (wcscmp(name, JSON_KEY_PASTE_AS_JSON_HOTKEY) == 0)
             return PASTE_AS_JSON_HOTKEY_NAME;
+
+        return nullptr;
+    }
+
+    const wchar_t* get_additional_action_hotkey_name(std::wstring name)
+    {
+        if (name == JSON_KEY_IMAGE_TO_TEXT_HOTKEY)
+            return IMAGE_TO_TEXT_HOTKEY_NAME;
+        if (name == JSON_KEY_PASTE_AS_TXT_FILE_HOTKEY)
+            return PASTE_AS_TXT_FILE_HOTKEY_NAME;
+        if (name == JSON_KEY_PASTE_AS_PNG_FILE_HOTKEY)
+            return PASTE_AS_PNG_FILE_HOTKEY_NAME;
+        if (name == JSON_KEY_PASTE_AS_HTML_FILE_HOTKEY)
+            return PASTE_AS_HTML_FILE_HOTKEY_NAME;
+        if (name == JSON_KEY_TRANSCODE_TO_MP3_HOTKEY)
+            return TRANSCODE_TO_MP3_HOTKEY_NAME;
+        if (name == JSON_KEY_TRANSCODE_TO_MP4_HOTKEY)
+            return TRANSCODE_TO_MP4_HOTKEY_NAME;
+
         return nullptr;
     }
 
@@ -270,12 +304,13 @@ private:
 
         if (action.HasKey(JSON_KEY_SHORTCUT))
         {
-            const AdditionalAction additionalAction
+            AdditionalAction additionalAction
             {
                 actionName.c_str(),
                 parse_single_hotkey(action.GetNamedObject(JSON_KEY_SHORTCUT))
             };
 
+            additionalAction.hotkey.name = get_additional_action_hotkey_name(additionalAction.id);
             m_additional_actions.push_back(additionalAction);
         }
         else
