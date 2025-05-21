@@ -408,6 +408,8 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 
                     if (lastValidSettings.IsValid())
                     {
+                        lastValidSettings.HotkeyName = hotkeySettings.HotkeyName;
+                        lastValidSettings.OwnerModuleName = hotkeySettings.OwnerModuleName;
                         CheckForConflicts(lastValidSettings);
                     }
                 }

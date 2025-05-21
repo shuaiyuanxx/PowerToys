@@ -96,9 +96,26 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _delayedTimer.Elapsed += DelayedTimer_Tick;
             _delayedTimer.AutoReset = false;
 
+            var actionNameMap = new Dictionary<IAdvancedPasteAction, string>
+            {
+                { _additionalActions.ImageToText, "ImageToTextShortcut" },
+                { _additionalActions.PasteAsFile.PasteAsTxtFile, "PasteAsTxtFileShortcut" },
+                { _additionalActions.PasteAsFile.PasteAsPngFile, "PasteAsPngFileShortcut" },
+                { _additionalActions.PasteAsFile.PasteAsHtmlFile, "PasteAsHtmlFileShortcut" },
+                { _additionalActions.Transcode.TranscodeToMp3, "TranscodeToMp3Shortcut" },
+                { _additionalActions.Transcode.TranscodeToMp4, "TranscodeToMp4Shortcut" },
+            };
+
             foreach (var action in _additionalActions.GetAllActions())
             {
                 action.PropertyChanged += OnAdditionalActionPropertyChanged;
+
+                if (action is AdvancedPasteAdditionalAction additionalAction &&
+                    string.IsNullOrEmpty(additionalAction.Shortcut.HotkeyName))
+                {
+                    additionalAction.Shortcut.HotkeyName = actionNameMap[action];
+                    additionalAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+                }
             }
 
             foreach (var customAction in _customActions)
