@@ -78,6 +78,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         JsonSerializer.Serialize(s, SourceGenerationContextContext.Default.PowerLauncherSettings)));
             };
 
+            if (string.IsNullOrEmpty(settings.Properties.OpenPowerLauncher.HotkeyName))
+            {
+                settings.Properties.OpenPowerLauncher.HotkeyName = "OpenPowerLauncher";
+                settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
+            }
+
             switch (settings.Properties.Theme)
             {
                 case Theme.Dark:

@@ -67,7 +67,7 @@ namespace CentralizedHotkeys
                 Logger::warn(L"Hotkey conflict detected. Shortcut: {}, from module: {}", ToWstring(shortcut), moduleName);
                 return false;
             }
-            hkmng.AddHotkey(hotkey, moduleName.c_str(), L"");
+            hkmng.AddHotkey(hotkey, moduleName.c_str(), shortcut.hotkeyName);
 
             if (!RegisterHotKey(runnerWindow, ids[shortcut], shortcut.modifiersMask, shortcut.vkCode))
             {
