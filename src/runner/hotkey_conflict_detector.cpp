@@ -1,5 +1,7 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "hotkey_conflict_detector.h"
+#include "common/utils/json.h"
+#include <common/SettingsAPI/settings_helpers.h>
 #include <windows.h>
 #include <unordered_map>
 #include <cwchar>
@@ -47,7 +49,7 @@ namespace HotkeyConflictDetector
         return *instance;
     }
 
-    bool HotkeyConflictManager::HasConflict(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
+    HotkeyConflictType HotkeyConflictManager::HasConflict(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
     {
         uint16_t handle = GetHotkeyHandle(_hotkey);
 
@@ -55,15 +57,17 @@ namespace HotkeyConflictDetector
 
         if (it == hotkeyMap.end())
         {
-            return HasConflictWithSystemHotkey(_hotkey);
+            return HasConflictWithSystemHotkey(_hotkey) ?
+                HotkeyConflictType::SystemConflict :
+                HotkeyConflictType::NoConflict;
         }
         if (wcscmp(it->second.moduleName.c_str(), _moduleName) == 0 && wcscmp(it->second.hotkeyName.c_str(), _hotkeyName) == 0)
         {
             // A shortcut matching its own assignment is not considered a conflict.
-            return false;
+            return HotkeyConflictType::NoConflict;
         }
 
-        return true;
+        return HotkeyConflictType::InAppConflict;
     }
 
     HotkeyConflictInfo HotkeyConflictManager::GetConflict(Hotkey const& _hotkey)
@@ -91,8 +95,17 @@ namespace HotkeyConflictDetector
     {
         uint16_t handle = GetHotkeyHandle(_hotkey);
 
-        if (HasConflict(_hotkey, _moduleName, _hotkeyName))
+        HotkeyConflictType conflictType = HasConflict(_hotkey, _moduleName, _hotkeyName);
+        if (conflictType != HotkeyConflictType::NoConflict)
         {
+            if (conflictType == HotkeyConflictType::InAppConflict)
+            {
+
+            }
+            else
+            {
+
+            }
             return false;
         }
 
@@ -185,6 +198,53 @@ namespace HotkeyConflictDetector
         }
 
         return false;
+    }
+
+    bool HotkeyConflictManager::UpdateHotkeyConflictToFile()
+    {
+        using namespace json;
+        JsonObject root;
+
+        auto serializeHotkey = [](const Hotkey& hotkey) -> JsonObject {
+            JsonObject obj;
+            obj.Insert(L"win", value(hotkey.win));
+            obj.Insert(L"ctrl", value(hotkey.ctrl));
+            obj.Insert(L"shift", value(hotkey.shift));
+            obj.Insert(L"alt", value(hotkey.alt));
+            obj.Insert(L"key", value(static_cast<int>(hotkey.key)));
+            return obj;
+        };
+
+        auto serializeConflictMap = [&](const std::unordered_map<uint16_t, std::vector<HotkeyConflictInfo>>& map) -> JsonArray {
+            JsonArray arr;
+            for (const auto& [handle, conflicts] : map)
+            {
+                for (const auto& info : conflicts)
+                {
+                    JsonObject obj;
+                    obj.Insert(L"hotkey", serializeHotkey(info.hotkey));
+                    obj.Insert(L"moduleName", value(info.moduleName));
+                    obj.Insert(L"hotkeyName", value(info.hotkeyName));
+                    arr.Append(obj);
+                }
+            }
+            return arr;
+        };
+
+        root.Insert(L"inAppConflicts", serializeConflictMap(inAppConflictHotkeyMap));
+        root.Insert(L"sysConflicts", serializeConflictMap(sysConflictHotkeyMap));
+
+        try
+        {
+            constexpr const wchar_t* hotkey_conflicts_filename = L"\\hotkey_conflicts.json";
+            const std::wstring save_file_location = PTSettingsHelper::get_root_save_folder_location() + hotkey_conflicts_filename;
+            to_file(save_file_location, root);
+            return true;
+        }
+        catch (...)
+        {
+            return false;
+        }
     }
 
     uint16_t HotkeyConflictManager::GetHotkeyHandle(const Hotkey& hotkey)

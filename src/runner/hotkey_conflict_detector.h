@@ -23,12 +23,19 @@ namespace HotkeyConflictDetector
 
     Hotkey ShortcutToHotkey(const CentralizedHotkeys::Shortcut& shortcut);
 
+    enum HotkeyConflictType
+    {
+        NoConflict = 0,
+        SystemConflict = 1,
+        InAppConflict = 2,
+    };
+
     class HotkeyConflictManager
     {
     public:
         static HotkeyConflictManager& GetInstance();
 
-        bool HasConflict(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
+        HotkeyConflictType HasConflict(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
         HotkeyConflictInfo GetConflict(const Hotkey& hotkey);
         bool AddHotkey(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
         bool RemoveHotkey(const Hotkey& hotkey);
@@ -39,13 +46,19 @@ namespace HotkeyConflictDetector
         static HotkeyConflictManager* instance;
 
         std::mutex hotkeyMutex;
+        // Hotkey in hotkeyMap means the hotkey has been registered successfully
         std::unordered_map<uint16_t, HotkeyConflictInfo> hotkeyMap;
+        // Hotkey in sysConflictHotkeyMap means the hotkey has conflict with system defined hotkeys
+        std::unordered_map<uint16_t, std::vector<HotkeyConflictInfo>> sysConflictHotkeyMap;
+        // Hotkey in inAppConflictHotkeyMap means the hotkey has conflict with other modules
+        std::unordered_map<uint16_t, std::vector<HotkeyConflictInfo>> inAppConflictHotkeyMap;
 
         uint16_t GetHotkeyHandle(const Hotkey&);
         bool HasConflictWithSystemHotkey(const Hotkey&);
 
+        bool UpdateHotkeyConflictToFile();
+
         HotkeyConflictManager() = default;
     };
-
 };
 
