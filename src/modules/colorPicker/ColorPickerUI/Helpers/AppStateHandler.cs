@@ -34,12 +34,18 @@ namespace ColorPicker.Helpers
         public static bool BlockEscapeKeyClosingColorPickerEditor { get; set; }
 
         [ImportingConstructor]
-        public AppStateHandler(IColorEditorViewModel colorEditorViewModel, IUserSettings userSettings, IMouseInfoProvider mouseInfoProvider)
+        public AppStateHandler(IColorEditorViewModel colorEditorViewModel, IUserSettings userSettings)
         {
             Application.Current.MainWindow.Closed += MainWindow_Closed;
             _colorEditorViewModel = colorEditorViewModel;
             _userSettings = userSettings;
-            _mouseInfoProvider = mouseInfoProvider;
+        }
+        
+        [Import]
+        public IMouseInfoProvider MouseInfoProvider
+        {
+            get { return _mouseInfoProvider; }
+            set { _mouseInfoProvider = value; }
         }
 
         public event EventHandler AppShown;
@@ -62,7 +68,10 @@ namespace ColorPicker.Helpers
                 if (!_colorPickerShown && !IsColorPickerEditorVisible())
                 {
                     // Capture the screen before activating ColorPicker to get accurate colors
-                    _mouseInfoProvider.CaptureScreenSnapshot();
+                    if (_mouseInfoProvider != null)
+                    {
+                        _mouseInfoProvider.CaptureScreenSnapshot();
+                    }
                     SessionEventHelper.Start(_userSettings.ActivationAction.Value);
                 }
 
