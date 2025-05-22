@@ -76,6 +76,17 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         public static extern bool FreeLibrary(IntPtr hModule);
 
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern int MessageBox(
+            IntPtr hwnd, 
+            string text,
+            string caption,
+            uint type);
+
+        // MessageBox constants
+        public const uint MB_OK = 0x00000000;
+        public const uint MB_ICONERROR = 0x00000010;
+
 #pragma warning restore CA1401 // P/Invokes should not be visible
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

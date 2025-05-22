@@ -88,7 +88,16 @@ namespace Microsoft.PowerToys.Settings.UI
                 Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = appLanguage;
             }
 
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Failed to initialize Settings UI components", ex);
+                ShowErrorAndExit("PowerToys Settings could not initialize properly. This may be due to compatibility issues with your Windows version. Please try using an earlier version of PowerToys.");
+                return;
+            }
 
             UnhandledException += App_UnhandledException;
 
@@ -232,56 +241,64 @@ namespace Microsoft.PowerToys.Settings.UI
             });
             ipcmanager.Start();
 
-            if (!ShowOobe && !ShowScoobe && !ShowFlyout)
+            try
             {
-                settingsWindow = new MainWindow();
-                settingsWindow.Activate();
-                settingsWindow.ExtendsContentIntoTitleBar = true;
-                settingsWindow.NavigateToSection(StartupPage);
-
-                // https://github.com/microsoft/microsoft-ui-xaml/issues/7595 - Activate doesn't bring window to the foreground
-                // Need to call SetForegroundWindow to actually gain focus.
-                WindowHelpers.BringToForeground(settingsWindow.GetWindowHandle());
-
-                // https://github.com/microsoft/microsoft-ui-xaml/issues/8948 - A window's top border incorrectly
-                // renders as black on Windows 10.
-                WindowHelpers.ForceTopBorder1PixelInsetOnWindows10(WindowNative.GetWindowHandle(settingsWindow));
-            }
-            else
-            {
-                // Create the Settings window hidden so that it's fully initialized and
-                // it will be ready to receive the notification if the user opens
-                // the Settings from the tray icon.
-                settingsWindow = new MainWindow(true);
-
-                if (ShowOobe)
+                if (!ShowOobe && !ShowScoobe && !ShowFlyout)
                 {
-                    PowerToysTelemetry.Log.WriteEvent(new OobeStartedEvent());
-                    OobeWindow oobeWindow = new OobeWindow(OOBE.Enums.PowerToysModules.Overview);
-                    oobeWindow.Activate();
-                    oobeWindow.ExtendsContentIntoTitleBar = true;
+                    settingsWindow = new MainWindow();
+                    settingsWindow.Activate();
+                    settingsWindow.ExtendsContentIntoTitleBar = true;
+                    settingsWindow.NavigateToSection(StartupPage);
+
+                    // https://github.com/microsoft/microsoft-ui-xaml/issues/7595 - Activate doesn't bring window to the foreground
+                    // Need to call SetForegroundWindow to actually gain focus.
+                    WindowHelpers.BringToForeground(settingsWindow.GetWindowHandle());
+
+                    // https://github.com/microsoft/microsoft-ui-xaml/issues/8948 - A window's top border incorrectly
+                    // renders as black on Windows 10.
                     WindowHelpers.ForceTopBorder1PixelInsetOnWindows10(WindowNative.GetWindowHandle(settingsWindow));
-                    SetOobeWindow(oobeWindow);
                 }
-                else if (ShowScoobe)
+                else
                 {
-                    PowerToysTelemetry.Log.WriteEvent(new ScoobeStartedEvent());
-                    OobeWindow scoobeWindow = new OobeWindow(OOBE.Enums.PowerToysModules.WhatsNew);
-                    scoobeWindow.Activate();
-                    scoobeWindow.ExtendsContentIntoTitleBar = true;
-                    WindowHelpers.ForceTopBorder1PixelInsetOnWindows10(WindowNative.GetWindowHandle(settingsWindow));
-                    SetOobeWindow(scoobeWindow);
-                }
-                else if (ShowFlyout)
-                {
-                    POINT? p = null;
-                    if (containsFlyoutPosition)
+                    // Create the Settings window hidden so that it's fully initialized and
+                    // it will be ready to receive the notification if the user opens
+                    // the Settings from the tray icon.
+                    settingsWindow = new MainWindow(true);
+
+                    if (ShowOobe)
                     {
-                        p = new POINT(flyout_x, flyout_y);
+                        PowerToysTelemetry.Log.WriteEvent(new OobeStartedEvent());
+                        OobeWindow oobeWindow = new OobeWindow(OOBE.Enums.PowerToysModules.Overview);
+                        oobeWindow.Activate();
+                        oobeWindow.ExtendsContentIntoTitleBar = true;
+                        WindowHelpers.ForceTopBorder1PixelInsetOnWindows10(WindowNative.GetWindowHandle(settingsWindow));
+                        SetOobeWindow(oobeWindow);
                     }
+                    else if (ShowScoobe)
+                    {
+                        PowerToysTelemetry.Log.WriteEvent(new ScoobeStartedEvent());
+                        OobeWindow scoobeWindow = new OobeWindow(OOBE.Enums.PowerToysModules.WhatsNew);
+                        scoobeWindow.Activate();
+                        scoobeWindow.ExtendsContentIntoTitleBar = true;
+                        WindowHelpers.ForceTopBorder1PixelInsetOnWindows10(WindowNative.GetWindowHandle(settingsWindow));
+                        SetOobeWindow(scoobeWindow);
+                    }
+                    else if (ShowFlyout)
+                    {
+                        POINT? p = null;
+                        if (containsFlyoutPosition)
+                        {
+                            p = new POINT(flyout_x, flyout_y);
+                        }
 
-                    ShellPage.OpenFlyoutCallback(p);
+                        ShellPage.OpenFlyoutCallback(p);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Failed to create and initialize Settings UI window", ex);
+                ShowErrorAndExit("PowerToys Settings could not initialize properly. This may be due to compatibility issues with your Windows version. Please try using an earlier version of PowerToys.");
             }
         }
 
@@ -456,6 +473,25 @@ namespace Microsoft.PowerToys.Settings.UI
                     Debug.Assert(false, "Unexpected SettingsWindow argument value");
                     return typeof(DashboardPage);
             }
+        }
+
+        private void ShowErrorAndExit(string message)
+        {
+            try
+            {
+                // Try to show a MessageBox or similar UI
+                var messageBoxResult = NativeMethods.MessageBox(
+                    IntPtr.Zero,
+                    message,
+                    "PowerToys Settings Error",
+                    NativeMethods.MB_OK | NativeMethods.MB_ICONERROR);
+            }
+            catch
+            {
+                // If even showing the error fails, just log and exit
+            }
+            
+            Environment.Exit(1);
         }
     }
 }
