@@ -25,6 +25,7 @@ namespace ColorPicker.Helpers
         private ColorEditorWindow _colorEditorWindow;
         private bool _colorPickerShown;
         private Lock _colorPickerVisibilityLock = new Lock();
+        private IMouseInfoProvider _mouseInfoProvider;
 
         private HwndSource _hwndSource;
         private const int _globalHotKeyId = 0x0001;
@@ -38,6 +39,13 @@ namespace ColorPicker.Helpers
             Application.Current.MainWindow.Closed += MainWindow_Closed;
             _colorEditorViewModel = colorEditorViewModel;
             _userSettings = userSettings;
+        }
+        
+        [Import]
+        public IMouseInfoProvider MouseInfoProvider
+        {
+            get { return _mouseInfoProvider; }
+            set { _mouseInfoProvider = value; }
         }
 
         public event EventHandler AppShown;
@@ -59,6 +67,11 @@ namespace ColorPicker.Helpers
             {
                 if (!_colorPickerShown && !IsColorPickerEditorVisible())
                 {
+                    // Capture the screen before activating ColorPicker to get accurate colors
+                    if (_mouseInfoProvider != null)
+                    {
+                        _mouseInfoProvider.CaptureScreenSnapshot();
+                    }
                     SessionEventHelper.Start(_userSettings.ActivationAction.Value);
                 }
 

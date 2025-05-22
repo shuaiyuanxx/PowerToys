@@ -7,6 +7,7 @@ using System.ComponentModel.Composition;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -28,6 +29,7 @@ namespace ColorPicker.Mouse
         private System.Windows.Point _previousMousePosition = new System.Windows.Point(-1, 1);
         private Color _previousColor = Color.Transparent;
         private bool _colorFormatChanged;
+        private Bitmap _screenSnapshot;
 
         [ImportingConstructor]
         public MouseInfoProvider(AppStateHandler appStateMonitor, IUserSettings userSettings)
@@ -99,8 +101,22 @@ namespace ColorPicker.Mouse
             }
         }
 
-        private static Color GetPixelColor(System.Windows.Point mousePosition)
+        private Color GetPixelColor(System.Windows.Point mousePosition)
         {
+            if (_screenSnapshot != null)
+            {
+                // Calculate the position relative to the virtual screen
+                int x = (int)mousePosition.X - (int)SystemParameters.VirtualScreenLeft;
+                int y = (int)mousePosition.Y - (int)SystemParameters.VirtualScreenTop;
+                
+                // Check bounds
+                if (x >= 0 && x < _screenSnapshot.Width && y >= 0 && y < _screenSnapshot.Height)
+                {
+                    return _screenSnapshot.GetPixel(x, y);
+                }
+            }
+            
+            // Fall back to screen capture if no snapshot or out of bounds
             var rect = new Rectangle((int)mousePosition.X, (int)mousePosition.Y, 1, 1);
             using (var bmp = new Bitmap(rect.Width, rect.Height, PixelFormat.Format32bppArgb))
             {
@@ -138,10 +154,12 @@ namespace ColorPicker.Mouse
         private void AppStateMonitor_AppClosed(object sender, EventArgs e)
         {
             DisposeHook();
+            DisposeScreenSnapshot();
         }
 
         private void AppStateMonitor_AppShown(object sender, EventArgs e)
         {
+            // Note: Screenshot is now captured earlier in AppStateHandler.StartUserSession
             UpdateMouseInfo();
             if (!_timer.IsEnabled)
             {
@@ -201,6 +219,31 @@ namespace ColorPicker.Mouse
             if (_userSettings.ChangeCursor.Value)
             {
                 CursorManager.RestoreOriginalCursors();
+            }
+        }
+        
+        public void CaptureScreenSnapshot()
+        {
+            DisposeScreenSnapshot();
+            
+            var screenWidth = (int)SystemParameters.VirtualScreenWidth;
+            var screenHeight = (int)SystemParameters.VirtualScreenHeight;
+            var screenLeft = (int)SystemParameters.VirtualScreenLeft;
+            var screenTop = (int)SystemParameters.VirtualScreenTop;
+            
+            _screenSnapshot = new Bitmap(screenWidth, screenHeight, PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(_screenSnapshot))
+            {
+                graphics.CopyFromScreen(screenLeft, screenTop, 0, 0, _screenSnapshot.Size, CopyPixelOperation.SourceCopy);
+            }
+        }
+        
+        private void DisposeScreenSnapshot()
+        {
+            if (_screenSnapshot != null)
+            {
+                _screenSnapshot.Dispose();
+                _screenSnapshot = null;
             }
         }
     }
