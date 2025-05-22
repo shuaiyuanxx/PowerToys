@@ -42,6 +42,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             ShowColorName = false;
             ActivationAction = ColorPickerActivationAction.OpenColorPickerAndThenEditor;
             CopiedColorRepresentation = "HEX";
+            PreventClosingWithEscapeKey = false;
         }
 
         public HotkeySettings ActivationShortcut { get; set; }
@@ -50,6 +51,11 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
         [CmdConfigureIgnoreAttribute]
         public bool ChangeCursor { get; set; }
+
+        [JsonPropertyName("preventclosingwithescapekey")]
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        [CmdConfigureIgnoreAttribute]
+        public bool PreventClosingWithEscapeKey { get; set; }
 
         [JsonPropertyName("copiedcolorrepresentation")]
         public string CopiedColorRepresentation { get; set; }

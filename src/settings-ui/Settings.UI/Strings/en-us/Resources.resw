@@ -1717,6 +1717,12 @@ Made with 💗 by Microsoft and the PowerToys community.</value>
   <data name="ColorPicker_ShowColorName.Description" xml:space="preserve">
     <value>This will show the name of the color when picking a color</value>
   </data>
+  <data name="ColorPicker_PreventClosingWithEscapeKey.Header" xml:space="preserve">
+    <value>Keep Color Picker open</value>
+  </data>
+  <data name="ColorPicker_PreventClosingWithEscapeKey.Description" xml:space="preserve">
+    <value>Prevent Color Picker from closing when Escape or Backspace is pressed</value>
+  </data>
   <data name="ImageResizer_DefaultSize_Large" xml:space="preserve">
     <value>Large</value>
     <comment>The size of the image</comment>

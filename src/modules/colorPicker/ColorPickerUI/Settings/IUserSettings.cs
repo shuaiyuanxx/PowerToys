@@ -29,6 +29,8 @@ namespace ColorPicker.Settings
 
         SettingItem<bool> ShowColorName { get; }
 
+        SettingItem<bool> PreventClosingWithEscapeKey { get; }
+
         void SendSettingsTelemetry();
     }
 }
