@@ -653,11 +653,15 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                         return (false, "General_SettingsBackupAndRestore_InvalidBackupLocation", "Error", lastBackupExists, "\n" + appBasePath);
                     }
 
-                    var dirExists = TryCreateDirectory(settingsBackupAndRestoreDir);
-                    if (!dirExists)
+                    // Only create the directory if we're doing an actual backup, not a dry run
+                    if (!dryRun)
                     {
-                        Logger.LogError($"Failed to create dir {settingsBackupAndRestoreDir}");
-                        return (false, $"General_SettingsBackupAndRestore_BackupError", "Error", lastBackupExists, "\n" + settingsBackupAndRestoreDir);
+                        var dirExists = TryCreateDirectory(settingsBackupAndRestoreDir);
+                        if (!dirExists)
+                        {
+                            Logger.LogError($"Failed to create dir {settingsBackupAndRestoreDir}");
+                            return (false, $"General_SettingsBackupAndRestore_BackupError", "Error", lastBackupExists, "\n" + settingsBackupAndRestoreDir);
+                        }
                     }
 
                     // get data needed for process
