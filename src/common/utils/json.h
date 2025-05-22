@@ -6,6 +6,9 @@
 
 #include <optional>
 #include <fstream>
+#include <Windows.h>
+#include <filesystem>
+#include <common/logger/logger.h>
 
 namespace json
 {
@@ -15,14 +18,23 @@ namespace json
     {
         try
         {
+            // Get original attributes and ensure file is readable
+            DWORD original_attributes = get_file_attributes_and_ensure_writable(file_name);
+            
             std::ifstream file(file_name.data(), std::ios::binary);
+            std::optional<JsonObject> result = std::nullopt;
+            
             if (file.is_open())
             {
                 using isbi = std::istreambuf_iterator<char>;
                 std::string obj_str{ isbi{ file }, isbi{} };
-                return JsonValue::Parse(winrt::to_hstring(obj_str)).GetObjectW();
+                result = JsonValue::Parse(winrt::to_hstring(obj_str)).GetObjectW();
             }
-            return std::nullopt;
+            
+            // Restore original attributes if they were changed
+            restore_file_attributes(file_name, original_attributes);
+            
+            return result;
         }
         catch (...)
         {
@@ -30,12 +42,98 @@ namespace json
         }
     }
 
-    inline void to_file(std::wstring_view file_name, const JsonObject& obj)
+    inline DWORD get_file_attributes_and_ensure_writable(std::wstring_view file_name)
     {
-        std::wstring obj_str{ obj.Stringify().c_str() };
-        std::ofstream{ file_name.data(), std::ios::binary } << winrt::to_string(obj_str);
+        // Get the file attributes
+        DWORD attributes = GetFileAttributesW(file_name.data());
+        
+        // If the file has the hidden attribute, temporarily remove it to allow writing
+        if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
+        {
+            if (!SetFileAttributesW(file_name.data(), attributes & ~FILE_ATTRIBUTE_HIDDEN))
+            {
+                // Log the error if attributes couldn't be changed
+                DWORD error = GetLastError();
+                wchar_t message[512];
+                FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                               NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                               message, 512, NULL);
+                
+                Logger::error(L"Failed to remove hidden attribute from file {}: {} (Error code: {})", 
+                              file_name, message, error);
+            }
+            else
+            {
+                Logger::info(L"Removed hidden attribute from file to enable writing: {}", file_name);
+            }
+        }
+        
+        // Ensure parent directory is also not hidden
+        std::filesystem::path file_path(file_name);
+        if (file_path.has_parent_path())
+        {
+            DWORD dir_attributes = GetFileAttributesW(file_path.parent_path().c_str());
+            if (dir_attributes != INVALID_FILE_ATTRIBUTES && (dir_attributes & FILE_ATTRIBUTE_HIDDEN))
+            {
+                if (!SetFileAttributesW(file_path.parent_path().c_str(), dir_attributes & ~FILE_ATTRIBUTE_HIDDEN))
+                {
+                    // Log the error if attributes couldn't be changed
+                    DWORD error = GetLastError();
+                    wchar_t message[512];
+                    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                   NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                   message, 512, NULL);
+                    
+                    Logger::error(L"Failed to remove hidden attribute from directory {}: {} (Error code: {})", 
+                                  file_path.parent_path().wstring(), message, error);
+                }
+                else
+                {
+                    Logger::info(L"Removed hidden attribute from directory to enable access: {}", 
+                                 file_path.parent_path().wstring());
+                }
+            }
+        }
+        
+        return attributes;
     }
 
+    inline void restore_file_attributes(std::wstring_view file_name, DWORD original_attributes)
+    {
+        // Only restore if the original attributes were valid and contained the hidden attribute
+        if (original_attributes != INVALID_FILE_ATTRIBUTES && (original_attributes & FILE_ATTRIBUTE_HIDDEN))
+        {
+            if (!SetFileAttributesW(file_name.data(), original_attributes))
+            {
+                // Log the error if attributes couldn't be restored
+                DWORD error = GetLastError();
+                wchar_t message[512];
+                FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                              NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                              message, 512, NULL);
+                
+                Logger::error(L"Failed to restore hidden attribute to file {}: {} (Error code: {})", 
+                             file_name, message, error);
+            }
+            else
+            {
+                Logger::info(L"Restored hidden attribute to file: {}", file_name);
+            }
+        }
+    }
+
+    inline void to_file(std::wstring_view file_name, const JsonObject& obj)
+    {
+        // Get original attributes and ensure file is writable
+        DWORD original_attributes = get_file_attributes_and_ensure_writable(file_name);
+        
+        // Write the file
+        std::wstring obj_str{ obj.Stringify().c_str() };
+        std::ofstream{ file_name.data(), std::ios::binary } << winrt::to_string(obj_str);
+        
+        // Restore original attributes if they were changed
+        restore_file_attributes(file_name, original_attributes);
+    }
     inline bool has(
         const json::JsonObject& o,
         std::wstring_view name,
