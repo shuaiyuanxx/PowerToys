@@ -70,7 +70,36 @@ namespace AdvancedPaste.Helpers
             try
             {
                 XmlDocument doc = new();
-                doc.LoadXml(text);
+                try
+                {
+                    // First try with original text
+                    doc.LoadXml(text);
+                }
+                catch (XmlException)
+                {
+                    // If parsing fails, try to fix common XML issues
+                    string fixedXml = TryFixMalformedXml(text);
+                    if (!string.IsNullOrEmpty(fixedXml))
+                    {
+                        Logger.LogDebug("Attempting to parse with fixed XML");
+                        try
+                        {
+                            doc.LoadXml(fixedXml);
+                        }
+                        catch (XmlException)
+                        {
+                            // If still failing, try one more approach - wrap the entire content in a root element
+                            Logger.LogDebug("Attempting to wrap entire content in root element");
+                            string wrappedXml = "<root>" + text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;") + "</root>";
+                            doc.LoadXml(wrappedXml);
+                        }
+                    }
+                    else
+                    {
+                        throw; // Re-throw if we couldn't fix the XML
+                    }
+                }
+                
                 Logger.LogDebug("Converted from XML.");
                 jsonText = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
             }
@@ -284,6 +313,88 @@ namespace AdvancedPaste.Helpers
             str = CsvReplaceDoubleQuotationMarksRegex.Replace(str, "\"");
 
             return str;
+        }
+
+        /// <summary>
+        /// Try to fix common XML formatting issues
+        /// </summary>
+        /// <param name="xml">XML string that might be malformed</param>
+        /// <returns>Fixed XML string or empty string if unfixable</returns>
+        private static string TryFixMalformedXml(string xml)
+        {
+            try
+            {
+                // Return empty if the input is empty
+                if (string.IsNullOrEmpty(xml))
+                {
+                    return string.Empty;
+                }
+
+                // Trim spaces
+                xml = xml.Trim();
+                
+                // Very basic approach - wrap in a root element if it doesn't start with <?xml or <
+                if (!xml.StartsWith("<?xml") && !xml.StartsWith("<"))
+                {
+                    xml = "<root>" + xml + "</root>";
+                    return xml;
+                }
+
+                // Implement a simple tag balancer
+                var matches = Regex.Matches(xml, @"</?([a-zA-Z][a-zA-Z0-9:\-_.]*)(?:\s+[^>]*)?(/?)>");
+                var tagStack = new Stack<string>();
+                
+                foreach (Match match in matches)
+                {
+                    string tag = match.Groups[1].Value;
+                    bool isOpeningTag = !match.Value.StartsWith("</");
+                    bool isSelfClosing = match.Groups[2].Value == "/" || match.Value.EndsWith("/>");
+                    
+                    if (isOpeningTag && !isSelfClosing)
+                    {
+                        tagStack.Push(tag);
+                    }
+                    else if (!isOpeningTag && tagStack.Count > 0)
+                    {
+                        string lastOpenTag = tagStack.Pop();
+                        if (lastOpenTag != tag)
+                        {
+                            // Mismatched tag, push the last one back
+                            tagStack.Push(lastOpenTag);
+                            // We found a problem but can't easily fix it
+                            // This XML is likely more complex and needs proper handling
+                        }
+                    }
+                }
+
+                // If we have unclosed tags, add closing tags for them
+                string fixedXml = xml;
+                if (tagStack.Count > 0)
+                {
+                    // Add closing tags in reverse order
+                    var remainingTags = new List<string>(tagStack);
+                    remainingTags.Reverse();
+                    foreach (var tag in remainingTags)
+                    {
+                        fixedXml += $"</{tag}>";
+                    }
+                    return fixedXml;
+                }
+
+                // Handle case where the content might be plain text with some XML-like characters
+                // but not valid XML syntax - wrap it with a root element
+                if (!xml.StartsWith("<") || !xml.EndsWith(">"))
+                {
+                    return "<root>" + xml + "</root>";
+                }
+                
+                return string.Empty; // No changes needed or couldn't fix
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Failed to fix malformed XML", ex);
+                return string.Empty;
+            }
         }
     }
 }
