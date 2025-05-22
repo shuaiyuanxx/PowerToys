@@ -23,5 +23,7 @@ namespace ColorPicker.Mouse
         System.Windows.Point CurrentPosition { get; }
 
         Color CurrentColor { get; }
+        
+        void CaptureScreenSnapshot();
     }
 }
