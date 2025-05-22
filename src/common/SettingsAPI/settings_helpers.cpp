@@ -23,6 +23,12 @@ namespace PTSettingsHelper
         if (!std::filesystem::exists(save_path))
         {
             std::filesystem::create_directories(save_path);
+            // Ensure directory is not hidden
+            DWORD attributes = GetFileAttributesW(save_path.c_str());
+            if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
+            {
+                SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+            }
         }
         return result;
     }
@@ -39,6 +45,12 @@ namespace PTSettingsHelper
         if (!std::filesystem::exists(save_path))
         {
             std::filesystem::create_directories(save_path);
+            // Ensure directory is not hidden
+            DWORD attributes = GetFileAttributesW(save_path.c_str());
+            if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
+            {
+                SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+            }
         }
         return result;
     }
@@ -52,6 +64,12 @@ namespace PTSettingsHelper
         if (!std::filesystem::exists(save_path))
         {
             std::filesystem::create_directories(save_path);
+            // Ensure directory is not hidden
+            DWORD attributes = GetFileAttributesW(save_path.c_str());
+            if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
+            {
+                SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+            }
         }
         return result;
     }

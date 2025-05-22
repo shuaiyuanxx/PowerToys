@@ -10,3 +10,6 @@
 #include <fstream>
 
 #include <common/logger/logger.h>
+
+// Additional includes for file attributes
+#include <Shlobj.h>
