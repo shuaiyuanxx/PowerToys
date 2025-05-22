@@ -448,6 +448,13 @@ private:
             }
 
             clipboard_text = pch_data;
+            
+            // Trim trailing newlines to prevent Excel from creating extra rows
+            while (!clipboard_text.empty() && 
+                  (clipboard_text.back() == L'\r' || clipboard_text.back() == L'\n')) {
+                clipboard_text.pop_back();
+            }
+            
             GlobalUnlock(h_clipboard_data);
 
             CloseClipboard();
