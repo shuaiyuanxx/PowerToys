@@ -33,6 +33,7 @@ namespace ColorPicker.Mouse
 
         private IntPtr _mouseHookHandle;
         private HookProc _mouseDelegate;
+        private bool _isFirstClickAfterSubscription;
 
         private event MouseUpEventHandler MouseDown;
 
@@ -111,6 +112,9 @@ namespace ColorPicker.Mouse
                     GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName),
                     0);
 
+                // Reset the first click flag whenever we subscribe
+                _isFirstClickAfterSubscription = true;
+
                 if (_mouseHookHandle == IntPtr.Zero)
                 {
                     int errorCode = Marshal.GetLastWin32Error();
@@ -131,6 +135,12 @@ namespace ColorPicker.Mouse
                         MouseDown.Invoke(null, new System.Drawing.Point(mouseHookStruct.pt.x, mouseHookStruct.pt.y));
                     }
 
+                    // Ensure we flag that we've processed the first click
+                    bool wasFirstClick = _isFirstClickAfterSubscription;
+                    _isFirstClickAfterSubscription = false;
+
+                    // Always block the first click from propagating to prevent accidental UI interactions
+                    // The -1 return value stops the message from propagating to other applications
                     return new IntPtr(-1);
                 }
 
