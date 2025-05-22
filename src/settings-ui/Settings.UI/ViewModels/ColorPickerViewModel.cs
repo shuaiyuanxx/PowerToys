@@ -195,6 +195,20 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 }
             }
         }
+        
+        public bool PreventClosingWithEscapeKey
+        {
+            get => _colorPickerSettings.Properties.PreventClosingWithEscapeKey;
+            set
+            {
+                if (_colorPickerSettings.Properties.PreventClosingWithEscapeKey != value)
+                {
+                    _colorPickerSettings.Properties.PreventClosingWithEscapeKey = value;
+                    OnPropertyChanged(nameof(PreventClosingWithEscapeKey));
+                    NotifySettingsChanged();
+                }
+            }
+        }
 
         public ObservableCollection<ColorFormatModel> ColorFormats { get; } = new ObservableCollection<ColorFormatModel>();
 

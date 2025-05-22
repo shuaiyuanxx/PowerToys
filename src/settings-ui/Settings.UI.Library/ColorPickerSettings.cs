@@ -59,6 +59,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             newSettings.Properties.ColorHistoryLimit = oldSettings.Properties.ColorHistoryLimit;
             newSettings.Properties.ShowColorName = oldSettings.Properties.ShowColorName;
             newSettings.Properties.ActivationShortcut = oldSettings.Properties.ActivationShortcut;
+            newSettings.Properties.PreventClosingWithEscapeKey = false; // default to false for upgraded settings
             newSettings.Properties.VisibleColorFormats = new Dictionary<string, KeyValuePair<bool, string>>();
             foreach (KeyValuePair<string, bool> oldValue in oldSettings.Properties.VisibleColorFormats)
             {

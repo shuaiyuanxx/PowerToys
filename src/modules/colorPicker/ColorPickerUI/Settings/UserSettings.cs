@@ -53,6 +53,7 @@ namespace ColorPicker.Settings
             ColorHistoryLimit = new SettingItem<int>(20);
             ColorHistory.CollectionChanged += ColorHistory_CollectionChanged;
             ShowColorName = new SettingItem<bool>(false);
+            PreventClosingWithEscapeKey = new SettingItem<bool>(false);
 
             LoadSettingsFromJson();
 
@@ -85,6 +86,8 @@ namespace ColorPicker.Settings
         public ObservableCollection<System.Collections.Generic.KeyValuePair<string, string>> VisibleColorFormats { get; private set; } = new ObservableCollection<System.Collections.Generic.KeyValuePair<string, string>>();
 
         public SettingItem<bool> ShowColorName { get; }
+
+        public SettingItem<bool> PreventClosingWithEscapeKey { get; }
 
         private void LoadSettingsFromJson()
         {
@@ -123,6 +126,12 @@ namespace ColorPicker.Settings
                                 ActivationAction.Value = settings.Properties.ActivationAction;
                                 ColorHistoryLimit.Value = settings.Properties.ColorHistoryLimit;
                                 ShowColorName.Value = settings.Properties.ShowColorName;
+                                
+                                // Set the value for PreventClosingWithEscapeKey if it exists in settings, otherwise keep default
+                                if (settings.Properties.GetType().GetProperty("PreventClosingWithEscapeKey") != null)
+                                {
+                                    PreventClosingWithEscapeKey.Value = settings.Properties.PreventClosingWithEscapeKey;
+                                }
 
                                 List<string> savedColorHistory = new List<string>();
                                 try

@@ -72,7 +72,10 @@ namespace ColorPicker.Keyboard
             // ESC pressed
             if (virtualCode == KeyInterop.VirtualKeyFromKey(Key.Escape) && e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyDown)
             {
-                e.Handled = _appStateHandler.HandleEscPressed();
+                if (!_userSettings.PreventClosingWithEscapeKey.Value)
+                {
+                    e.Handled = _appStateHandler.HandleEscPressed();
+                }
                 return;
             }
 
@@ -84,7 +87,10 @@ namespace ColorPicker.Keyboard
 
             if (virtualCode == KeyInterop.VirtualKeyFromKey(Key.Back) && e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyDown)
             {
-                e.Handled = _appStateHandler.HandleEscPressed();
+                if (!_userSettings.PreventClosingWithEscapeKey.Value)
+                {
+                    e.Handled = _appStateHandler.HandleEscPressed();
+                }
                 return;
             }
 
