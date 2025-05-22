@@ -27,7 +27,21 @@ namespace PTSettingsHelper
             DWORD attributes = GetFileAttributesW(save_path.c_str());
             if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
             {
-                SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+                if (!SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN))
+                {
+                    DWORD error = GetLastError();
+                    wchar_t message[512];
+                    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                  message, 512, NULL);
+                    
+                    Logger::error(L"Failed to remove hidden attribute from directory {}: {} (Error code: {})", 
+                                 save_path.wstring(), message, error);
+                }
+                else
+                {
+                    Logger::info(L"Removed hidden attribute from directory: {}", save_path.wstring());
+                }
             }
         }
         return result;
@@ -49,7 +63,21 @@ namespace PTSettingsHelper
             DWORD attributes = GetFileAttributesW(save_path.c_str());
             if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
             {
-                SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+                if (!SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN))
+                {
+                    DWORD error = GetLastError();
+                    wchar_t message[512];
+                    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                  message, 512, NULL);
+                    
+                    Logger::error(L"Failed to remove hidden attribute from directory {}: {} (Error code: {})", 
+                                 save_path.wstring(), message, error);
+                }
+                else
+                {
+                    Logger::info(L"Removed hidden attribute from directory: {}", save_path.wstring());
+                }
             }
         }
         return result;
@@ -68,7 +96,21 @@ namespace PTSettingsHelper
             DWORD attributes = GetFileAttributesW(save_path.c_str());
             if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
             {
-                SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+                if (!SetFileAttributesW(save_path.c_str(), attributes & ~FILE_ATTRIBUTE_HIDDEN))
+                {
+                    DWORD error = GetLastError();
+                    wchar_t message[512];
+                    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                  message, 512, NULL);
+                    
+                    Logger::error(L"Failed to remove hidden attribute from directory {}: {} (Error code: {})", 
+                                 save_path.wstring(), message, error);
+                }
+                else
+                {
+                    Logger::info(L"Removed hidden attribute from directory: {}", save_path.wstring());
+                }
             }
         }
         return result;

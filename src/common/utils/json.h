@@ -8,6 +8,7 @@
 #include <fstream>
 #include <Windows.h>
 #include <filesystem>
+#include <common/logger/logger.h>
 
 namespace json
 {
@@ -49,7 +50,22 @@ namespace json
         // If the file has the hidden attribute, temporarily remove it to allow writing
         if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_HIDDEN))
         {
-            SetFileAttributesW(file_name.data(), attributes & ~FILE_ATTRIBUTE_HIDDEN);
+            if (!SetFileAttributesW(file_name.data(), attributes & ~FILE_ATTRIBUTE_HIDDEN))
+            {
+                // Log the error if attributes couldn't be changed
+                DWORD error = GetLastError();
+                wchar_t message[512];
+                FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                               NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                               message, 512, NULL);
+                
+                Logger::error(L"Failed to remove hidden attribute from file {}: {} (Error code: {})", 
+                              file_name, message, error);
+            }
+            else
+            {
+                Logger::info(L"Removed hidden attribute from file to enable writing: {}", file_name);
+            }
         }
         
         // Ensure parent directory is also not hidden
@@ -59,7 +75,23 @@ namespace json
             DWORD dir_attributes = GetFileAttributesW(file_path.parent_path().c_str());
             if (dir_attributes != INVALID_FILE_ATTRIBUTES && (dir_attributes & FILE_ATTRIBUTE_HIDDEN))
             {
-                SetFileAttributesW(file_path.parent_path().c_str(), dir_attributes & ~FILE_ATTRIBUTE_HIDDEN);
+                if (!SetFileAttributesW(file_path.parent_path().c_str(), dir_attributes & ~FILE_ATTRIBUTE_HIDDEN))
+                {
+                    // Log the error if attributes couldn't be changed
+                    DWORD error = GetLastError();
+                    wchar_t message[512];
+                    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                   NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                   message, 512, NULL);
+                    
+                    Logger::error(L"Failed to remove hidden attribute from directory {}: {} (Error code: {})", 
+                                  file_path.parent_path().wstring(), message, error);
+                }
+                else
+                {
+                    Logger::info(L"Removed hidden attribute from directory to enable access: {}", 
+                                 file_path.parent_path().wstring());
+                }
             }
         }
         
@@ -71,7 +103,22 @@ namespace json
         // Only restore if the original attributes were valid and contained the hidden attribute
         if (original_attributes != INVALID_FILE_ATTRIBUTES && (original_attributes & FILE_ATTRIBUTE_HIDDEN))
         {
-            SetFileAttributesW(file_name.data(), original_attributes);
+            if (!SetFileAttributesW(file_name.data(), original_attributes))
+            {
+                // Log the error if attributes couldn't be restored
+                DWORD error = GetLastError();
+                wchar_t message[512];
+                FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                              NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                              message, 512, NULL);
+                
+                Logger::error(L"Failed to restore hidden attribute to file {}: {} (Error code: {})", 
+                             file_name, message, error);
+            }
+            else
+            {
+                Logger::info(L"Restored hidden attribute to file: {}", file_name);
+            }
         }
     }
 
