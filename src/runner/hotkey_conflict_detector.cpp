@@ -100,12 +100,14 @@ namespace HotkeyConflictDetector
         {
             if (conflictType == HotkeyConflictType::InAppConflict)
             {
-
+                inAppConflictHotkeyMap[handle].insert({ _hotkey, _moduleName, _hotkeyName });
             }
             else
             {
-
+                sysConflictHotkeyMap[handle].insert({ _hotkey, _moduleName, _hotkeyName });
             }
+            
+            UpdateHotkeyConflictToFile();
             return false;
         }
 
@@ -115,40 +117,150 @@ namespace HotkeyConflictDetector
         hotkeyInfo.hotkey = _hotkey;
         hotkeyMap[handle] = hotkeyInfo;
 
+        UpdateHotkeyConflictToFile();
         return true;
     }
 
-    bool HotkeyConflictManager::RemoveHotkey(Hotkey const& _hotkey)
+    bool HotkeyConflictManager::RemoveHotkey(Hotkey const& _hotkey, const std::wstring& moduleName)
     {
         uint16_t handle = GetHotkeyHandle(_hotkey);
+        bool foundRecord = false;
 
         auto it = hotkeyMap.find(handle);
-        if (it == hotkeyMap.end())
+        if (it != hotkeyMap.end() && it->second.moduleName == moduleName)
         {
-            return false;
+            hotkeyMap.erase(it);
+            foundRecord = true;
         }
 
-        hotkeyMap.erase(it);
+        auto it_sys = sysConflictHotkeyMap.find(handle);
+        if (it_sys != sysConflictHotkeyMap.end())
+        {
+            auto& sysConflicts = it_sys->second;
+            for (auto it_conf = sysConflicts.begin(); it_conf != sysConflicts.end();)
+            {
+                if (it_conf->moduleName == moduleName)
+                {
+                    it_conf = sysConflicts.erase(it_conf);
+                    foundRecord = true;
+                }
+                else
+                {
+                    ++it_conf;
+                }
+            }
 
-        return true;
+            if (sysConflicts.empty())
+            {
+                sysConflictHotkeyMap.erase(it_sys);
+            }
+        }
+
+        auto it_inApp = inAppConflictHotkeyMap.find(handle);
+        if (it_inApp != inAppConflictHotkeyMap.end())
+        {
+            auto& inAppConflicts = it_inApp->second;
+            for (auto it_conf = inAppConflicts.begin(); it_conf != inAppConflicts.end();)
+            {
+                if (it_conf->moduleName == moduleName)
+                {
+                    it_conf = inAppConflicts.erase(it_conf);
+                    foundRecord = true;
+                }
+                else
+                {
+                    ++it_conf;
+                }
+            }
+
+            if (inAppConflicts.empty())
+            {
+                inAppConflictHotkeyMap.erase(it_inApp);
+            }
+        }
+
+        if (foundRecord)
+        {
+            UpdateHotkeyConflictToFile();
+        }
+
+        return foundRecord;
     }
 
     bool HotkeyConflictManager::RemoveHotkeyByModule(const std::wstring& moduleName)
     {
         std::lock_guard<std::mutex> lock(hotkeyMutex);
-        auto it = hotkeyMap.begin();
-        while (it != hotkeyMap.end())
+        bool foundRecord = false;
+
+        for (auto it = hotkeyMap.begin(); it != hotkeyMap.end();)
         {
             if (it->second.moduleName == moduleName)
             {
                 it = hotkeyMap.erase(it);
+                foundRecord = true;
             }
             else
             {
                 ++it;
             }
         }
-        return true;
+
+        for (auto it = sysConflictHotkeyMap.begin(); it != sysConflictHotkeyMap.end();)
+        {
+            auto& conflictSet = it->second;
+            for (auto setIt = conflictSet.begin(); setIt != conflictSet.end();)
+            {
+                if (setIt->moduleName == moduleName)
+                {
+                    setIt = conflictSet.erase(setIt);
+                    foundRecord = true;
+                }
+                else
+                {
+                    ++setIt;
+                }
+            }
+            if (conflictSet.empty())
+            {
+                it = sysConflictHotkeyMap.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
+        for (auto it = inAppConflictHotkeyMap.begin(); it != inAppConflictHotkeyMap.end();)
+        {
+            auto& conflictSet = it->second;
+            for (auto setIt = conflictSet.begin(); setIt != conflictSet.end();)
+            {
+                if (setIt->moduleName == moduleName)
+                {
+                    setIt = conflictSet.erase(setIt);
+                    foundRecord = true;
+                }
+                else
+                {
+                    ++setIt;
+                }
+            }
+            if (conflictSet.empty())
+            {
+                it = inAppConflictHotkeyMap.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
+        if (foundRecord)
+        {
+            UpdateHotkeyConflictToFile();
+        }
+
+        return foundRecord;
     }
 
     bool HotkeyConflictManager::HasConflictWithSystemHotkey(const Hotkey& hotkey)
@@ -215,7 +327,7 @@ namespace HotkeyConflictDetector
             return obj;
         };
 
-        auto serializeConflictMap = [&](const std::unordered_map<uint16_t, std::vector<HotkeyConflictInfo>>& map) -> JsonArray {
+        auto serializeConflictMap = [&](const std::unordered_map<uint16_t, std::unordered_set<HotkeyConflictInfo>>& map) -> JsonArray {
             JsonArray arr;
             for (const auto& [handle, conflicts] : map)
             {

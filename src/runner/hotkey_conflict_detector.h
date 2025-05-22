@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 #include "pch.h"
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
 
 #include "../modules/interface/powertoy_module_interface.h"
@@ -17,6 +18,15 @@ namespace HotkeyConflictDetector
         Hotkey hotkey;
         std::wstring moduleName;
         std::wstring hotkeyName;
+
+        inline bool operator==(const HotkeyConflictInfo& other) const  
+        {  
+           return hotkey == other.hotkey &&  
+                  moduleName == other.moduleName &&  
+                  hotkeyName == other.hotkeyName;  
+        }
+
+
     };
 
     Hotkey HotkeyExToHotkey(const HotkeyEx& hotkeyEx);
@@ -38,7 +48,7 @@ namespace HotkeyConflictDetector
         HotkeyConflictType HasConflict(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
         HotkeyConflictInfo GetConflict(const Hotkey& hotkey);
         bool AddHotkey(const Hotkey& hotkey, const wchar_t* moduleName, const wchar_t* hotkeyName);
-        bool RemoveHotkey(const Hotkey& hotkey);
+        bool RemoveHotkey(const Hotkey& hotkey, const std::wstring& moduleName);
         bool RemoveHotkeyByModule(const std::wstring& moduleName);
 
     private:
@@ -49,9 +59,9 @@ namespace HotkeyConflictDetector
         // Hotkey in hotkeyMap means the hotkey has been registered successfully
         std::unordered_map<uint16_t, HotkeyConflictInfo> hotkeyMap;
         // Hotkey in sysConflictHotkeyMap means the hotkey has conflict with system defined hotkeys
-        std::unordered_map<uint16_t, std::vector<HotkeyConflictInfo>> sysConflictHotkeyMap;
+        std::unordered_map<uint16_t, std::unordered_set<HotkeyConflictInfo>> sysConflictHotkeyMap;
         // Hotkey in inAppConflictHotkeyMap means the hotkey has conflict with other modules
-        std::unordered_map<uint16_t, std::vector<HotkeyConflictInfo>> inAppConflictHotkeyMap;
+        std::unordered_map<uint16_t, std::unordered_set<HotkeyConflictInfo>> inAppConflictHotkeyMap;
 
         uint16_t GetHotkeyHandle(const Hotkey&);
         bool HasConflictWithSystemHotkey(const Hotkey&);
@@ -62,3 +72,27 @@ namespace HotkeyConflictDetector
     };
 };
 
+namespace std
+{
+    template<>
+    struct hash<HotkeyConflictDetector::HotkeyConflictInfo>
+    {
+        size_t operator()(const HotkeyConflictDetector::HotkeyConflictInfo& info) const
+        {
+
+            size_t hotkeyHash =
+                (info.hotkey.win ? 1ULL : 0ULL) |
+                ((info.hotkey.ctrl ? 1ULL : 0ULL) << 1) |
+                ((info.hotkey.shift ? 1ULL : 0ULL) << 2) |
+                ((info.hotkey.alt ? 1ULL : 0ULL) << 3) |
+                (static_cast<size_t>(info.hotkey.key) << 4);
+
+            size_t moduleHash = std::hash<std::wstring>{}(info.moduleName);
+            size_t nameHash = std::hash<std::wstring>{}(info.hotkeyName);
+
+            return hotkeyHash ^ 
+                ((moduleHash << 1) | (moduleHash >> (sizeof(size_t) * 8 - 1))) ^    // rotate left 1 bit
+                ((nameHash << 2) | (nameHash >> (sizeof(size_t) * 8 - 2)));         // rotate left 2 bits
+        }
+    };
+}

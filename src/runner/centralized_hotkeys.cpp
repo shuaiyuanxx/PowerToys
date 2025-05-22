@@ -61,13 +61,12 @@ namespace CentralizedHotkeys
 
             HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
             HotkeyConflictDetector::Hotkey hotkey = HotkeyConflictDetector::ShortcutToHotkey(shortcut);
-            bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), L"");
-            if (hasConflict)
+            bool succeed = hkmng.AddHotkey(hotkey, moduleName.c_str(), shortcut.hotkeyName);
+            if (!succeed)
             {
                 Logger::warn(L"Hotkey conflict detected. Shortcut: {}, from module: {}", ToWstring(shortcut), moduleName);
                 return false;
             }
-            hkmng.AddHotkey(hotkey, moduleName.c_str(), shortcut.hotkeyName);
 
             if (!RegisterHotKey(runnerWindow, ids[shortcut], shortcut.modifiersMask, shortcut.vkCode))
             {
@@ -94,7 +93,7 @@ namespace CentralizedHotkeys
                 if (it->second.empty())
                 {
                     HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-                    hkmng.RemoveHotkey(HotkeyConflictDetector::ShortcutToHotkey(it->first));
+                    hkmng.RemoveHotkey(HotkeyConflictDetector::ShortcutToHotkey(it->first), moduleName);
 
                     if (!UnregisterHotKey(runnerWindow, ids[it->first]))
                     {
