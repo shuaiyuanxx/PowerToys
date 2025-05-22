@@ -90,8 +90,18 @@ namespace AdvancedPaste.Helpers
                         {
                             // If still failing, try one more approach - wrap the entire content in a root element
                             Logger.LogDebug("Attempting to wrap entire content in root element");
-                            string wrappedXml = "<root>" + text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;") + "</root>";
-                            doc.LoadXml(wrappedXml);
+                            try
+                            {
+                                // Handle HTML-like content which might not be valid XML
+                                // This helps with the example shown in the issue
+                                string wrappedXml = "<root>" + text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;") + "</root>";
+                                doc.LoadXml(wrappedXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.LogError("Failed to parse text as XML even after multiple attempts", ex);
+                                throw; // We've tried our best, give up on XML parsing
+                            }
                         }
                     }
                     else
