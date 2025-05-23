@@ -48,6 +48,9 @@ public sealed partial class MainWindow : WindowEx,
     private readonly WNDPROC? _originalWndProc;
     private readonly List<TopLevelHotkey> _hotkeys = [];
     private bool _ignoreHotKeyWhenFullScreen = true;
+    
+    // Store the last window position
+    private PointInt32? _lastWindowPosition = null;
 
     // Stylistically, window messages are WM_*
 #pragma warning disable SA1310 // Field names should not contain underscore
@@ -101,6 +104,10 @@ public sealed partial class MainWindow : WindowEx,
         ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Collapsed;
         SizeChanged += WindowSizeChanged;
+        
+        // Subscribe to window position changes
+        AppWindow.Changed += AppWindow_Changed;
+        
         RootShellPage.Loaded += RootShellPage_Loaded;
 
         // LOAD BEARING: If you don't stick the pointer to HotKeyPrc into a
@@ -134,6 +141,15 @@ public sealed partial class MainWindow : WindowEx,
 
     private void WindowSizeChanged(object sender, WindowSizeChangedEventArgs args) => UpdateRegionsForCustomTitleBar();
 
+    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        // Save the window position when it's moved
+        if (args.DidPositionChange)
+        {
+            _lastWindowPosition = sender.Position;
+        }
+    }
+
     private void PositionCentered()
     {
         var displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest);
@@ -151,6 +167,20 @@ public sealed partial class MainWindow : WindowEx,
             centeredPosition.X += displayArea.WorkArea.X;
             centeredPosition.Y += displayArea.WorkArea.Y;
             AppWindow.Move(centeredPosition);
+        }
+    }
+    
+    private void PositionAtStartMenu(DisplayArea displayArea)
+    {
+        if (displayArea is not null)
+        {
+            var startMenuPosition = AppWindow.Position;
+            
+            // Position in the bottom left corner, similar to where the Start Menu appears
+            startMenuPosition.X = displayArea.WorkArea.X;
+            startMenuPosition.Y = displayArea.WorkArea.Y + displayArea.WorkArea.Height - AppWindow.Size.Height;
+            
+            AppWindow.Move(startMenuPosition);
         }
     }
 
@@ -232,7 +262,37 @@ public sealed partial class MainWindow : WindowEx,
         }
 
         var display = GetScreen(hwnd, target);
-        PositionCentered(display);
+        
+        // Get window position settings
+        var settings = App.Current.Services.GetService<SettingsModel>()!;
+        
+        // Handle window positioning based on user preference
+        switch (settings.WindowPosition)
+        {
+            case WindowPositionBehavior.SaveLastPosition:
+                if (_lastWindowPosition.HasValue)
+                {
+                    // Restore the last position
+                    AppWindow.Move(_lastWindowPosition.Value);
+                }
+                else
+                {
+                    // If no last position is saved, center it
+                    PositionCentered(display);
+                }
+                break;
+                
+            case WindowPositionBehavior.StartMenuPosition:
+                // Position at the start menu location
+                PositionAtStartMenu(display);
+                break;
+                
+            case WindowPositionBehavior.RecenterOnDisplay:
+            default:
+                // Use the default centering behavior
+                PositionCentered(display);
+                break;
+        }
 
         PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOW);
 

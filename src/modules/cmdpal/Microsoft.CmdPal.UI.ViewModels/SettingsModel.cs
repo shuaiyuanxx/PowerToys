@@ -42,6 +42,8 @@ public partial class SettingsModel : ObservableObject
 
     public bool IgnoreShortcutWhenFullscreen { get; set; }
 
+    public WindowPositionBehavior WindowPosition { get; set; } = WindowPositionBehavior.RecenterOnDisplay;
+
     public Dictionary<string, ProviderSettings> ProviderSettings { get; set; } = [];
 
     public Dictionary<string, CommandAlias> Aliases { get; set; } = [];
@@ -202,4 +204,11 @@ public enum MonitorBehavior
     ToPrimary = 1,
     ToFocusedWindow = 2,
     InPlace = 3,
+}
+
+public enum WindowPositionBehavior
+{
+    RecenterOnDisplay = 0, // Default: re-center the window on the display
+    SaveLastPosition = 1, // Remember the last position and restore it
+    StartMenuPosition = 2, // Position the window where the Start Menu would be
 }
