@@ -324,6 +324,7 @@
         <ContentDialog
             x:Name="EnableAIDialog"
             x:Uid="EnableAIDialog"
+            MinHeight="520" 
             IsPrimaryButtonEnabled="False"
             IsSecondaryButtonEnabled="True"
             PrimaryButtonStyle="{StaticResource AccentButtonStyle}">
