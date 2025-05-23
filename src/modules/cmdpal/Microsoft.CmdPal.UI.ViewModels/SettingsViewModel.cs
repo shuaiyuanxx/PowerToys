@@ -118,6 +118,16 @@ public partial class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public int WindowPositionIndex
+    {
+        get => (int)_settings.WindowPosition;
+        set
+        {
+            _settings.WindowPosition = (WindowPositionBehavior)value;
+            Save();
+        }
+    }
+
     public ObservableCollection<ProviderSettingsViewModel> CommandProviders { get; } = [];
 
     public SettingsViewModel(SettingsModel settings, IServiceProvider serviceProvider, TaskScheduler scheduler)

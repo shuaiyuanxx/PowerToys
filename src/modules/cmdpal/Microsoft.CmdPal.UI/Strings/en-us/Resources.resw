@@ -403,6 +403,21 @@ Right-click to remove the key combination, thereby deactivating the shortcut.</v
   <data name="Settings_GeneralPage_ShowSystemTrayIcon_SettingsCard.Description" xml:space="preserve">
     <value>Choose if Command Palette is visible in the system tray</value>
   </data>
+  <data name="WindowPosition_SettingsCard.Header" xml:space="preserve">
+    <value>Window position behavior</value>
+  </data>
+  <data name="WindowPosition_SettingsCard.Description" xml:space="preserve">
+    <value>Control how the window is positioned each time it is opened</value>
+  </data>
+  <data name="WindowPosition_Option_Recenter.Content" xml:space="preserve">
+    <value>Re-center it</value>
+  </data>
+  <data name="WindowPosition_Option_SaveLastPosition.Content" xml:space="preserve">
+    <value>Leave it where it was</value>
+  </data>
+  <data name="WindowPosition_Option_StartMenuPosition.Content" xml:space="preserve">
+    <value>Open it where the Start Menu would be</value>
+  </data>
   <data name="BackButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Back</value>
   </data>
