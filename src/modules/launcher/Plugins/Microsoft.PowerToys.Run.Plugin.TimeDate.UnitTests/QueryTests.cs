@@ -36,7 +36,8 @@ namespace Microsoft.PowerToys.Run.Plugin.TimeDate.UnitTests
         [DataRow("date", 2)] // Setting 'Only Date, Time, Now on global results' is default on
         [DataRow("now", 3)] // Setting 'Only Date, Time, Now on global results' is default on
         [DataRow("current", 3)] // Setting 'Only Date, Time, Now on global results' is default on
-        [DataRow("year", 0)] // Setting 'Only Date, Time, Now on global results' is default on
+        [DataRow("year", 1)] // Year is now a fallback item
+        [DataRow("week", 1)] // Week is now a fallback item
         [DataRow("time::10:10:10", 0)] // Setting 'Only Date, Time, Now on global results' is default on
         [DataRow("date::10/10/10", 0)] // Setting 'Only Date, Time, Now on global results' is default on
         public void CountWithoutPluginKeyword(string typedString, int expectedResultCount)
@@ -56,9 +57,9 @@ namespace Microsoft.PowerToys.Run.Plugin.TimeDate.UnitTests
         [DataRow("(time", 18)]
         [DataRow("(date", 28)]
         [DataRow("(year", 8)]
-        [DataRow("(now", 34)]
-        [DataRow("(current", 34)]
-        [DataRow("(", 34)]
+        [DataRow("(now", 36)]
+        [DataRow("(current", 36)]
+        [DataRow("(", 36)]
         [DataRow("(now::10:10:10", 1)] // Windows file time
         [DataRow("(current::10:10:10", 0)]
         public void CountWithPluginKeyword(string typedString, int expectedResultCount)
