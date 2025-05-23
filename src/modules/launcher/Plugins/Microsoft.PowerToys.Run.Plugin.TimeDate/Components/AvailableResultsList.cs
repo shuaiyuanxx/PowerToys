@@ -38,8 +38,7 @@ namespace Microsoft.PowerToys.Run.Plugin.TimeDate.Components
 
             results.AddRange(new[]
             {
-                // This range is reserved for the following three results: Time, Date, Now
-                // Don't add any new result in this range! For new results, please use the next range.
+                // This range includes fallback results that are always shown
                 new AvailableResult()
                 {
                     Value = dateTimeNow.ToString(TimeAndDateHelper.GetStringFormat(FormatStringType.Time, timeExtended, dateExtended), CultureInfo.CurrentCulture),
@@ -60,6 +59,20 @@ namespace Microsoft.PowerToys.Run.Plugin.TimeDate.Components
                     Label = ResultHelper.SelectStringFromResources(isSystemDateTime, "Microsoft_plugin_timedate_DateAndTime", "Microsoft_plugin_timedate_Now"),
                     AlternativeSearchTag = ResultHelper.SelectStringFromResources(isSystemDateTime, "Microsoft_plugin_timedate_SearchTagFormat"),
                     IconType = ResultIconType.DateTime,
+                },
+                new AvailableResult()
+                {
+                    Value = calendar.GetYear(dateTimeNow).ToString(CultureInfo.CurrentCulture),
+                    Label = Resources.Microsoft_plugin_timedate_Year,
+                    AlternativeSearchTag = ResultHelper.SelectStringFromResources(isSystemDateTime, "Microsoft_plugin_timedate_SearchTagDate"),
+                    IconType = ResultIconType.Date,
+                },
+                new AvailableResult()
+                {
+                    Value = weekOfYear.ToString(CultureInfo.CurrentCulture),
+                    Label = Resources.Microsoft_plugin_timedate_WeekOfYear,
+                    AlternativeSearchTag = ResultHelper.SelectStringFromResources(isSystemDateTime, "Microsoft_plugin_timedate_SearchTagDate"),
+                    IconType = ResultIconType.Date,
                 },
             });
 
