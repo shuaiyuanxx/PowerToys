@@ -40,7 +40,7 @@ public static class TransformHelpers
     private static async Task<DataPackage> ToPlainTextAsync(DataPackageView clipboardData)
     {
         Logger.LogTrace();
-        return CreateDataPackageFromText(await clipboardData.GetTextOrEmptyAsync());
+        return CreateDataPackageFromText(await clipboardData.GetTextOrHtmlTextAsync());
     }
 
     private static async Task<DataPackage> ToMarkdownAsync(DataPackageView clipboardData)
