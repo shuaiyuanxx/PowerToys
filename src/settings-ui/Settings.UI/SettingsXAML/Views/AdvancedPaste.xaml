@@ -324,11 +324,11 @@
         <ContentDialog
             x:Name="EnableAIDialog"
             x:Uid="EnableAIDialog"
-            MinHeight="520" 
+            MaxHeight="{x:Bind RootPage.ActualHeight, Mode=OneWay}"
             IsPrimaryButtonEnabled="False"
             IsSecondaryButtonEnabled="True"
             PrimaryButtonStyle="{StaticResource AccentButtonStyle}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,16,0">
                 <Grid RowSpacing="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
