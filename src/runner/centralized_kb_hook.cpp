@@ -93,6 +93,18 @@ namespace CentralizedKeyboardHook
             // The new keystroke was generated from one of our actions. We should pass it along.
             return CallNextHookEx(hHook, nCode, wParam, lParam);
         }
+        
+        // Check if this is an AltGr key combination
+        // AltGr is represented as Right Alt (VK_RMENU) with the extended key flag set
+        // When AltGr is pressed, Windows also sets Left Ctrl as pressed
+        if ((keyPressInfo.vkCode != VK_RMENU) && // Not the AltGr key itself
+            (GetAsyncKeyState(VK_RMENU) & 0x8000) && // Right Alt is pressed
+            (keyPressInfo.flags & KF_EXTENDED) && // Extended key flag is set
+            (GetAsyncKeyState(VK_LCONTROL) & 0x8000)) // Left Ctrl is also pressed
+        {
+            // Allow AltGr combinations to pass through for diacritic marks
+            return CallNextHookEx(hHook, nCode, wParam, lParam);
+        }
 
         // Check if the keys are pressed.
         if (!pressedKeyDescriptors.empty())
