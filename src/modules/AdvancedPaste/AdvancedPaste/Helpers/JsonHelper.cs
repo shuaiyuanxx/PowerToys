@@ -47,6 +47,49 @@ namespace AdvancedPaste.Helpers
             }
         }
 
+        // Process JSON that's already in JSON format to prevent double-serialization
+        // This fixes the issue where pasting JSON content multiple times results in incorrect formatting
+        // (e.g., double-serialized strings in JSON arrays)
+        private static string ProcessExistingJson(string jsonText)
+        {
+            try
+            {
+                // Parse the JSON to see what kind of structure it has
+                using var document = JsonDocument.Parse(jsonText);
+                var root = document.RootElement;
+
+                // If it's already a JSON array of strings or primitives, we want to avoid
+                // double-serializing it (which would result in an array of JSON strings)
+                if (root.ValueKind == System.Text.Json.JsonValueKind.Array)
+                {
+                    // Create a new array with the string values
+                    var values = new List<string>();
+                    foreach (var element in root.EnumerateArray())
+                    {
+                        if (element.ValueKind == System.Text.Json.JsonValueKind.String)
+                        {
+                            values.Add(element.GetString());
+                        }
+                        else
+                        {
+                            // For non-string values, convert to their string representation
+                            values.Add(element.ToString());
+                        }
+                    }
+                    
+                    // Re-serialize the array properly to avoid double serialization when pasting multiple times
+                    return JsonConvert.SerializeObject(values, Newtonsoft.Json.Formatting.Indented);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Error processing existing JSON", ex);
+            }
+
+            // If we couldn't process it as expected, return the original text
+            return jsonText;
+        }
+
         internal static async Task<string> ToJsonFromXmlOrCsvAsync(DataPackageView clipboardData)
         {
             Logger.LogTrace();
@@ -60,10 +103,10 @@ namespace AdvancedPaste.Helpers
             var text = await clipboardData.GetTextAsync();
             string jsonText = string.Empty;
 
-            // If the text is already JSON, return it
+            // If the text is already JSON, process it to avoid double-serialization
             if (IsJson(text))
             {
-                return text;
+                return ProcessExistingJson(text);
             }
 
             // Try convert XML
