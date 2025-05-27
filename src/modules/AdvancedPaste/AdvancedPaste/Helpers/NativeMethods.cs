@@ -166,5 +166,11 @@ namespace AdvancedPaste.Helpers
 
         [DllImport("Shlwapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern HResult AssocQueryString(AssocF flags, AssocStr str, string pszAssoc, string pszExtra, [Out] StringBuilder pszOut, [In][Out] ref uint pcchOut);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern int GetClassName(IntPtr hWnd, [Out] string lpClassName, int nMaxCount);
     }
 }
