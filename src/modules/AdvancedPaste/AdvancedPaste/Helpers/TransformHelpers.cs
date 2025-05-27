@@ -146,26 +146,52 @@ public static class TransformHelpers
         var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var fileName = $"{prefix}{timestamp}.{fileExtension}";
 
-        // Try to create file directly in Desktop folder first to support pasting to desktop
+        // Check if the active window is the desktop
+        if (IsDesktopWindowActive())
+        {
+            try
+            {
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (Directory.Exists(desktopPath))
+                {
+                    // Create the file directly on desktop since we're pasting to desktop
+                    return Path.Combine(desktopPath, fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Failed to access desktop folder: {ex.Message}");
+            }
+        }
+
+        // For all other targets, use system temp path
+        return Path.Combine(Path.GetTempPath(), fileName);
+    }
+    
+    private static bool IsDesktopWindowActive()
+    {
         try
         {
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var desktopFilePath = Path.Combine(desktopPath, fileName);
-            
-            // Check if we can access the desktop folder (this means we might be pasting to desktop)
-            if (Directory.Exists(desktopPath))
+            // Get the foreground window class name and verify if it's the desktop
+            var hwnd = NativeMethods.GetForegroundWindow();
+            if (hwnd == IntPtr.Zero)
             {
-                return desktopFilePath;
+                return false;
             }
+            
+            const int maxLength = 256;
+            var className = new String(' ', maxLength);
+            int result = NativeMethods.GetClassName(hwnd, className, maxLength);
+            
+            // "Progman" is Program Manager (Desktop)
+            // "WorkerW" is also desktop when desktop is active
+            return result > 0 && (className.StartsWith("Progman") || className.StartsWith("WorkerW"));
         }
         catch (Exception ex)
         {
-            // If there's any error accessing the desktop folder, fall back to temp path
-            Logger.LogError($"Failed to access desktop folder: {ex.Message}");
+            Logger.LogError($"Error checking for desktop window: {ex.Message}");
+            return false;
         }
-
-        // Fall back to temp path for normal folder targets
-        return Path.Combine(Path.GetTempPath(), fileName);
     }
 
     private static DataPackage CreateDataPackageFromText(string content) => DataPackageHelpers.CreateFromText(content);
