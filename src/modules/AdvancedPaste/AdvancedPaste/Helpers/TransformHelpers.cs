@@ -144,8 +144,28 @@ public static class TransformHelpers
     {
         var prefix = ResourceLoaderInstance.ResourceLoader.GetString("PasteAsFile_FilePrefix");
         var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var fileName = $"{prefix}{timestamp}.{fileExtension}";
 
-        return Path.Combine(Path.GetTempPath(), $"{prefix}{timestamp}.{fileExtension}");
+        // Try to create file directly in Desktop folder first to support pasting to desktop
+        try
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var desktopFilePath = Path.Combine(desktopPath, fileName);
+            
+            // Check if we can access the desktop folder (this means we might be pasting to desktop)
+            if (Directory.Exists(desktopPath))
+            {
+                return desktopFilePath;
+            }
+        }
+        catch (Exception ex)
+        {
+            // If there's any error accessing the desktop folder, fall back to temp path
+            Logger.LogError($"Failed to access desktop folder: {ex.Message}");
+        }
+
+        // Fall back to temp path for normal folder targets
+        return Path.Combine(Path.GetTempPath(), fileName);
     }
 
     private static DataPackage CreateDataPackageFromText(string content) => DataPackageHelpers.CreateFromText(content);
