@@ -10,9 +10,9 @@
  - [] reboot the machine and verify it now runs as user
 
 **Modules on/off:**
- - [] turn off all the modules and verify all module are off
+ - [x] turn off all the modules and verify all module are off
  - [] restart PT and verify that all module are still off in the settings page and they are actually inactive
- - [] turn on all the module, all module are now working
+ - [x] turn on all the module, all module are now working
  - [] restart PT and verify that all module are still on in the settings page and they are actually working
 
 **Quick access tray icon flyout:**
