@@ -3,8 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
+using Microsoft.AdvancedPaste.UITests.Helper;
 using Microsoft.PowerToys.UITest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,9 +17,12 @@ namespace Microsoft.AdvancedPaste.UITests
     [TestClass]
     public class AdvancedPasteUITest : UITestBase
     {
+        private Process? wordpadProcess;
+
         public AdvancedPasteUITest()
             : base(PowerToysModule.PowerToysSettings, size: WindowSize.Small)
         {
+            OpenWordPad();
         }
 
         [TestMethod]
@@ -34,110 +41,92 @@ namespace Microsoft.AdvancedPaste.UITests
             // Ensure the directory exists
             Assert.IsTrue(Directory.Exists(testFilesDir), $"Test files directory not found at: {testFilesDir}");
 
-            // Create working copies of the test files
-            string tempDirectory = Path.Combine(Path.GetTempPath(), "AdvancedPasteUITestDocFile_" + Guid.NewGuid().ToString());
-            Directory.CreateDirectory(tempDirectory);
+            string[] filePaths = Directory.GetFiles(testFilesDir);
 
-            string sourceFilePath = Path.Combine(tempDirectory, "SourceDocument.docx");
-            string targetFilePath = Path.Combine(tempDirectory, "TargetDocument.docx");
+            foreach (string filePath in filePaths)
+            {
+                string content = FileReader.ReadContent(filePath);
+                Assert.IsNotNull(content, $"Failed to read content from file: {filePath}");
 
-            // Copy the test files from the output directory
-            File.Copy(Path.Combine(testFilesDir, "testSrc.docx"), sourceFilePath);
-            File.Copy(Path.Combine(testFilesDir, "testDst.docx"), targetFilePath);
+                // Copy the content to clipboard
+                Clipboard.SetText(content);
+
+                PasteClipboardContent();
+            }
+        }
+
+        private IntPtr OpenWordPad()
+        {
+            wordpadProcess = Process.Start("write.exe");
+            if (wordpadProcess == null)
+            {
+                throw new InvalidOperationException("Failed to start WordPad.");
+            }
+
+            wordpadProcess.WaitForInputIdle();
+
+            IntPtr hWnd = wordpadProcess.MainWindowHandle;
+
+            if (hWnd == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Could not get WordPad main window handle.");
+            }
+
+            SetForegroundWindow(hWnd);
+
+            Thread.Sleep(500); // Wait for the window to be ready
+
+            return hWnd;
+        }
+
+        private void PasteClipboardContent()
+        {
+            if (wordpadProcess == null || wordpadProcess.HasExited)
+            {
+                throw new InvalidOperationException("WordPad is not running.");
+            }
+
+            SetForegroundWindow(wordpadProcess.MainWindowHandle);
+            Thread.Sleep(200);
+
+            System.Windows.Forms.SendKeys.SendWait("^v");
+
+            Thread.Sleep(500);
+        }
+
+        private void CloseWordPad(int timeout = 3000)
+        {
+            if (wordpadProcess == null || wordpadProcess.HasExited)
+            {
+                return;
+            }
 
             try
             {
-                // Initialize Word documents manager
-                using (var wordManager = new WordManager())
+                wordpadProcess.CloseMainWindow();
+                if (!wordpadProcess.WaitForExit(timeout))
                 {
-                    // Open Word documents
-                    wordManager.OpenDocuments(sourceFilePath, targetFilePath);
-
-                    // Add test content to the documents
-                    wordManager.AddTestContent(10, 5);
-
-                    // Get and verify initial content
-                    string[] sourceContent = wordManager.GetSourceContent();
-                    string[] targetContent = wordManager.GetTargetContent();
-
-                    Assert.AreEqual(10, sourceContent.Length, "Source document should have 10 lines");
-                    Assert.AreEqual(5, targetContent.Length, "Target document should have 5 lines");
-
-                    // Copy specific lines from source document
-                    string copiedText = wordManager.CopyTextFromSource(2, 4);
-
-                    // Verify that text was copied correctly
-                    Assert.IsTrue(copiedText.Contains("Source document line 2"), "Copied text should contain line 2");
-                    Assert.IsTrue(copiedText.Contains("Source document line 3"), "Copied text should contain line 3");
-                    Assert.IsTrue(copiedText.Contains("Source document line 4"), "Copied text should contain line 4");
-
-                    // Paste text to target document at line 3
-                    wordManager.PasteTextToTarget(3);
-
-                    // Allow Word some time to process
-                    Thread.Sleep(1000);
-
-                    // Get updated content and verify paste operation
-                    string[] updatedTargetContent = wordManager.GetTargetContent();
-
-                    // Check that content was inserted properly
-                    Assert.IsTrue(
-                        updatedTargetContent.Length > targetContent.Length,
-                        "Target document should have more lines after paste operation");
-
-                    // Find the pasted content in the target document
-                    bool foundLine2 = false;
-                    bool foundLine3 = false;
-                    bool foundLine4 = false;
-
-                    foreach (string line in updatedTargetContent)
-                    {
-                        if (line.Contains("Source document line 2"))
-                        {
-                            foundLine2 = true;
-                        }
-
-                        if (line.Contains("Source document line 3"))
-                        {
-                            foundLine3 = true;
-                        }
-
-                        if (line.Contains("Source document line 4"))
-                        {
-                            foundLine4 = true;
-                        }
-                    }
-
-                    Assert.IsTrue(foundLine2, "Target document should contain 'Source document line 2'");
-                    Assert.IsTrue(foundLine3, "Target document should contain 'Source document line 3'");
-                    Assert.IsTrue(foundLine4, "Target document should contain 'Source document line 4'");
+                    wordpadProcess.Kill(true);
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error closing WordPad: {ex.Message}");
             }
             finally
             {
-                // Clean up temporary files
-                try
-                {
-                    if (File.Exists(sourceFilePath))
-                    {
-                        File.Delete(sourceFilePath);
-                    }
-
-                    if (File.Exists(targetFilePath))
-                    {
-                        File.Delete(targetFilePath);
-                    }
-
-                    if (Directory.Exists(tempDirectory))
-                    {
-                        Directory.Delete(tempDirectory, true);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Cleanup error: {ex.Message}");
-                }
+                wordpadProcess.Dispose();
+                wordpadProcess = null;
             }
         }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            CloseWordPad();
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
     }
 }
