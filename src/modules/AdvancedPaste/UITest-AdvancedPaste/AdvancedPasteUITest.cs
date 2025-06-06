@@ -22,7 +22,6 @@ namespace Microsoft.AdvancedPaste.UITests
         public AdvancedPasteUITest()
             : base(PowerToysModule.PowerToysSettings, size: WindowSize.Small)
         {
-            OpenWordPad();
         }
 
         [TestMethod]
@@ -42,6 +41,8 @@ namespace Microsoft.AdvancedPaste.UITests
             Assert.IsTrue(Directory.Exists(testFilesDir), $"Test files directory not found at: {testFilesDir}");
 
             string[] filePaths = Directory.GetFiles(testFilesDir);
+            string dstFilePath = Path.Combine(testFilesDir, "DstFile.rtf");
+            IntPtr hWnd = OpenWordPad(dstFilePath);
 
             foreach (string filePath in filePaths)
             {
@@ -50,45 +51,34 @@ namespace Microsoft.AdvancedPaste.UITests
 
                 SetClipboardContent(content);
 
-                OpenWordPad();
-                PasteClipboardContent();
-                CloseWordPad();
+                PasteClipboardContent(hWnd);
             }
         }
 
-        private IntPtr OpenWordPad()
+        private IntPtr OpenWordPad(string filePath)
         {
-            wordpadProcess = Process.Start("write.exe");
+            wordpadProcess = Process.Start("write.exe", filePath);
             if (wordpadProcess == null)
             {
                 throw new InvalidOperationException("Failed to start WordPad.");
             }
 
-            wordpadProcess.WaitForInputIdle();
-
+            // wordpadProcess.WaitForInputIdle();
             IntPtr hWnd = wordpadProcess.MainWindowHandle;
 
-            /*
             if (hWnd == IntPtr.Zero)
             {
-                throw new InvalidOperationException("Could not get WordPad main window handle.");
+                string windowTitle = Path.GetFileName(filePath) + ".rtf - WordPad";
+                hWnd = FindWindow("WordPadClass", windowTitle);
+                Assert.IsNotNull(hWnd, $"Failed to find WordPad window with title: {windowTitle}");
             }
-
-            SetForegroundWindow(hWnd);*/
-
-            Thread.Sleep(500); // Wait for the window to be ready
 
             return hWnd;
         }
 
-        private void PasteClipboardContent()
+        private void PasteClipboardContent(IntPtr hWnd)
         {
-            if (wordpadProcess == null || wordpadProcess.HasExited)
-            {
-                throw new InvalidOperationException("WordPad is not running.");
-            }
-
-            SetForegroundWindow(wordpadProcess.MainWindowHandle);
+            SetForegroundWindow(hWnd);
             Thread.Sleep(200);
 
             System.Windows.Forms.SendKeys.SendWait("^v");
@@ -162,5 +152,8 @@ namespace Microsoft.AdvancedPaste.UITests
 
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr FindWindow(string? lpClassName, string? lpWindowName);
     }
 }
