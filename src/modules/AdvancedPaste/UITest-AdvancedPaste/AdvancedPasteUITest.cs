@@ -68,7 +68,7 @@ namespace Microsoft.AdvancedPaste.UITests
 
             if (hWnd == IntPtr.Zero)
             {
-                string windowTitle = Path.GetFileName(filePath) + ".rtf - WordPad";
+                string windowTitle = Path.GetFileName(filePath) + " - WordPad";
                 hWnd = FindWindow("WordPadClass", windowTitle);
                 Assert.IsNotNull(hWnd, $"Failed to find WordPad window with title: {windowTitle}");
             }
@@ -81,35 +81,24 @@ namespace Microsoft.AdvancedPaste.UITests
             SetForegroundWindow(hWnd);
             Thread.Sleep(200);
 
-            System.Windows.Forms.SendKeys.SendWait("^v");
+            // System.Windows.Forms.SendKeys.SendWait("^{v}");
+            // this.SendKeys(Key.Win, Key.Shift, Key.V);
+            this.SendKeys(Key.LCtrl, Key.V);
 
             Thread.Sleep(500);
         }
 
         private void CloseWordPad(int timeout = 3000)
         {
-            if (wordpadProcess == null || wordpadProcess.HasExited)
+            if (wordpadProcess == null)
             {
                 return;
             }
 
-            try
-            {
-                wordpadProcess.CloseMainWindow();
-                if (!wordpadProcess.WaitForExit(timeout))
-                {
-                    wordpadProcess.Kill(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error closing WordPad: {ex.Message}");
-            }
-            finally
-            {
-                wordpadProcess.Dispose();
-                wordpadProcess = null;
-            }
+            wordpadProcess.Kill(true);
+
+            wordpadProcess.Dispose();
+            wordpadProcess = null;
         }
 
         private void SetClipboardContent(string content)
