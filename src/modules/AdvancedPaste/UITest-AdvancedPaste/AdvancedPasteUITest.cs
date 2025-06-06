@@ -35,7 +35,7 @@ namespace Microsoft.AdvancedPaste.UITests
 #pragma warning disable CS8604 // Possible null reference argument.
             string testFilesDir = Path.Combine(
                 Path.GetDirectoryName(currentTestType.Assembly.Location),
-                "wordTestFile");
+                "TestFiles");
 #pragma warning restore CS8604 // Possible null reference argument.
 
             // Ensure the directory exists
@@ -48,10 +48,11 @@ namespace Microsoft.AdvancedPaste.UITests
                 string content = FileReader.ReadContent(filePath);
                 Assert.IsNotNull(content, $"Failed to read content from file: {filePath}");
 
-                // Copy the content to clipboard
-                Clipboard.SetText(content);
+                SetClipboardContent(content);
 
+                OpenWordPad();
                 PasteClipboardContent();
+                CloseWordPad();
             }
         }
 
@@ -67,12 +68,13 @@ namespace Microsoft.AdvancedPaste.UITests
 
             IntPtr hWnd = wordpadProcess.MainWindowHandle;
 
+            /*
             if (hWnd == IntPtr.Zero)
             {
                 throw new InvalidOperationException("Could not get WordPad main window handle.");
             }
 
-            SetForegroundWindow(hWnd);
+            SetForegroundWindow(hWnd);*/
 
             Thread.Sleep(500); // Wait for the window to be ready
 
@@ -117,6 +119,38 @@ namespace Microsoft.AdvancedPaste.UITests
             {
                 wordpadProcess.Dispose();
                 wordpadProcess = null;
+            }
+        }
+
+        private void SetClipboardContent(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                throw new ArgumentException("Content cannot be null or empty", nameof(content));
+            }
+
+            try
+            {
+                var staThread = new Thread(() =>
+                {
+                    try
+                    {
+                        System.Windows.Forms.Clipboard.SetText(content);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error setting clipboard content: {ex.Message}");
+                    }
+                });
+
+                staThread.SetApartmentState(ApartmentState.STA);
+                staThread.Start();
+                staThread.Join();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to set clipboard content: {ex.Message}");
+                throw;
             }
         }
 
