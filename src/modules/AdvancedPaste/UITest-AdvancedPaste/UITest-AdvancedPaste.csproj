@@ -19,6 +19,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Appium.WebDriver" />
+		<PackageReference Include="Microsoft.Office.Interop.Word" />
 		<PackageReference Include="MSTest" />
 		<PackageReference Include="System.Net.Http" />
 		<PackageReference Include="System.Private.Uri" />
@@ -27,6 +28,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\common\UITestAutomation\UITestAutomation.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="wordTestFile\**\*.*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 </Project>

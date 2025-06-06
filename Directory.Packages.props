@@ -40,6 +40,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.5" />
+    <PackageVersion Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1004" />
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.15.0" />
     <PackageVersion Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
@@ -67,6 +68,7 @@
     <PackageVersion Include="NLog.Schema" Version="5.2.8" />
     <PackageVersion Include="OpenAI" Version="2.0.0" />
     <PackageVersion Include="ReverseMarkdown" Version="4.1.0" />
+    <PackageVersion Include="RtfPipe" Version="2.0.7677.4303" />
     <PackageVersion Include="ScipBe.Common.Office.OneNote" Version="3.0.1" />
     <PackageVersion Include="SharpCompress" Version="0.37.2" />
     <PackageVersion Include="StreamJsonRpc" Version="2.21.69" />
