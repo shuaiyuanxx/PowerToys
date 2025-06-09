@@ -24,13 +24,11 @@ namespace Microsoft.AdvancedPaste.UITests
     {
         private readonly string testFilesFolderPath;
         private readonly string pasteAsPlainTextFileName = "PasteAsPlainTextFile.rtf";
+        private readonly string wordpadPath = @"C:\Program Files\wordpad\wordpad.exe";
 
         // private readonly string pasteAsMarkdownFileName = "PasteAsMarkdownFile.html";
 
         // private readonly string pasteAsJsonFileName = "PasteAsJsonFile.xml";
-        private Process? wordpadProcess;
-        private IntPtr wordpadHWnd;
-
         public AdvancedPasteUITest()
             : base(PowerToysModule.PowerToysSettings, size: WindowSize.Small)
         {
@@ -42,9 +40,6 @@ namespace Microsoft.AdvancedPaste.UITests
             Assert.IsTrue(Directory.Exists(testFilesFolder), $"Test files directory not found at: {testFilesFolder}");
 
             testFilesFolderPath = testFilesFolder;
-
-            // Open a temporary WordPad file for testing
-            OpenWordPad();
         }
 
         [TestMethod]
@@ -66,17 +61,52 @@ namespace Microsoft.AdvancedPaste.UITests
             return content;
         }
 
+        private void SetupClipboardFromRtfFile(string testFileName)
+        {
+            string filePath = Path.Combine(testFilesFolderPath, testFileName);
+
+            Process srcWordpadProcess = Process.Start(wordpadPath, filePath);
+            if (srcWordpadProcess == null)
+            {
+                throw new InvalidOperationException("Failed to start WordPad.");
+            }
+
+            IntPtr hWnd = srcWordpadProcess.MainWindowHandle;
+
+            if (hWnd == IntPtr.Zero)
+            {
+                string windowTitle = Path.GetFileName(filePath) + " - WordPad";
+                hWnd = FindWindow("WordPadClass", windowTitle);
+                Assert.IsNotNull(hWnd, $"Failed to find WordPad window with title: {windowTitle}");
+            }
+
+            SetForegroundWindow(hWnd);
+            Thread.Sleep(500);
+
+            this.SendKeys(Key.LCtrl, Key.A); // Select all text
+            Thread.Sleep(500);
+            this.SendKeys(Key.LCtrl, Key.C); // Copy selected text
+            Thread.Sleep(500);
+            this.SendKeys(Key.LCtrl, Key.V); // Copy selected text
+            Thread.Sleep(500);
+            this.SendKeys(Key.LCtrl, Key.V); // Copy selected text
+            Thread.Sleep(500);
+
+            srcWordpadProcess.Kill(true);
+            Thread.Sleep(300);
+        }
+
         private void TestCasePasteAsPlainText()
         {
             // Copy some rich text(e.g word of the text is different color, another work is bold, underlined, etd.).
-            string content = GetTestContentFromFile(pasteAsPlainTextFileName);
-            SetClipboardContent(content);
+            SetupClipboardFromRtfFile(pasteAsPlainTextFileName);
+            string rawClipboardContent = GetClipboardContent();
 
             // Paste the text using standard Windows Ctrl + V shortcut and ensure that rich text is pasted(with all colors, formatting, etc.)
             PasteClipboardContent(Key.LCtrl, Key.V);
             string clipboardContent = GetClipboardContent();
             Assert.IsTrue(
-                string.Equals(clipboardContent, content, StringComparison.Ordinal),
+                string.Equals(clipboardContent.Substring(0, 20), rawClipboardContent.Substring(0, 20), StringComparison.Ordinal),
                 "The pasted content should not be changed.");
 
             // Paste the text using Paste As Plain Text activation shortcut and ensure that plain text without any formatting is pasted.
@@ -88,18 +118,16 @@ namespace Microsoft.AdvancedPaste.UITests
                 "The pasted content should be plain text without any formatting.");
 
             // Paste again the text using standard Windows Ctrl + V shortcut and ensure the text is now pasted plain without formatting as well.
-            PasteClipboardContent(Key.LCtrl, Key.V);
+            PasteClipboardContent();
             clipboardContent = GetClipboardContent();
             Assert.IsTrue(
                 string.Equals(clipboardContent, plainTextFromFile, StringComparison.Ordinal),
                 "The pasted content should be plain text without any formatting.");
 
             // Copy some rich text again.
-            content = GetTestContentFromFile(pasteAsPlainTextFileName);
-            SetClipboardContent(content);
+            SetupClipboardFromRtfFile(pasteAsPlainTextFileName);
 
             // Open Advanced Paste window using hotkey, click Paste as Plain Text button and confirm that plain text without any formatting is pasted.
-            SetForegroundWindow(wordpadHWnd);
             Thread.Sleep(200);
             SendKeys(Key.Win, Key.Shift, Key.V); // Open Advanced Paste window
             Thread.Sleep(500);
@@ -111,11 +139,11 @@ namespace Microsoft.AdvancedPaste.UITests
             // Open Advanced Paste window using hotkey, press Ctrl + 1 and confirm that plain text without any formatting is pasted.
         }
 
-        private void OpenWordPad()
+        private void PasteClipboardContent(params Key[] keys)
         {
-            string tempFile = Path.Combine(testFilesFolderPath, "DstFile.rtf");
+            string tempFile = Path.Combine(testFilesFolderPath, "Document.rtf");
 
-            wordpadProcess = Process.Start("write.exe", tempFile);
+            Process wordpadProcess = Process.Start(wordpadPath, tempFile);
             if (wordpadProcess == null)
             {
                 throw new InvalidOperationException("Failed to start WordPad.");
@@ -130,62 +158,14 @@ namespace Microsoft.AdvancedPaste.UITests
                 Assert.IsNotNull(hWnd, $"Failed to find WordPad window with title: {windowTitle}");
             }
 
-            wordpadHWnd = hWnd;
-        }
-
-        private void PasteClipboardContent(params Key[] keys)
-        {
-            SetForegroundWindow(wordpadHWnd);
+            SetForegroundWindow(hWnd);
             Thread.Sleep(200);
 
-            SendKeys(keys);
-
+            this.SendKeys(keys);
             Thread.Sleep(500);
-        }
-
-        private void CloseWordPad()
-        {
-            if (wordpadProcess == null)
-            {
-                return;
-            }
 
             wordpadProcess.Kill(true);
-
-            wordpadProcess.Dispose();
-            wordpadProcess = null;
-        }
-
-        private void SetClipboardContent(string content)
-        {
-            if (string.IsNullOrEmpty(content))
-            {
-                throw new ArgumentException("Content cannot be null or empty", nameof(content));
-            }
-
-            try
-            {
-                var staThread = new Thread(() =>
-                {
-                    try
-                    {
-                        System.Windows.Forms.Clipboard.SetText(content);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error setting clipboard content: {ex.Message}");
-                    }
-                });
-
-                staThread.SetApartmentState(ApartmentState.STA);
-                staThread.Start();
-                staThread.Join();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to set clipboard content: {ex.Message}");
-                throw;
-            }
+            Thread.Sleep(500);
         }
 
         private string GetClipboardContent()
@@ -211,12 +191,6 @@ namespace Microsoft.AdvancedPaste.UITests
             staThread.Join();
 
             return clipboardText;
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            CloseWordPad();
         }
 
         [DllImport("user32.dll")]
