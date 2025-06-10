@@ -39,9 +39,26 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             PerUser,
         }
 
+        public class HotkeyConflictItem
+        {
+            public string Module { get; set; }
+
+            public string HotkeyName { get; set; }
+
+            public string ConflictsWith { get; set; }
+
+            public bool IsSystemConflict { get; set; }
+
+            public string Description => IsSystemConflict
+                ? $"{Module}: {HotkeyName} conflicts with System shortcut"
+                : $"{Module}: {HotkeyName} conflicts with {ConflictsWith}";
+        }
+
         private GeneralSettings GeneralSettingsConfig { get; set; }
 
         private UpdatingSettings UpdatingSettingsConfig { get; set; }
+
+        private List<HotkeyConflictItem> _hotkeyConflicts = new List<HotkeyConflictItem>();
 
         public ButtonClickCommand CheckForUpdatesEventHandler { get; set; }
 
@@ -72,6 +89,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         public string RunningAsUserDefaultText { get; set; }
 
         public string RunningAsAdminDefaultText { get; set; }
+
+        public ObservableCollection<HotkeyConflictItem> HotkeyConflicts { get; } = new ObservableCollection<HotkeyConflictItem>();
 
         private string _settingsConfigFileFolder = string.Empty;
 
@@ -195,7 +214,105 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             string localLowEtwDirPath = Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), "AppData", "LocalLow", "Microsoft", "PowerToys", "etw");
             DeleteDiagnosticDataOlderThan28Days(localLowEtwDirPath);
 
+            LoadHotkeyConflicts();
+
             InitializeLanguages();
+        }
+
+        private void LoadHotkeyConflicts()
+        {
+            try
+            {
+                // Get the correct path to the settings folder
+                var settingsUtils = new SettingsUtils();
+                string rootFolder = Path.GetDirectoryName(settingsUtils.GetSettingsFilePath());
+                string hotkeyConflictsPath = Path.Combine(rootFolder, "hotkey_conflicts.json");
+
+                if (!File.Exists(hotkeyConflictsPath))
+                {
+                    return;
+                }
+
+                // Clear any existing conflicts
+                HotkeyConflicts.Clear();
+
+                string jsonContent = File.ReadAllText(hotkeyConflictsPath).Trim('\0');
+                using JsonDocument document = JsonDocument.Parse(jsonContent);
+                JsonElement root = document.RootElement;
+
+                // Process in-app conflicts
+                if (root.TryGetProperty("inAppConflicts", out JsonElement inAppConflictsElement) &&
+                    inAppConflictsElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (JsonElement conflictGroup in inAppConflictsElement.EnumerateArray())
+                    {
+                        if (conflictGroup.TryGetProperty("hotkey", out _) &&
+                            conflictGroup.TryGetProperty("modules", out JsonElement modulesElement) &&
+                            modulesElement.ValueKind == JsonValueKind.Array)
+                        {
+                            // Get all modules in conflict
+                            var modules = modulesElement.EnumerateArray().ToList();
+
+                            // Create conflict entries for each pair of modules (module A conflicts with module B)
+                            for (int i = 0; i < modules.Count; i++)
+                            {
+                                for (int j = i + 1; j < modules.Count; j++)
+                                {
+                                    string moduleNameA = modules[i].GetProperty("moduleName").GetString();
+                                    string hotkeyNameA = modules[i].GetProperty("hotkeyName").GetString();
+                                    string moduleNameB = modules[j].GetProperty("moduleName").GetString();
+                                    string hotkeyNameB = modules[j].GetProperty("hotkeyName").GetString();
+
+                                    HotkeyConflicts.Add(new HotkeyConflictItem
+                                    {
+                                        Module = moduleNameA,
+                                        HotkeyName = hotkeyNameA,
+                                        ConflictsWith = $"{moduleNameB}: {hotkeyNameB}",
+                                        IsSystemConflict = false,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Process system conflicts
+                if (root.TryGetProperty("sysConflicts", out JsonElement sysConflictsElement) &&
+                    sysConflictsElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (JsonElement conflictGroup in sysConflictsElement.EnumerateArray())
+                    {
+                        if (conflictGroup.TryGetProperty("hotkey", out _) &&
+                            conflictGroup.TryGetProperty("modules", out JsonElement modulesElement) &&
+                            modulesElement.ValueKind == JsonValueKind.Array)
+                        {
+                            // For system conflicts, each module conflicts with a system shortcut
+                            foreach (JsonElement module in modulesElement.EnumerateArray())
+                            {
+                                string moduleName = module.GetProperty("moduleName").GetString();
+                                string hotkeyName = module.GetProperty("hotkeyName").GetString();
+
+                                HotkeyConflicts.Add(new HotkeyConflictItem
+                                {
+                                    Module = moduleName,
+                                    HotkeyName = hotkeyName,
+                                    ConflictsWith = "System",
+                                    IsSystemConflict = true,
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Notify UI of changes
+                OnPropertyChanged(nameof(HotkeyConflicts));
+                OnPropertyChanged(nameof(HasHotkeyConflicts));
+                OnPropertyChanged(nameof(HotkeyConflictsWarningText));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error loading hotkey conflicts: {ex.Message}", ex);
+            }
         }
 
         // Supported languages. Taken from Resources.wxs + default + en-US
@@ -268,6 +385,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private bool _languageChanged;
 
         private string reportBugLink;
+
+        public bool HasHotkeyConflicts => HotkeyConflicts.Count > 0;
+
+        public string HotkeyConflictsWarningText => HasHotkeyConflicts ?
+            $"{HotkeyConflicts.Count} hotkey conflict{(HotkeyConflicts.Count > 1 ? "s" : string.Empty)} detected" :
+            "No hotkey conflicts detected";
 
         // Gets or sets a value indicating whether run powertoys on start-up.
         public string ReportBugLink
