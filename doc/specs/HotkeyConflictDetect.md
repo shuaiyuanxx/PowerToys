@@ -181,6 +181,7 @@ This feature aims to:
 <div align="center">
 <img src="../images/hotkeyConflict/GeneralPageDemoUI.jpg" width="800px">
 </div>
+
 **Actual Data Flow Implementation:**
 ```
 Settings UI Input → IPC Request (check_hotkey_conflict) → 
