@@ -39,26 +39,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             PerUser,
         }
 
-        public class HotkeyConflictItem
-        {
-            public string Module { get; set; }
-
-            public string HotkeyName { get; set; }
-
-            public string ConflictsWith { get; set; }
-
-            public bool IsSystemConflict { get; set; }
-
-            public string Description => IsSystemConflict
-                ? $"{Module}: {HotkeyName} conflicts with System shortcut"
-                : $"{Module}: {HotkeyName} conflicts with {ConflictsWith}";
-        }
-
         private GeneralSettings GeneralSettingsConfig { get; set; }
 
         private UpdatingSettings UpdatingSettingsConfig { get; set; }
-
-        private List<HotkeyConflictItem> _hotkeyConflicts = new List<HotkeyConflictItem>();
 
         public ButtonClickCommand CheckForUpdatesEventHandler { get; set; }
 
@@ -90,7 +73,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         public string RunningAsAdminDefaultText { get; set; }
 
-        public ObservableCollection<HotkeyConflictItem> HotkeyConflicts { get; } = new ObservableCollection<HotkeyConflictItem>();
+        public ObservableCollection<HotkeyConflictGroup> HotkeyConflicts { get; } = new ObservableCollection<HotkeyConflictGroup>();
 
         private string _settingsConfigFileFolder = string.Empty;
 
@@ -236,70 +219,101 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 // Clear any existing conflicts
                 HotkeyConflicts.Clear();
 
+                // Read and parse the JSON
                 string jsonContent = File.ReadAllText(hotkeyConflictsPath).Trim('\0');
                 using JsonDocument document = JsonDocument.Parse(jsonContent);
                 JsonElement root = document.RootElement;
 
-                // Process in-app conflicts
+                // Create dictionaries to store conflicts grouped by hotkey
+                Dictionary<string, List<ModuleHotkeyInfo>> inAppConflictsDict = new Dictionary<string, List<ModuleHotkeyInfo>>();
+                Dictionary<string, List<ModuleHotkeyInfo>> sysConflictsDict = new Dictionary<string, List<ModuleHotkeyInfo>>();
+
+                // Process in-app conflicts and group by hotkey
                 if (root.TryGetProperty("inAppConflicts", out JsonElement inAppConflictsElement) &&
                     inAppConflictsElement.ValueKind == JsonValueKind.Array)
                 {
                     foreach (JsonElement conflictGroup in inAppConflictsElement.EnumerateArray())
                     {
-                        if (conflictGroup.TryGetProperty("hotkey", out _) &&
+                        if (conflictGroup.TryGetProperty("hotkey", out JsonElement hotkeyElement) &&
                             conflictGroup.TryGetProperty("modules", out JsonElement modulesElement) &&
                             modulesElement.ValueKind == JsonValueKind.Array)
                         {
-                            // Get all modules in conflict
-                            var modules = modulesElement.EnumerateArray().ToList();
+                            // Create a unique key for this hotkey
+                            string hotkeyKey = CreateHotkeyKey(hotkeyElement);
 
-                            // Create conflict entries for each pair of modules (module A conflicts with module B)
-                            for (int i = 0; i < modules.Count; i++)
+                            // Initialize the list if this is a new hotkey
+                            if (!inAppConflictsDict.TryGetValue(hotkeyKey, out var moduleList))
                             {
-                                for (int j = i + 1; j < modules.Count; j++)
-                                {
-                                    string moduleNameA = modules[i].GetProperty("moduleName").GetString();
-                                    string hotkeyNameA = modules[i].GetProperty("hotkeyName").GetString();
-                                    string moduleNameB = modules[j].GetProperty("moduleName").GetString();
-                                    string hotkeyNameB = modules[j].GetProperty("hotkeyName").GetString();
-
-                                    HotkeyConflicts.Add(new HotkeyConflictItem
-                                    {
-                                        Module = moduleNameA,
-                                        HotkeyName = hotkeyNameA,
-                                        ConflictsWith = $"{moduleNameB}: {hotkeyNameB}",
-                                        IsSystemConflict = false,
-                                    });
-                                }
+                                moduleList = new List<ModuleHotkeyInfo>();
+                                inAppConflictsDict[hotkeyKey] = moduleList;
                             }
-                        }
-                    }
-                }
 
-                // Process system conflicts
-                if (root.TryGetProperty("sysConflicts", out JsonElement sysConflictsElement) &&
-                    sysConflictsElement.ValueKind == JsonValueKind.Array)
-                {
-                    foreach (JsonElement conflictGroup in sysConflictsElement.EnumerateArray())
-                    {
-                        if (conflictGroup.TryGetProperty("hotkey", out _) &&
-                            conflictGroup.TryGetProperty("modules", out JsonElement modulesElement) &&
-                            modulesElement.ValueKind == JsonValueKind.Array)
-                        {
-                            // For system conflicts, each module conflicts with a system shortcut
+                            // Add all modules that use this hotkey
                             foreach (JsonElement module in modulesElement.EnumerateArray())
                             {
                                 string moduleName = module.GetProperty("moduleName").GetString();
                                 string hotkeyName = module.GetProperty("hotkeyName").GetString();
 
-                                HotkeyConflicts.Add(new HotkeyConflictItem
+                                moduleList.Add(new ModuleHotkeyInfo
                                 {
-                                    Module = moduleName,
+                                    ModuleName = moduleName,
                                     HotkeyName = hotkeyName,
-                                    ConflictsWith = "System",
-                                    IsSystemConflict = true,
                                 });
                             }
+
+                            // Create a HotkeyConflictGroup for our internal tracking
+                            HotkeySettings hotkeySettings = CreateHotkeySettings(hotkeyElement);
+                            HotkeyConflicts.Add(new HotkeyConflictGroup
+                            {
+                                Hotkey = hotkeySettings,
+                                Modules = new List<ModuleHotkeyInfo>(inAppConflictsDict[hotkeyKey]),
+                                IsSystemConflict = false,
+                            });
+                        }
+                    }
+                }
+
+                // Process system conflicts and group by hotkey
+                if (root.TryGetProperty("sysConflicts", out JsonElement sysConflictsElement) &&
+                    sysConflictsElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (JsonElement conflictGroup in sysConflictsElement.EnumerateArray())
+                    {
+                        if (conflictGroup.TryGetProperty("hotkey", out JsonElement hotkeyElement) &&
+                            conflictGroup.TryGetProperty("modules", out JsonElement modulesElement) &&
+                            modulesElement.ValueKind == JsonValueKind.Array)
+                        {
+                            // Create a unique key for this hotkey
+                            string hotkeyKey = CreateHotkeyKey(hotkeyElement);
+
+                            // Initialize the list if this is a new hotkey
+                            if (!sysConflictsDict.TryGetValue(hotkeyKey, out var moduleList))
+                            {
+                                moduleList = new List<ModuleHotkeyInfo>();
+                                sysConflictsDict[hotkeyKey] = moduleList;
+                            }
+
+                            // Add all modules that conflict with this system hotkey
+                            foreach (JsonElement module in modulesElement.EnumerateArray())
+                            {
+                                string moduleName = module.GetProperty("moduleName").GetString();
+                                string hotkeyName = module.GetProperty("hotkeyName").GetString();
+
+                                moduleList.Add(new ModuleHotkeyInfo
+                                {
+                                    ModuleName = moduleName,
+                                    HotkeyName = hotkeyName,
+                                });
+                            }
+
+                            // Create a HotkeyConflictGroup for our internal tracking
+                            HotkeySettings hotkeySettings = CreateHotkeySettings(hotkeyElement);
+                            HotkeyConflicts.Add(new HotkeyConflictGroup
+                            {
+                                Hotkey = hotkeySettings,
+                                Modules = new List<ModuleHotkeyInfo>(sysConflictsDict[hotkeyKey]),
+                                IsSystemConflict = true,
+                            });
                         }
                     }
                 }
@@ -313,6 +327,28 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 Logger.LogError($"Error loading hotkey conflicts: {ex.Message}", ex);
             }
+        }
+
+        private string CreateHotkeyKey(JsonElement hotkeyElement)
+        {
+            bool win = hotkeyElement.TryGetProperty("win", out JsonElement winElement) && winElement.GetBoolean();
+            bool ctrl = hotkeyElement.TryGetProperty("ctrl", out JsonElement ctrlElement) && ctrlElement.GetBoolean();
+            bool shift = hotkeyElement.TryGetProperty("shift", out JsonElement shiftElement) && shiftElement.GetBoolean();
+            bool alt = hotkeyElement.TryGetProperty("alt", out JsonElement altElement) && altElement.GetBoolean();
+            int key = hotkeyElement.TryGetProperty("key", out JsonElement keyElement) ? keyElement.GetInt32() : 0;
+
+            return $"{(win ? "Win+" : string.Empty)}{(ctrl ? "Ctrl+" : string.Empty)}{(shift ? "Shift+" : string.Empty)}{(alt ? "Alt+" : string.Empty)}{key}";
+        }
+
+        private HotkeySettings CreateHotkeySettings(JsonElement hotkeyElement)
+        {
+            bool win = hotkeyElement.TryGetProperty("win", out JsonElement winElement) && winElement.GetBoolean();
+            bool ctrl = hotkeyElement.TryGetProperty("ctrl", out JsonElement ctrlElement) && ctrlElement.GetBoolean();
+            bool shift = hotkeyElement.TryGetProperty("shift", out JsonElement shiftElement) && shiftElement.GetBoolean();
+            bool alt = hotkeyElement.TryGetProperty("alt", out JsonElement altElement) && altElement.GetBoolean();
+            int key = hotkeyElement.TryGetProperty("key", out JsonElement keyElement) ? keyElement.GetInt32() : 0;
+
+            return new HotkeySettings(win, ctrl, alt, shift, key);
         }
 
         // Supported languages. Taken from Resources.wxs + default + en-US
