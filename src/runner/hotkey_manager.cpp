@@ -1,31 +1,33 @@
 ﻿#include "pch.h"
-#include "hotkey_conflict_detector.h"
+#include "hotkey_manager.h"
 #include "common/utils/json.h"
 #include <common/SettingsAPI/settings_helpers.h>
 #include <windows.h>
 #include <unordered_map>
 #include <cwchar>
 
-namespace HotkeyConflictDetector
+namespace HotkeyManager
 {
-    Hotkey HotkeyExToHotkey(const HotkeyEx& hotkeyEx)
+    Shortcut HotkeyToShortcut(const Hotkey& hotkey)
     {
-        Hotkey hotkey;
+        WORD modifiersMask = 0;
+        if (hotkey.win)
+            modifiersMask |= MOD_WIN;
+        if (hotkey.ctrl)
+            modifiersMask |= MOD_CONTROL;
+        if (hotkey.shift)
+            modifiersMask |= MOD_SHIFT;
+        if (hotkey.alt)
+            modifiersMask |= MOD_ALT;
 
-        hotkey.win = (hotkeyEx.modifiersMask & MOD_WIN) != 0;
-        hotkey.ctrl = (hotkeyEx.modifiersMask & MOD_CONTROL) != 0;
-        hotkey.shift = (hotkeyEx.modifiersMask & MOD_SHIFT) != 0;
-        hotkey.alt = (hotkeyEx.modifiersMask & MOD_ALT) != 0;
+        WORD vkCode = static_cast<WORD>(hotkey.key);
 
-        hotkey.key = hotkeyEx.vkCode > 255 ? 0 : static_cast<unsigned char>(hotkeyEx.vkCode);
-
-        return hotkey;
+        return Shortcut(modifiersMask, vkCode);
     }
 
-    Hotkey ShortcutToHotkey(const CentralizedHotkeys::Shortcut& shortcut)
+    Hotkey ShortcutToHotkey(const Shortcut& shortcut)
     {
-        Hotkey hotkey;
-
+        PowertoyModuleIface::Hotkey hotkey{};
         hotkey.win = (shortcut.modifiersMask & MOD_WIN) != 0;
         hotkey.ctrl = (shortcut.modifiersMask & MOD_CONTROL) != 0;
         hotkey.shift = (shortcut.modifiersMask & MOD_SHIFT) != 0;
@@ -36,22 +38,32 @@ namespace HotkeyConflictDetector
         return hotkey;
     }
 
-    HotkeyConflictManager* HotkeyConflictManager::instance = nullptr;
-    std::mutex HotkeyConflictManager::instanceMutex;
+    uint16_t GetHotkeyHandle(const Hotkey& hotkey)
+    {
+        uint16_t handle = hotkey.key;
+        handle |= hotkey.win << 8;
+        handle |= hotkey.ctrl << 9;
+        handle |= hotkey.shift << 10;
+        handle |= hotkey.alt << 11;
+        return handle;
+    }
 
-    HotkeyConflictManager& HotkeyConflictManager::GetInstance()
+    HotkeyManager* HotkeyManager::instance = nullptr;
+    std::mutex HotkeyManager::instanceMutex;
+
+    HotkeyManager& HotkeyManager::GetInstance()
     {
         std::lock_guard<std::mutex> lock(instanceMutex);
         if (instance == nullptr)
         {
-            instance = new HotkeyConflictManager();
+            instance = new HotkeyManager();
         }
         return *instance;
     }
 
-    HotkeyConflictType HotkeyConflictManager::HasConflict(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
+    HotkeyConflictType HotkeyManager::HasConflict(const Hotkey& hotkey, const std::wstring moduleName, const std::wstring hotkeyName)
     {
-        uint16_t handle = GetHotkeyHandle(_hotkey);
+        uint16_t handle = GetHotkeyHandle(hotkey);
 
         if (handle == 0)
         {
@@ -62,218 +74,166 @@ namespace HotkeyConflictDetector
 
         if (it == hotkeyMap.end())
         {
-            return HasConflictWithSystemHotkey(_hotkey) ?
-                HotkeyConflictType::SystemConflict :
-                HotkeyConflictType::NoConflict;
+            return HasConflictWithSystemHotkey(hotkey) ?
+                       HotkeyConflictType::SystemConflict :
+                       HotkeyConflictType::NoConflict;
         }
-        if (wcscmp(it->second.moduleName.c_str(), _moduleName) == 0 && wcscmp(it->second.hotkeyName.c_str(), _hotkeyName) == 0)
+
+        auto& entryList = it->second;
+
+        if (entryList.size() > 1)
+        {
+            return HotkeyConflictType::InAppConflict;
+        }
+
+        // only 1 hotkey in the list, do selfchecking
+        auto& hotkeyEntry = entryList.front();
+        if (hotkeyEntry.moduleName == moduleName && hotkeyEntry.hotkeyName == hotkeyName)
         {
             // A shortcut matching its own assignment is not considered a conflict.
-            return HotkeyConflictType::NoConflict;
+            if (hotkeyEntry.isRegistered)
+            {
+                return HotkeyConflictType::NoConflict;
+            }
+            // If there is only a single hotkey entry, corresponding to the hotkey itself, 
+            // and it still fails to register, the most likely cause is a conflict with a system-reserved shortcut.
+            return HotkeyConflictType::SystemConflict;
         }
+
 
         return HotkeyConflictType::InAppConflict;
     }
 
-    HotkeyConflictInfo HotkeyConflictManager::GetConflict(Hotkey const& _hotkey)
+    HotkeyConflictType HotkeyManager::HasConflict(const Shortcut& shortcut, const std::wstring moduleName, const std::wstring hotkeyName)
     {
-        HotkeyConflictInfo conflictHotkeyInfo;
+        return HasConflict(ShortcutToHotkey(shortcut), moduleName, hotkeyName);
+    }
 
-        uint16_t handle = GetHotkeyHandle(_hotkey);
+    // make sure there is conflict before get the conflict
+    HotkeyEntry HotkeyManager::GetConflict(const Hotkey& hotkey)
+    {
+        uint16_t handle = GetHotkeyHandle(hotkey);
 
         if (hotkeyMap.find(handle) != hotkeyMap.end())
         {
-            return hotkeyMap[handle];
+            // return the first item
+            return hotkeyMap[handle].front();
         }
 
-        // Check if shortcut has conflict with system pre-defined hotkeys
-        if (HasConflictWithSystemHotkey(_hotkey))
-        {
-            conflictHotkeyInfo.hotkey = _hotkey;
-            conflictHotkeyInfo.moduleName = L"System";
-        }
-
-        return conflictHotkeyInfo;
+        // If cannot find record in hotkeyMap, then the conflict must be system conflict
+        HotkeyEntry hotkeyEntry(hotkey, L"System", L"", []() { return false; });
+        return hotkeyEntry;
     }
 
-    bool HotkeyConflictManager::AddHotkey(Hotkey const& _hotkey, const wchar_t* _moduleName, const wchar_t* _hotkeyName)
+    bool HotkeyManager::AddRecord(const Shortcut& shortcut, const std::wstring& moduleName, const std::wstring& hotkeyName, std::function<void(WORD, WORD)> fun)
     {
-        uint16_t handle = GetHotkeyHandle(_hotkey);
+        uint16_t handle = GetHotkeyHandle(ShortcutToHotkey(shortcut));
 
         if (handle == 0)
         {
             return false;
         }
 
-        HotkeyConflictType conflictType = HasConflict(_hotkey, _moduleName, _hotkeyName);
-        if (conflictType != HotkeyConflictType::NoConflict)
+        std::lock_guard<std::mutex> lock(hotkeyMutex);
+        auto& entryList = hotkeyMap[handle];
+        for (const auto& entry : entryList)
         {
-            if (conflictType == HotkeyConflictType::InAppConflict)
+            if (entry.moduleName == moduleName && entry.hotkeyName == hotkeyName)
             {
-                inAppConflictHotkeyMap[handle].insert({ _hotkey, _moduleName, _hotkeyName });
+                return false;
             }
-            else
-            {
-                sysConflictHotkeyMap[handle].insert({ _hotkey, _moduleName, _hotkeyName });
-            }
-            
-            UpdateHotkeyConflictToFile();
-            return false;
         }
 
-        HotkeyConflictInfo hotkeyInfo;
-        hotkeyInfo.moduleName = _moduleName;
-        hotkeyInfo.hotkeyName = _hotkeyName;
-        hotkeyInfo.hotkey = _hotkey;
-        hotkeyMap[handle] = hotkeyInfo;
+        entryList.emplace_back(shortcut, moduleName, hotkeyName, fun);
 
-        UpdateHotkeyConflictToFile();
         return true;
     }
 
-    bool HotkeyConflictManager::RemoveHotkey(Hotkey const& _hotkey, const std::wstring& moduleName)
+    bool HotkeyManager::AddRecord(const Hotkey& hotkey, const std::wstring& moduleName, const std::wstring& hotkeyName, std::function<bool()> fun)
     {
-        uint16_t handle = GetHotkeyHandle(_hotkey);
-        bool foundRecord = false;
+        uint16_t handle = GetHotkeyHandle(hotkey);
 
-        auto it = hotkeyMap.find(handle);
-        if (it != hotkeyMap.end() && it->second.moduleName == moduleName)
+        if (handle == 0)
         {
-            hotkeyMap.erase(it);
-            foundRecord = true;
+            return false;
         }
 
-        auto it_sys = sysConflictHotkeyMap.find(handle);
-        if (it_sys != sysConflictHotkeyMap.end())
+        std::lock_guard<std::mutex> lock(hotkeyMutex);
+        auto& entryList = hotkeyMap[handle];
+        for (const auto& entry : entryList)
         {
-            auto& sysConflicts = it_sys->second;
-            for (auto it_conf = sysConflicts.begin(); it_conf != sysConflicts.end();)
+            if (entry.moduleName == moduleName && entry.hotkeyName == hotkeyName)
             {
-                if (it_conf->moduleName == moduleName)
-                {
-                    it_conf = sysConflicts.erase(it_conf);
-                    foundRecord = true;
-                }
-                else
-                {
-                    ++it_conf;
-                }
-            }
-
-            if (sysConflicts.empty())
-            {
-                sysConflictHotkeyMap.erase(it_sys);
+                return false;
             }
         }
 
-        auto it_inApp = inAppConflictHotkeyMap.find(handle);
-        if (it_inApp != inAppConflictHotkeyMap.end())
-        {
-            auto& inAppConflicts = it_inApp->second;
-            for (auto it_conf = inAppConflicts.begin(); it_conf != inAppConflicts.end();)
-            {
-                if (it_conf->moduleName == moduleName)
-                {
-                    it_conf = inAppConflicts.erase(it_conf);
-                    foundRecord = true;
-                }
-                else
-                {
-                    ++it_conf;
-                }
-            }
+        entryList.emplace_back(hotkey, moduleName, hotkeyName, fun);
 
-            if (inAppConflicts.empty())
-            {
-                inAppConflictHotkeyMap.erase(it_inApp);
-            }
-        }
-
-        if (foundRecord)
-        {
-            UpdateHotkeyConflictToFile();
-        }
-
-        return foundRecord;
+        return true;
     }
 
-    bool HotkeyConflictManager::RemoveHotkeyByModule(const std::wstring& moduleName)
+    void HotkeyManager::RemoveRecord(Shortcut const& shortcut, const std::wstring& moduleName)
+    {
+        uint16_t handle = GetHotkeyHandle(ShortcutToHotkey(shortcut));
+
+        std::lock_guard<std::mutex> lock(hotkeyMutex);
+        auto it = hotkeyMap.find(handle);
+        if (it != hotkeyMap.end())
+        {
+            auto& entryList = it->second;
+            for (auto entryIt = entryList.begin(); entryIt != entryList.end(); )
+            {
+                if (entryIt->moduleName == moduleName)
+                {
+                    entryIt = entryList.erase(entryIt);
+                }
+                else
+                {
+                    ++entryIt;
+                }
+            }
+
+            if (entryList.empty())
+            {
+                hotkeyMap.erase(it);
+            }
+        }
+    }
+
+    // isShortcut: true -> remove shortcut from hotkeyMap, this type use RegisterHotkey API
+    // isShortcut: false -> remove hotkey from hotkeyMap, this hotkey register by low level keyboard hook
+    void HotkeyManager::RemoveRecordByModule(const std::wstring& moduleName, bool isShortcut)
     {
         std::lock_guard<std::mutex> lock(hotkeyMutex);
-        bool foundRecord = false;
 
-        for (auto it = hotkeyMap.begin(); it != hotkeyMap.end();)
+        for (auto it = hotkeyMap.begin(); it != hotkeyMap.end(); )
         {
-            if (it->second.moduleName == moduleName)
+            auto& entryList = it->second;
+            for (auto entryIt = entryList.begin(); entryIt != entryList.end(); )
+            {
+                if (entryIt->moduleName == moduleName && entryIt->isShortcut == isShortcut)
+                {
+                    entryIt = entryList.erase(entryIt);
+                }
+                else
+                {
+                    ++entryIt;
+                }
+            }
+           
+            if (entryList.empty())
             {
                 it = hotkeyMap.erase(it);
-                foundRecord = true;
             }
             else
             {
                 ++it;
             }
         }
-
-        for (auto it = sysConflictHotkeyMap.begin(); it != sysConflictHotkeyMap.end();)
-        {
-            auto& conflictSet = it->second;
-            for (auto setIt = conflictSet.begin(); setIt != conflictSet.end();)
-            {
-                if (setIt->moduleName == moduleName)
-                {
-                    setIt = conflictSet.erase(setIt);
-                    foundRecord = true;
-                }
-                else
-                {
-                    ++setIt;
-                }
-            }
-            if (conflictSet.empty())
-            {
-                it = sysConflictHotkeyMap.erase(it);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-
-        for (auto it = inAppConflictHotkeyMap.begin(); it != inAppConflictHotkeyMap.end();)
-        {
-            auto& conflictSet = it->second;
-            for (auto setIt = conflictSet.begin(); setIt != conflictSet.end();)
-            {
-                if (setIt->moduleName == moduleName)
-                {
-                    setIt = conflictSet.erase(setIt);
-                    foundRecord = true;
-                }
-                else
-                {
-                    ++setIt;
-                }
-            }
-            if (conflictSet.empty())
-            {
-                it = inAppConflictHotkeyMap.erase(it);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-
-        if (foundRecord)
-        {
-            UpdateHotkeyConflictToFile();
-        }
-
-        return foundRecord;
     }
 
-    bool HotkeyConflictManager::HasConflictWithSystemHotkey(const Hotkey& hotkey)
+    bool HotkeyManager::HasConflictWithSystemHotkey(const Hotkey& hotkey)
     {
         // Convert PowerToys Hotkey format to Win32 RegisterHotKey format
         UINT modifiers = 0;
@@ -322,7 +282,13 @@ namespace HotkeyConflictDetector
         return false;
     }
 
-    bool HotkeyConflictManager::UpdateHotkeyConflictToFile()
+    std::unordered_map<uint16_t, std::list<HotkeyEntry>>& HotkeyManager::GetHotkeyEntries()
+    {
+        return hotkeyMap;
+    }
+
+    /*
+    bool HotkeyManager::UpdateHotkeyConflictToFile()
     {
         static bool isDirty = true;
         static bool writeScheduled = false;
@@ -360,7 +326,7 @@ namespace HotkeyConflictDetector
                 JsonArray sysConflictsArray;
 
                 // Process in-app conflicts
-                std::map<uint16_t, std::vector<HotkeyConflictInfo>> groupedInAppConflicts;
+                std::map<uint16_t, std::vector<HotkeyEntry>> groupedInAppConflicts;
                 for (const auto& [handle, conflicts] : inAppConflictHotkeyMap)
                 {
                     groupedInAppConflicts[handle].push_back(hotkeyMap[handle]);
@@ -396,7 +362,7 @@ namespace HotkeyConflictDetector
                 }
 
                 // Process system conflicts
-                std::map<uint16_t, std::vector<HotkeyConflictInfo>> groupedSysConflicts;
+                std::map<uint16_t, std::vector<HotkeyEntry>> groupedSysConflicts;
                 for (const auto& [handle, conflicts] : sysConflictHotkeyMap)
                 {
                     for (const auto& info : conflicts)
@@ -451,15 +417,7 @@ namespace HotkeyConflictDetector
         }).detach();
 
         return true;
-    }
+    }*/
 
-    uint16_t HotkeyConflictManager::GetHotkeyHandle(const Hotkey& hotkey)
-    {
-        uint16_t handle = hotkey.key;
-        handle |= hotkey.win << 8;
-        handle |= hotkey.ctrl << 9;
-        handle |= hotkey.shift << 10;
-        handle |= hotkey.alt << 11;
-        return handle;
-    }
+    
 }

@@ -13,7 +13,7 @@
 #include "UpdateUtils.h"
 #include "centralized_kb_hook.h"
 #include "Generated files/resource.h"
-#include "hotkey_conflict_detector.h"
+#include "hotkey_manager.h"
 
 #include <common/utils/json.h>
 #include <common/SettingsAPI/settings_helpers.cpp>
@@ -257,8 +257,8 @@ void dispatch_received_json(const std::wstring& json_to_parse)
                 std::wstring moduleName = value.GetObjectW().GetNamedString(L"moduleName", L"").c_str();
                 std::wstring hotkeyName = value.GetObjectW().GetNamedString(L"hotkeyName", L"").c_str();
 
-                auto& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-                bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), hotkeyName.c_str());
+                auto& hkmng = HotkeyManager::HotkeyManager::GetInstance();
+                bool hasConflict = hkmng.HasConflict(hotkey, moduleName, hotkeyName);
 
                 json::JsonObject response;
                 response.SetNamedValue(L"response_type", json::JsonValue::CreateStringValue(L"hotkey_conflict_result"));

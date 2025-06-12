@@ -44,4 +44,8 @@ namespace CentralizedHotkeys
     void PopulateHotkey(Shortcut shortcut);
 
     void RegisterWindow(HWND hwnd);
+
+    void UnregisterHotkeys();
+
+    void RegisterHotkeys();
 }

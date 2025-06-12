@@ -480,6 +480,11 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
             {
                 // Save settings on closing, if closed 'normal'
                 PTSettingsHelper::save_general_settings(get_general_settings().to_json());
+
+                CentralizedHotkeys::UnregisterHotkeys();
+                CentralizedKeyboardHook::UnregisterHotkeys();
+                CentralizedKeyboardHook::RegisterHotkeys();
+                CentralizedHotkeys::RegisterHotkeys();
             }
         }
         else

@@ -302,7 +302,7 @@ void start_enabled_powertoys()
         {
             Logger::info(L"start_enabled_powertoys: Enabling powertoy {}", name);
             powertoy->enable();
-            powertoy.UpdateHotkeyEx();
+            // powertoy.UpdateHotkeyEx(); // no need to update hotkeyEx here since it is already done in PowertoyModule() constructor.
         }
     }
 }

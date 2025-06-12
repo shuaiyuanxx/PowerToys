@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "centralized_kb_hook.h"
-#include "hotkey_conflict_detector.h"
+#include "hotkey_manager.h"
 #include <common/debug_control.h>
 #include <common/utils/winapi_error.h>
 #include <common/logger/logger.h>
@@ -190,15 +190,8 @@ namespace CentralizedKeyboardHook
 
     void SetHotkeyAction(const std::wstring& moduleName, const Hotkey& hotkey, std::function<bool()>&& action) noexcept
     {
-        Logger::trace(L"Register hotkey action for {}", moduleName);
-        std::unique_lock lock{ mutex };
-
-        HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-        bool succeed = hkmng.AddHotkey(hotkey, moduleName.c_str(), hotkey.name);
-        if (succeed)
-        {
-            hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .action = std::move(action) });
-        }
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        hotkeyManager.AddRecord(hotkey, moduleName, hotkey.name, action);
     }
 
     void AddPressedKeyAction(const std::wstring& moduleName, const DWORD vk, const UINT milliseconds, std::function<bool()>&& action) noexcept
@@ -214,7 +207,10 @@ namespace CentralizedKeyboardHook
 
     void ClearModuleHotkeys(const std::wstring& moduleName) noexcept
     {
-        Logger::trace(L"UnRegister hotkey action for {}", moduleName);
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        hotkeyManager.RemoveRecordByModule(moduleName, false);
+
+        /*Logger::trace(L"UnRegister hotkey action for {}", moduleName);
         {
             std::unique_lock lock{ mutex };
             auto it = hotkeyDescriptors.begin();
@@ -245,8 +241,48 @@ namespace CentralizedKeyboardHook
                 }
             }
         }
-        HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-        hkmng.RemoveHotkeyByModule(moduleName);
+        HotkeyConflictDetector::HotkeyManager& hkmng = HotkeyConflictDetector::HotkeyManager::GetInstance();
+        hkmng.RemoveHotkeyByModule(moduleName);*/
+    }
+
+    void RegisterHotkeys()
+    {
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        auto& hotkeyEntries = hotkeyManager.GetHotkeyEntries();
+
+        for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
+        {
+            if (it->second.size() == 1 || !it->second.front().isShortcut)
+            {
+                auto& action = std::get<std::function<bool()>>(it->second.front().action);
+
+                hotkeyDescriptors.insert({ 
+                    .hotkey = it->second.front().hotkey, 
+                    .moduleName = it->second.front().moduleName,
+                    .action = std::move(action) 
+                    });
+                it->second.front().isRegistered = true;
+            }
+        }
+    }
+
+    void UnregisterHotkeys()
+    {
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        auto& hotkeyEntries = hotkeyManager.GetHotkeyEntries();
+
+        hotkeyDescriptors.clear();
+
+        for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
+        {
+            for (auto entryIt = it->second.begin(); entryIt != it->second.end(); ++entryIt)
+            {
+                if (entryIt->isRegistered)
+                {
+                    entryIt->isRegistered = false;
+                }
+            }
+        }
     }
 
     void Start() noexcept
