@@ -3,9 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-
+using System.Threading.Tasks;
 using CommunityToolkit.WinUI;
-using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Views;
@@ -13,7 +12,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using StreamJsonRpc;
 using Windows.System;
 
 namespace Microsoft.PowerToys.Settings.UI.Controls
@@ -215,30 +213,49 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 
         private void CheckForConflictsAndUpdateVisibility(HotkeySettings settings)
         {
+            // Generate a truly unique request ID
+            string requestId = Guid.NewGuid().ToString();
+
+            var controlReference = this;
+
             void UpdateUIForConflict(bool hasConflict, string conflictModule, string conflictHotkeyName)
             {
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    _lastHasConflict = hasConflict;
+                    if (controlReference != null && !disposedValue)
+                    {
+                        _lastHasConflict = hasConflict;
 
-                    if (hasConflict)
-                    {
-                        ConflictToolTipText = $"Conflict detected with {conflictModule}: {conflictHotkeyName}";
-                        ConflictIconVisibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        ConflictToolTipText = string.Empty;
-                        ConflictIconVisibility = Visibility.Collapsed;
-                        settings.HasConflict = false;
+                        if (hasConflict)
+                        {
+                            ConflictToolTipText = $"Conflict detected with {conflictModule}: {conflictHotkeyName}";
+                            ConflictIconVisibility = Visibility.Visible;
+                            settings.HasConflict = true;
+                        }
+                        else
+                        {
+                            ConflictToolTipText = string.Empty;
+                            ConflictIconVisibility = Visibility.Collapsed;
+                            settings.HasConflict = false;
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"[HotkeyConflict] UI updated for hotkey: {settings}, requestId: {requestId}, hasConflict: {hasConflict}");
                     }
                 });
             }
 
-            HotkeyConflictHelper.CheckHotkeyConflict(
-                settings,
-                ShellPage.SendDefaultIPCMessage,
-                UpdateUIForConflict);
+            var delay = Task.Delay(50 * Math.Abs(requestId.GetHashCode() % 10));
+            delay.ContinueWith(
+                t =>
+                {
+                    System.Diagnostics.Debug.WriteLine($"[HotkeyConflict] Sending request for hotkey: {settings}, requestId: {requestId}");
+
+                    HotkeyConflictHelper.CheckHotkeyConflict(
+                        settings,
+                        ShellPage.SendDefaultIPCMessage,
+                        UpdateUIForConflict);
+                },
+                TaskScheduler.Default);
         }
 
         private void KeyEventHandler(int key, bool matchValue, int matchValueCode)
@@ -438,12 +455,8 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                         c.ConflictMessage = string.Empty;
                         c.HasConflict = false;
                     }
-
-                    Logger.LogInfo($"UI updated for hotkey conflict: [hasConflict={hasConflict}]");
                 });
             }
-
-            Logger.LogInfo($"Sending hotkey conflict check request: [hotkey={settings}], [module={settings.OwnerModuleName}], [name={settings.HotkeyName}]");
 
             HotkeyConflictHelper.CheckHotkeyConflict(
                 settings,
