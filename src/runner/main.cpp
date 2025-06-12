@@ -196,6 +196,11 @@ int runner(bool isProcessElevated, bool openSettings, std::string settingsWindow
         }
         // Start initial powertoys
         start_enabled_powertoys();
+
+        // Register hotkey
+        CentralizedKeyboardHook::RegisterHotkeys();
+        CentralizedHotkeys::RegisterHotkeys();
+
         std::wstring product_version = get_product_version();
         Trace::EventLaunch(product_version, isProcessElevated);
         PTSettingsHelper::save_last_version_run(product_version);
@@ -480,11 +485,6 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
             {
                 // Save settings on closing, if closed 'normal'
                 PTSettingsHelper::save_general_settings(get_general_settings().to_json());
-
-                CentralizedHotkeys::UnregisterHotkeys();
-                CentralizedKeyboardHook::UnregisterHotkeys();
-                CentralizedKeyboardHook::RegisterHotkeys();
-                CentralizedHotkeys::RegisterHotkeys();
             }
         }
         else

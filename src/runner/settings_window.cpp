@@ -34,6 +34,7 @@
 
 TwoWayPipeMessageIPC* current_settings_ipc = NULL;
 std::mutex ipc_mutex;
+std::mutex hotkey_mutex;
 std::atomic_bool g_isLaunchInProgress = false;
 std::atomic_bool isUpdateCheckThreadRunning = false;
 HANDLE g_terminateSettingsEvent = CreateEventW(nullptr, false, false, CommonSharedConstants::TERMINATE_SETTINGS_SHARED_EVENT);
@@ -156,6 +157,11 @@ void send_json_config_to_module(const std::wstring& module_key, const std::wstri
         moduleIt->second->set_config(settings.c_str());
         moduleIt->second.update_hotkeys();
         moduleIt->second.UpdateHotkeyEx();
+
+        CentralizedHotkeys::UnregisterHotkeys();
+        CentralizedKeyboardHook::UnregisterHotkeys();
+        CentralizedHotkeys::RegisterHotkeys();
+        CentralizedKeyboardHook::RegisterHotkeys();
     }
 }
 
@@ -257,6 +263,17 @@ void dispatch_received_json(const std::wstring& json_to_parse)
                 std::wstring moduleName = value.GetObjectW().GetNamedString(L"moduleName", L"").c_str();
                 std::wstring hotkeyName = value.GetObjectW().GetNamedString(L"hotkeyName", L"").c_str();
 
+                Logger::info(
+                    L"Received IPC for hotkey conflict checking: [request_id={}], [moduleName={}], [hotkeyName={}], [win={}, ctrl={}, shift={}, alt={}, key={}].",
+                    requestId,
+                    moduleName,
+                    hotkeyName,
+                    hotkey.win,
+                    hotkey.ctrl,
+                    hotkey.shift,
+                    hotkey.alt,
+                    static_cast<int>(hotkey.key));
+
                 auto& hkmng = HotkeyManager::HotkeyManager::GetInstance();
                 bool hasConflict = hkmng.HasConflict(hotkey, moduleName, hotkeyName);
 
@@ -276,6 +293,11 @@ void dispatch_received_json(const std::wstring& json_to_parse)
                 if (current_settings_ipc)
                 {
                     current_settings_ipc->send(response.Stringify().c_str());
+
+                    Logger::info(
+                        L"Sent IPC response for hotkey conflict checking: [request_id={}], [has_conflict={}].",
+                        requestId,
+                        hasConflict);
                 }
             }
             catch (...)

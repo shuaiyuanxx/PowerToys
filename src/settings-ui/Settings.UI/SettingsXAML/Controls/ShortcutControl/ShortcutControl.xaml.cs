@@ -5,6 +5,7 @@
 using System;
 
 using CommunityToolkit.WinUI;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Views;
@@ -12,6 +13,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using StreamJsonRpc;
 using Windows.System;
 
 namespace Microsoft.PowerToys.Settings.UI.Controls
@@ -436,8 +438,12 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                         c.ConflictMessage = string.Empty;
                         c.HasConflict = false;
                     }
+
+                    Logger.LogInfo($"UI updated for hotkey conflict: [hasConflict={hasConflict}]");
                 });
             }
+
+            Logger.LogInfo($"Sending hotkey conflict check request: [hotkey={settings}], [module={settings.OwnerModuleName}], [name={settings.HotkeyName}]");
 
             HotkeyConflictHelper.CheckHotkeyConflict(
                 settings,

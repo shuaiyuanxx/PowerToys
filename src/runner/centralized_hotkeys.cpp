@@ -56,7 +56,7 @@ namespace CentralizedHotkeys
 
         for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
         {
-            if (it->second.size() == 1 || it->second.front().isShortcut)
+            if (it->second.size() == 1 && it->second.front().isShortcut)
             {
                 Shortcut shortcut = HotkeyManager::HotkeyToShortcut(it->second.front().hotkey);
                 auto action = std::get<std::function<void(WORD, WORD)>>(it->second.front().action);
