@@ -11,6 +11,7 @@ namespace CentralizedHotkeys
 {
     std::map<Shortcut, std::function<void(WORD, WORD)>> actions;
     std::map<Shortcut, int> ids;
+    std::mutex mutex;
     HWND runnerWindow;
     int nextId = 0;
 
@@ -51,9 +52,11 @@ namespace CentralizedHotkeys
 
     void RegisterHotkeys()
     {
+        Logger::info(L"Registering hotkeys...");
         auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
         auto& hotkeyEntries = hotkeyManager.GetHotkeyEntries();
 
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
         {
             if (it->second.size() == 1 && it->second.front().isShortcut)
@@ -80,6 +83,7 @@ namespace CentralizedHotkeys
 
     void UnregisterHotkeys()
     {
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = actions.begin(); it != actions.end(); ++it)
         {
             if (!UnregisterHotKey(runnerWindow, ids[it->first]))

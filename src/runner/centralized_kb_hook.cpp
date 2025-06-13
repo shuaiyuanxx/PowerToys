@@ -250,9 +250,10 @@ namespace CentralizedKeyboardHook
         auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
         auto& hotkeyEntries = hotkeyManager.GetHotkeyEntries();
 
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
         {
-            if (it->second.size() == 1 || !it->second.front().isShortcut)
+            if (it->second.size() == 1 && !it->second.front().isShortcut)
             {
                 auto& action = std::get<std::function<bool()>>(it->second.front().action);
 
@@ -271,6 +272,7 @@ namespace CentralizedKeyboardHook
         auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
         auto& hotkeyEntries = hotkeyManager.GetHotkeyEntries();
 
+        std::lock_guard<std::mutex> lock(mutex);
         hotkeyDescriptors.clear();
 
         for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
