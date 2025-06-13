@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "centralized_hotkeys.h"
+#include "hotkey_manager.h"
 
 #include <map>
 #include <common/logger/logger.h>
@@ -8,9 +9,11 @@
 
 namespace CentralizedHotkeys
 {
-    std::map<Shortcut, std::vector<Action>> actions;
+    std::map<Shortcut, std::function<void(WORD, WORD)>> actions;
     std::map<Shortcut, int> ids;
+    std::mutex mutex;
     HWND runnerWindow;
+    int nextId = 0;
 
     std::wstring ToWstring(const Shortcut& shortcut)
     {
@@ -40,59 +43,68 @@ namespace CentralizedHotkeys
         return res;
     }
 
-    bool AddHotkeyAction(Shortcut shortcut, Action action)
+    bool AddHotkeyAction(Shortcut shortcut, Action action, std::wstring moduleName)
     {
-        if (!actions[shortcut].empty())
-        {
-            // It will only work if previous one is rewritten
-            Logger::warn(L"{} shortcut is already registered", ToWstring(shortcut));
-        }
-
-        actions[shortcut].push_back(action);
-        // Register hotkey if it is the first shortcut
-        if (actions[shortcut].size() == 1)
-        {
-            if (ids.find(shortcut) == ids.end())
-            {
-                static int nextId = 0;
-                ids[shortcut] = nextId++;
-            }
-
-            if (!RegisterHotKey(runnerWindow, ids[shortcut], shortcut.modifiersMask, shortcut.vkCode))
-            {
-                Logger::warn(L"Failed to add {} shortcut. {}", ToWstring(shortcut), get_last_error_or_default(GetLastError()));
-                return false;
-            }
-
-            Logger::trace(L"{} shortcut registered", ToWstring(shortcut));
-            return true;
-        }
-
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        hotkeyManager.AddRecord(shortcut, moduleName, shortcut.hotkeyName, action.action);
         return true;
+    }
+
+    void RegisterHotkeys()
+    {
+        Logger::info(L"Registering hotkeys...");
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        auto& hotkeyEntries = hotkeyManager.GetHotkeyEntries();
+
+        std::lock_guard<std::mutex> lock(mutex);
+        for (auto it = hotkeyEntries.begin(); it != hotkeyEntries.end(); ++it)
+        {
+            if (it->second.size() == 1 && it->second.front().isShortcut)
+            {
+                Shortcut shortcut = HotkeyManager::HotkeyToShortcut(it->second.front().hotkey);
+                auto action = std::get<std::function<void(WORD, WORD)>>(it->second.front().action);
+                actions[shortcut] = action;
+                
+                ids[shortcut] = nextId++;
+
+                if (!RegisterHotKey(runnerWindow, ids[shortcut], shortcut.modifiersMask, shortcut.vkCode))
+                {
+                    it->second.front().isRegistered = false;
+                    Logger::warn(L"Failed to add {} shortcut. {}", ToWstring(shortcut), get_last_error_or_default(GetLastError()));
+                }
+                else
+                {
+                    it->second.front().isRegistered = true;
+                    Logger::trace(L"{} shortcut registered", ToWstring(shortcut));
+                }
+            }
+        }
+    }
+
+    void UnregisterHotkeys()
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        for (auto it = actions.begin(); it != actions.end(); ++it)
+        {
+            if (!UnregisterHotKey(runnerWindow, ids[it->first]))
+            {
+                Logger::warn(L"Failed to unregister {} shortcut. {}", ToWstring(it->first), get_last_error_or_default(GetLastError()));
+            }
+            else
+            {
+                Logger::trace(L"{} shortcut unregistered", ToWstring(it->first));
+            }
+        }
+
+        actions.clear();
+        ids.clear();
+        nextId = 0;
     }
 
     void UnregisterHotkeysForModule(std::wstring moduleName)
     {
-        for (auto it = actions.begin(); it != actions.end(); it++)
-        {
-            auto val = std::find_if(it->second.begin(), it->second.end(), [moduleName](Action a) { return a.moduleName == moduleName; });
-            if (val != it->second.end())
-            {
-                it->second.erase(val);
-
-                if (it->second.empty())
-                {
-                    if (!UnregisterHotKey(runnerWindow, ids[it->first]))
-                    {
-                        Logger::warn(L"Failed to unregister {} shortcut. {}", ToWstring(it->first), get_last_error_or_default(GetLastError()));
-                    }
-                    else
-                    {
-                        Logger::trace(L"{} shortcut unregistered", ToWstring(it->first));
-                    }
-                }
-            }
-        }
+        auto& hotkeyManager = HotkeyManager::HotkeyManager::GetInstance();
+        hotkeyManager.RemoveRecordByModule(moduleName, true);
     }
 
     void PopulateHotkey(Shortcut shortcut)
@@ -101,7 +113,7 @@ namespace CentralizedHotkeys
         {
             try
             {
-                actions[shortcut].begin()->action(shortcut.modifiersMask, shortcut.vkCode);
+                actions[shortcut](shortcut.modifiersMask, shortcut.vkCode);
             }
             catch(std::exception& ex)
             {

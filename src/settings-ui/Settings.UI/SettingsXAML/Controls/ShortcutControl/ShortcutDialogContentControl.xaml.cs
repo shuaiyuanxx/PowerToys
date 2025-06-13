@@ -11,6 +11,21 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 {
     public sealed partial class ShortcutDialogContentControl : UserControl
     {
+        public static readonly DependencyProperty HasConflictProperty = DependencyProperty.Register("HasConflict", typeof(bool), typeof(ShortcutDialogContentControl), new PropertyMetadata(false));
+        public static readonly DependencyProperty ConflictMessageProperty = DependencyProperty.Register("ConflictMessage", typeof(string), typeof(ShortcutDialogContentControl), new PropertyMetadata(string.Empty));
+
+        public bool HasConflict
+        {
+            get => (bool)GetValue(HasConflictProperty);
+            set => SetValue(HasConflictProperty, value);
+        }
+
+        public string ConflictMessage
+        {
+            get => (string)GetValue(ConflictMessageProperty);
+            set => SetValue(ConflictMessageProperty, value);
+        }
+
         public ShortcutDialogContentControl()
         {
             this.InitializeComponent();

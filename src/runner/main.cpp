@@ -198,6 +198,11 @@ int runner(bool isProcessElevated, bool openSettings, std::string settingsWindow
         }
         // Start initial powertoys
         start_enabled_powertoys();
+
+        // Register hotkey
+        CentralizedKeyboardHook::RegisterHotkeys();
+        CentralizedHotkeys::RegisterHotkeys();
+
         std::wstring product_version = get_product_version();
         Trace::EventLaunch(product_version, isProcessElevated);
         PTSettingsHelper::save_last_version_run(product_version);

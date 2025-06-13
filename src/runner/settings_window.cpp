@@ -13,6 +13,7 @@
 #include "UpdateUtils.h"
 #include "centralized_kb_hook.h"
 #include "Generated files/resource.h"
+#include "hotkey_manager.h"
 
 #include <common/utils/json.h>
 #include <common/SettingsAPI/settings_helpers.cpp>
@@ -33,6 +34,7 @@
 
 TwoWayPipeMessageIPC* current_settings_ipc = NULL;
 std::mutex ipc_mutex;
+std::mutex hotkey_mutex;
 std::atomic_bool g_isLaunchInProgress = false;
 std::atomic_bool isUpdateCheckThreadRunning = false;
 HANDLE g_terminateSettingsEvent = CreateEventW(nullptr, false, false, CommonSharedConstants::TERMINATE_SETTINGS_SHARED_EVENT);
@@ -155,6 +157,11 @@ void send_json_config_to_module(const std::wstring& module_key, const std::wstri
         moduleIt->second->set_config(settings.c_str());
         moduleIt->second.update_hotkeys();
         moduleIt->second.UpdateHotkeyEx();
+
+        CentralizedHotkeys::UnregisterHotkeys();
+        CentralizedKeyboardHook::UnregisterHotkeys();
+        CentralizedHotkeys::RegisterHotkeys();
+        CentralizedKeyboardHook::RegisterHotkeys();
     }
 }
 
@@ -240,6 +247,63 @@ void dispatch_received_json(const std::wstring& json_to_parse)
             constexpr const wchar_t* language_filename = L"\\language.json";
             const std::wstring save_file_location = PTSettingsHelper::get_root_save_folder_location() + language_filename;
             json::to_file(save_file_location, j);
+        }
+        else if (name == L"check_hotkey_conflict")
+        {
+            try
+            {
+                PowertoyModuleIface::Hotkey hotkey;
+                hotkey.win = value.GetObjectW().GetNamedBoolean(L"win", false);
+                hotkey.ctrl = value.GetObjectW().GetNamedBoolean(L"ctrl", false);
+                hotkey.shift = value.GetObjectW().GetNamedBoolean(L"shift", false);
+                hotkey.alt = value.GetObjectW().GetNamedBoolean(L"alt", false);
+                hotkey.key = static_cast<unsigned char>(value.GetObjectW().GetNamedNumber(L"key", 0));
+
+                std::wstring requestId = value.GetObjectW().GetNamedString(L"request_id", L"").c_str();
+                std::wstring moduleName = value.GetObjectW().GetNamedString(L"moduleName", L"").c_str();
+                std::wstring hotkeyName = value.GetObjectW().GetNamedString(L"hotkeyName", L"").c_str();
+
+                Logger::info(
+                    L"Received IPC for hotkey conflict checking: [request_id={}], [moduleName={}], [hotkeyName={}], [win={}, ctrl={}, shift={}, alt={}, key={}].",
+                    requestId,
+                    moduleName,
+                    hotkeyName,
+                    hotkey.win,
+                    hotkey.ctrl,
+                    hotkey.shift,
+                    hotkey.alt,
+                    static_cast<int>(hotkey.key));
+
+                auto& hkmng = HotkeyManager::HotkeyManager::GetInstance();
+                bool hasConflict = hkmng.HasConflict(hotkey, moduleName, hotkeyName);
+
+                json::JsonObject response;
+                response.SetNamedValue(L"response_type", json::JsonValue::CreateStringValue(L"hotkey_conflict_result"));
+                response.SetNamedValue(L"request_id", json::JsonValue::CreateStringValue(requestId));
+                response.SetNamedValue(L"has_conflict", json::JsonValue::CreateBooleanValue(hasConflict));
+
+                if (hasConflict)
+                {
+                    auto conflictInfo = hkmng.GetConflict(hotkey);
+                    response.SetNamedValue(L"conflict_module", json::JsonValue::CreateStringValue(conflictInfo.moduleName));
+                    response.SetNamedValue(L"conflict_hotkey_name", json::JsonValue::CreateStringValue(conflictInfo.hotkeyName));
+                }
+
+                std::unique_lock lock{ ipc_mutex };
+                if (current_settings_ipc)
+                {
+                    current_settings_ipc->send(response.Stringify().c_str());
+
+                    Logger::info(
+                        L"Sent IPC response for hotkey conflict checking: [request_id={}], [has_conflict={}].",
+                        requestId,
+                        hasConflict);
+                }
+            }
+            catch (...)
+            {
+                Logger::error(L"Failed to process hotkey conflict check request");
+            }
         }
     }
     return;
