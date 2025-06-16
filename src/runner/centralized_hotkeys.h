@@ -7,11 +7,15 @@ namespace CentralizedHotkeys
     struct Action
     {
         std::wstring moduleName;
+        std::wstring hotkeyName;
+        bool isActivated;
         std::function<void(WORD, WORD)> action;
 
         Action(std::wstring moduleName = L"", std::function<void(WORD, WORD)> action = ([](WORD /*modifiersMask*/, WORD /*vkCode*/) {}))
         {
             this->moduleName = moduleName;
+            this->hotkeyName = L"";
+            this->isActivated = false;
             this->action = action;
         }
     };

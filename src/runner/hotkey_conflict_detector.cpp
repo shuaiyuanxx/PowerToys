@@ -57,6 +57,16 @@ namespace HotkeyConflictDetector
         {
             return HotkeyConflictType::NoConflict;
         }
+        
+        if (inAppConflictHotkeyMap.find(handle) != inAppConflictHotkeyMap.end())
+        {
+            return HotkeyConflictType::InAppConflict;
+        }
+
+        if (sysConflictHotkeyMap.find(handle) != sysConflictHotkeyMap.end())
+        {
+            return HotkeyConflictType::SystemConflict;
+        }
 
         auto it = hotkeyMap.find(handle);
 
@@ -66,6 +76,7 @@ namespace HotkeyConflictDetector
                 HotkeyConflictType::SystemConflict :
                 HotkeyConflictType::NoConflict;
         }
+
         if (wcscmp(it->second.moduleName.c_str(), _moduleName) == 0 && wcscmp(it->second.hotkeyName.c_str(), _hotkeyName) == 0)
         {
             // A shortcut matching its own assignment is not considered a conflict.
@@ -110,6 +121,12 @@ namespace HotkeyConflictDetector
         {
             if (conflictType == HotkeyConflictType::InAppConflict)
             {
+                auto hotkeyFound = hotkeyMap.find(handle);
+                if (hotkeyFound != hotkeyMap.end())
+                {
+                    inAppConflictHotkeyMap[handle].insert(hotkeyFound->second);
+                    hotkeyMap.erase(hotkeyFound);
+                }
                 inAppConflictHotkeyMap[handle].insert({ _hotkey, _moduleName, _hotkeyName });
             }
             else
@@ -183,6 +200,19 @@ namespace HotkeyConflictDetector
                 }
             }
 
+            if (inAppConflicts.size() == 1)
+            {
+                const auto& onlyConflict = *inAppConflicts.begin();
+                if (HasConflictWithSystemHotkey(onlyConflict.hotkey))
+                {
+                    sysConflictHotkeyMap[handle].insert(onlyConflict);
+                }
+                else
+                {
+                    hotkeyMap[handle] = onlyConflict;
+                }
+                inAppConflictHotkeyMap.erase(it_inApp);
+            }
             if (inAppConflicts.empty())
             {
                 inAppConflictHotkeyMap.erase(it_inApp);
@@ -255,8 +285,21 @@ namespace HotkeyConflictDetector
                     ++setIt;
                 }
             }
-            if (conflictSet.empty())
+            if (conflictSet.size() <= 1)
             {
+                if (!conflictSet.empty())
+                {
+                    const auto& onlyConflict = *conflictSet.begin();
+                    if (HasConflictWithSystemHotkey(onlyConflict.hotkey))
+                    {
+                        sysConflictHotkeyMap[GetHotkeyHandle(onlyConflict.hotkey)].insert(onlyConflict);
+                    }
+                    else
+                    {
+                        hotkeyMap[GetHotkeyHandle(onlyConflict.hotkey)] = onlyConflict;
+                    }
+                }
+
                 it = inAppConflictHotkeyMap.erase(it);
             }
             else
@@ -363,7 +406,6 @@ namespace HotkeyConflictDetector
                 std::map<uint16_t, std::vector<HotkeyConflictInfo>> groupedInAppConflicts;
                 for (const auto& [handle, conflicts] : inAppConflictHotkeyMap)
                 {
-                    groupedInAppConflicts[handle].push_back(hotkeyMap[handle]);
                     for (const auto& info : conflicts)
                     {
                         groupedInAppConflicts[handle].push_back(info);

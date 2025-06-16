@@ -43,29 +43,27 @@ namespace CentralizedHotkeys
 
     bool AddHotkeyAction(Shortcut shortcut, Action action, std::wstring moduleName)
     {
-        if (!actions[shortcut].empty())
+        HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
+        HotkeyConflictDetector::Hotkey hotkey = HotkeyConflictDetector::ShortcutToHotkey(shortcut);
+        bool succeed = hkmng.AddHotkey(hotkey, moduleName.c_str(), shortcut.hotkeyName);
+
+        Logger::info(L"Hotkey {} {} in {} has been added to database with return value: {}", shortcut.hotkeyName, moduleName, ToWstring(shortcut), succeed);
+
+        if (!succeed)
         {
-            // It will only work if previous one is rewritten
-            Logger::warn(L"{} shortcut is already registered", ToWstring(shortcut));
+            Logger::warn(L"Shortcut conflict detected. Shortcut: {}, from module: {}", ToWstring(shortcut), moduleName);
         }
 
+        action.hotkeyName = shortcut.hotkeyName;
         actions[shortcut].push_back(action);
+
         // Register hotkey if it is the first shortcut
-        if (actions[shortcut].size() == 1)
+        if (succeed)
         {
             if (ids.find(shortcut) == ids.end())
             {
                 static int nextId = 0;
                 ids[shortcut] = nextId++;
-            }
-
-            HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-            HotkeyConflictDetector::Hotkey hotkey = HotkeyConflictDetector::ShortcutToHotkey(shortcut);
-            bool succeed = hkmng.AddHotkey(hotkey, moduleName.c_str(), shortcut.hotkeyName);
-            if (!succeed)
-            {
-                Logger::warn(L"Hotkey conflict detected. Shortcut: {}, from module: {}", ToWstring(shortcut), moduleName);
-                return false;
             }
 
             if (!RegisterHotKey(runnerWindow, ids[shortcut], shortcut.modifiersMask, shortcut.vkCode))
@@ -74,15 +72,36 @@ namespace CentralizedHotkeys
                 return false;
             }
 
+            actions[shortcut].back().isActivated = true;
+
             Logger::trace(L"{} shortcut registered", ToWstring(shortcut));
             return true;
         }
+        
+        // Got conflict, unregister the shortcut.
+        for (int i = 0; i < actions[shortcut].size(); ++i)
+        {
+            if (actions[shortcut][i].isActivated)
+            {
+                if (!UnregisterHotKey(runnerWindow, ids[shortcut]))
+                {
+                    Logger::warn(L"Failed to unregister {} shortcut. {}", ToWstring(shortcut), get_last_error_or_default(GetLastError()));
+                }
+                else
+                {
+                    Logger::trace(L"{} shortcut unregistered", ToWstring(shortcut));
+                }
+                actions[shortcut][i].isActivated = false;
+            }
+        }
 
-        return true;
+        return false;
     }
 
     void UnregisterHotkeysForModule(std::wstring moduleName)
     {
+        HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
+
         for (auto it = actions.begin(); it != actions.end(); it++)
         {
             auto val = std::find_if(it->second.begin(), it->second.end(), [moduleName](Action a) { return a.moduleName == moduleName; });
@@ -92,9 +111,6 @@ namespace CentralizedHotkeys
 
                 if (it->second.empty())
                 {
-                    HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-                    hkmng.RemoveHotkey(HotkeyConflictDetector::ShortcutToHotkey(it->first), moduleName);
-
                     if (!UnregisterHotKey(runnerWindow, ids[it->first]))
                     {
                         Logger::warn(L"Failed to unregister {} shortcut. {}", ToWstring(it->first), get_last_error_or_default(GetLastError()));
@@ -102,6 +118,30 @@ namespace CentralizedHotkeys
                     else
                     {
                         Logger::trace(L"{} shortcut unregistered", ToWstring(it->first));
+                    }
+                }
+                else if (it->second.size() == 1)
+                {
+                    Logger::info(L"Found only 1 shortcut, trying to register {}", ToWstring(it->first));
+
+                    if (hkmng.HasConflict(HotkeyConflictDetector::ShortcutToHotkey(it->first), 
+                        it->second.front().moduleName.c_str(), 
+                        it->second.front().hotkeyName.c_str()))
+                    {
+                        if (ids.find(it->first) == ids.end())
+                        {
+                            static int nextId = 0;
+                            ids[it->first] = nextId++;
+                        }
+
+                        if (!RegisterHotKey(runnerWindow, ids[it->first], it->first.modifiersMask, it->first.vkCode))
+                        {
+                            Logger::warn(L"Failed to add {} shortcut. {}", ToWstring(it->first), get_last_error_or_default(GetLastError()));
+                        }
+
+                        Logger::info(L"Succeed to register hotkey {}", ToWstring(it->first));
+
+                        it->second.front().isActivated = true;
                     }
                 }
             }
