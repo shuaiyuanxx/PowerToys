@@ -80,6 +80,8 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             set => SetValue(AllowDisableProperty, value);
         }
 
+        public bool HasConflict => ConflictIconVisibility == Visibility.Visible;
+
         public bool Enabled
         {
             get

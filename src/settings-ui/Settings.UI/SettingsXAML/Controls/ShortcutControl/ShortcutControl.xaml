@@ -39,7 +39,8 @@
                                     AutomationProperties.AccessibilityView="Raw"
                                     Content="{Binding}"
                                     IsTabStop="False"
-                                    VisualType="Small" />
+                                    VisualType="Small"
+                                    IsError="{Binding ElementName=LayoutRoot, Path=HasConflict, Mode=OneWay}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -48,8 +49,8 @@
                         x:Name="ConflictIcon"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         FontSize="16"
-                        Foreground="#cc3300"
-                        Glyph="&#xE7BA;"
+                        Foreground="{ThemeResource InfoBarErrorSeverityIconBackground}"
+                        Glyph="&#xF736;"
                         ToolTipService.ToolTip="{x:Bind ConflictToolTipText, Mode=OneWay}"
                         Visibility="{x:Bind ConflictIconVisibility, Mode=OneWay}" />
                     
