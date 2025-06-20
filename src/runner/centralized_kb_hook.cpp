@@ -12,7 +12,6 @@ namespace CentralizedKeyboardHook
     {
         Hotkey hotkey;
         std::wstring moduleName;
-        bool isActivated;
         std::function<bool()> action;
 
         bool operator<(const HotkeyDescriptor& other) const
@@ -164,7 +163,7 @@ namespace CentralizedKeyboardHook
             std::unique_lock lock{ mutex };
             HotkeyDescriptor dummy{ .hotkey = hotkey };
             auto it = hotkeyDescriptors.find(dummy);
-            if (it != hotkeyDescriptors.end() && it->isActivated)
+            if (it != hotkeyDescriptors.end())
             {
                 action = it->action;
             }
@@ -195,36 +194,9 @@ namespace CentralizedKeyboardHook
         std::unique_lock lock{ mutex };
 
         HotkeyConflictDetector::HotkeyConflictManager& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-        bool succeed = hkmng.AddHotkey(hotkey, moduleName.c_str(), hotkey.name);
+        hkmng.AddHotkey(hotkey, moduleName.c_str(), hotkey.name);
 
-        Logger::info(L"Hotkey {} in {} has been added to database with return value: {}", hotkey.name, moduleName, succeed);
-
-        if (!succeed)
-        {
-            Logger::info(L"Conflict detected. Going to disable all the same hotkey for all modules.");
-            for (auto it = hotkeyDescriptors.begin(); it != hotkeyDescriptors.end();)
-            {
-                if (it->hotkey == hotkey && it->isActivated)
-                {
-                    HotkeyDescriptor newDesc = *it;
-                    newDesc.isActivated = false;
-                    newDesc.action = it->action;
-                    newDesc.moduleName = it->moduleName;
-
-                    Logger::info(L"Hotkey in {} is disabled now.", it->moduleName);
-
-                    it = hotkeyDescriptors.erase(it);
-                    hotkeyDescriptors.insert(std::move(newDesc));
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-            Logger::info(L"Disabled all the same hotkey since they are conflict with each other.");
-        }
-
-        hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .isActivated = succeed, .action = std::move(action) });
+        hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .action = std::move(action) });
     }
 
     void AddPressedKeyAction(const std::wstring& moduleName, const DWORD vk, const UINT milliseconds, std::function<bool()>&& action) noexcept
