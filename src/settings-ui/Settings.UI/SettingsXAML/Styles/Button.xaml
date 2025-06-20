@@ -150,7 +150,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
     <Style x:Key="HyperlinkButtonStyle" TargetType="HyperlinkButton" />
 
     <Style x:Key="TextButtonStyle" TargetType="ButtonBase">

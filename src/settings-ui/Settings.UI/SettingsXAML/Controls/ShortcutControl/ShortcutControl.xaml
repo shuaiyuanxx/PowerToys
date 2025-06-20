@@ -15,6 +15,7 @@
             <Button
                 x:Name="EditButton"
                 Padding="0"
+                AutomationProperties.Name="{x:Bind ConflictToolTipText, Mode=OneWay}"
                 Click="OpenDialogButton_Click"
                 CornerRadius="8">
                 <StackPanel
@@ -38,10 +39,21 @@
                                     AutomationProperties.AccessibilityView="Raw"
                                     Content="{Binding}"
                                     IsTabStop="False"
-                                    VisualType="Small" />
+                                    VisualType="Small"
+                                    IsError="{Binding ElementName=LayoutRoot, Path=HasConflict, Mode=OneWay}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <FontIcon
+                        x:Name="ConflictIcon"
+                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                        FontSize="16"
+                        Foreground="{ThemeResource InfoBarErrorSeverityIconBackground}"
+                        Glyph="&#xF736;"
+                        ToolTipService.ToolTip="{x:Bind ConflictToolTipText, Mode=OneWay}"
+                        Visibility="{x:Bind ConflictIconVisibility, Mode=OneWay}" />
+                    
                     <FontIcon
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         FontSize="16"

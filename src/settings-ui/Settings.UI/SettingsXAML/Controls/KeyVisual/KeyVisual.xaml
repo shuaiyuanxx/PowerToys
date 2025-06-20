@@ -57,10 +57,9 @@
                                 <VisualState x:Name="Default" />
                                 <VisualState x:Name="Error">
                                     <VisualState.Setters>
-                                        <Setter Target="ContentHolder.Fill" Value="{ThemeResource InfoBarErrorSeverityBackgroundBrush}" />
-                                        <Setter Target="KeyPresenter.Foreground" Value="{ThemeResource InfoBarErrorSeverityIconBackground}" />
+                                        <Setter Target="ContentHolder.Fill" Value="{ThemeResource InfoBarErrorSeverityIconBackground}" />
+                                        <Setter Target="KeyPresenter.Foreground" Value="White" />
                                         <Setter Target="ContentHolder.Stroke" Value="{ThemeResource InfoBarErrorSeverityIconBackground}" />
-                                        <Setter Target="ContentHolder.StrokeThickness" Value="2" />
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
