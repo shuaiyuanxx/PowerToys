@@ -112,6 +112,7 @@
                                                         MinWidth="140"
                                                         Margin="2"
                                                         VerticalAlignment="Center"
+                                                        Source="ConflictWindow"
                                                         HasConflict="True"
                                                         HotkeySettings="{x:Bind HotkeySettings, Mode=TwoWay}"
                                                         IsEnabled="True" />
