@@ -11,7 +11,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Telemetry.Events
 {
     [EventData]
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
-    public class ShortcutConflictsResolvedInConflitWindowEvent : EventBase, IEvent
+    public class ShortcutConflictsResolvedInConflictWindowEvent : EventBase, IEvent
     {
         public PartA_PrivTags PartA_PrivTags => PartA_PrivTags.ProductAndServiceUsage;
 
