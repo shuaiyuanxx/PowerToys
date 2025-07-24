@@ -99,7 +99,7 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                 var conflictsResolved = _previousConflictCount - currentConflictCount > 0;
 
                 // Send telemetry for conflicts reduction
-                PowerToysTelemetry.Log.WriteEvent(new ShortcutConflictsResolvedInConflitWindowEvent()
+                PowerToysTelemetry.Log.WriteEvent(new ShortcutConflictsResolvedInConflictWindowEvent()
                 {
                     PreviousConflictCount = _previousConflictCount,
                     CurrentConflictCount = currentConflictCount,
