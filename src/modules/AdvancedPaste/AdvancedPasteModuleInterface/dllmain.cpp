@@ -76,8 +76,8 @@ private:
 
     static const constexpr int NUM_DEFAULT_HOTKEYS = 4;
 
-    Hotkey m_paste_as_plain_hotkey = { .win = true, .ctrl = true, .shift = false, .alt = true, .key = 'V'};
-    Hotkey m_advanced_paste_ui_hotkey = { .win = true, .ctrl = false, .shift = true, .alt = false, .key = 'V'};
+    Hotkey m_paste_as_plain_hotkey = { .win = true, .ctrl = true, .shift = false, .alt = true, .key = 'V' };
+    Hotkey m_advanced_paste_ui_hotkey = { .win = true, .ctrl = false, .shift = true, .alt = false, .key = 'V' };
     Hotkey m_paste_as_markdown_hotkey{};
     Hotkey m_paste_as_json_hotkey{};
 
@@ -93,7 +93,6 @@ private:
 
     using CustomAction = ActionData<int>;
     std::vector<CustomAction> m_custom_actions;
-    std::vector<std::wstring> m_custom_action_hotkey_names;
 
     bool m_is_advanced_ai_enabled = false;
     bool m_preview_custom_format_output = true;
@@ -103,7 +102,6 @@ private:
         try
         {
             const auto jsonHotkeyObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(keyName);
-            Hotkey hotkey = parse_single_hotkey(jsonHotkeyObject);
             return parse_single_hotkey(jsonHotkeyObject);
         }
         catch (...)
