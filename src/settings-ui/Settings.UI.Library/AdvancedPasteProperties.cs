@@ -11,9 +11,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 {
     public class AdvancedPasteProperties
     {
-        public static readonly HotkeySettings DefaultAdvancedPasteUIShortcut = new HotkeySettings(true, false, false, true, 0x56, AdvancedPasteProperties.HotkeyOrder.AdvancedPasteUIHotkey.ToString(), AdvancedPasteSettings.ModuleName); // Win+Shift+V
+        public static readonly HotkeySettings DefaultAdvancedPasteUIShortcut = new HotkeySettings(true, false, false, true, 0x56, "1", AdvancedPasteSettings.ModuleName); // Win+Shift+V
 
-        public static readonly HotkeySettings DefaultPasteAsPlainTextShortcut = new HotkeySettings(true, true, true, false, 0x56, AdvancedPasteProperties.HotkeyOrder.PasteAsPlainHotkey.ToString(), AdvancedPasteSettings.ModuleName); // Ctrl+Win+Alt+V
+        public static readonly HotkeySettings DefaultPasteAsPlainTextShortcut = new HotkeySettings(true, true, true, false, 0x56, "0", AdvancedPasteSettings.ModuleName); // Ctrl+Win+Alt+V
 
         public enum HotkeyOrder
         {
@@ -32,8 +32,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         {
             AdvancedPasteUIShortcut = DefaultAdvancedPasteUIShortcut;
             PasteAsPlainTextShortcut = DefaultPasteAsPlainTextShortcut;
-            PasteAsMarkdownShortcut = new(AdvancedPasteProperties.HotkeyOrder.PasteAsMarkdownHotkey.ToString(), AdvancedPasteSettings.ModuleName);
-            PasteAsJsonShortcut = new(AdvancedPasteProperties.HotkeyOrder.PasteAsJsonHotkey.ToString(), AdvancedPasteSettings.ModuleName);
+            PasteAsMarkdownShortcut = new("2", AdvancedPasteSettings.ModuleName);
+            PasteAsJsonShortcut = new("3", AdvancedPasteSettings.ModuleName);
             CustomActions = new();
             AdditionalActions = new();
             IsAdvancedAIEnabled = false;

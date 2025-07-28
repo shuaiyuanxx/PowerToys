@@ -267,7 +267,7 @@ private:
         }
     }
 
-    void read_settings(PowerToysSettings::PowerToyValues& settings)
+        void read_settings(PowerToysSettings::PowerToyValues& settings)
     {
         const auto settingsObject = settings.get_raw_json();
 
@@ -320,9 +320,21 @@ private:
                     {
                         const auto additionalActions = propertiesObject.GetNamedObject(JSON_KEY_ADDITIONAL_ACTIONS);
 
-                        for (const auto& [actionName, additionalAction] : additionalActions)
+                        // Define the expected order to ensure consistent hotkey ID assignment
+                        const std::vector<winrt::hstring> expectedOrder = {
+                            L"image-to-text",
+                            L"paste-as-file",
+                            L"transcode"
+                        };
+
+                        // Process actions in the predefined order
+                        for (auto& actionKey : expectedOrder)
                         {
-                            process_additional_action(actionName, additionalAction);
+                            if (additionalActions.HasKey(actionKey))
+                            {
+                                const auto actionValue = additionalActions.GetNamedValue(actionKey);
+                                process_additional_action(actionKey, actionValue);
+                            }
                         }
                     }
 

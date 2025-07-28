@@ -37,7 +37,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             Code = 0;
 
             HasConflict = false;
-            HotkeyName = "0";
+            HotkeyName = "-1";
             OwnerModuleName = string.Empty;
         }
 
