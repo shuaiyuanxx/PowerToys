@@ -66,13 +66,15 @@ void PowertoyModule::update_hotkeys()
 
     for (size_t i = 0; i < hotkeyCount; i++)
     {
-        
-        hkmng.AddHotkey(hotkeys[i], std::to_wstring(i).c_str(), hotkeys[i].name, pt_module->is_enabled());
+        if (hotkeys[i].isShown)
+        {
+            hkmng.AddHotkey(hotkeys[i], pt_module->get_key(), hotkeys[i].name == nullptr ? std::to_wstring(i).c_str() : hotkeys[i].name, pt_module->is_enabled());
 
-        CentralizedKeyboardHook::SetHotkeyAction(pt_module->get_key(), hotkeys[i], [modulePtr, i] {
-            Logger::trace(L"{} hotkey is invoked from Centralized keyboard hook", modulePtr->get_key());
-            return modulePtr->on_hotkey(i);
-        });
+            CentralizedKeyboardHook::SetHotkeyAction(pt_module->get_key(), hotkeys[i], [modulePtr, i] {
+                Logger::trace(L"{} hotkey is invoked from Centralized keyboard hook", modulePtr->get_key());
+                return modulePtr->on_hotkey(i);
+            });
+        }
     }
 }
 

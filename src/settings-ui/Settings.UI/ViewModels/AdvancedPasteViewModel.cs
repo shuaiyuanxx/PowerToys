@@ -47,8 +47,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private string _pasteAsJsonShortcutTooltip;
 
         // Counter for the increment method
-        private int _counter = 4;
-        private bool _isFirstCall = true;
+        private int _counter = 3;
 
         private bool disposedValue;
 
@@ -112,10 +111,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             foreach (var action in _additionalActions.GetAllActions())
             {
-                if (action is AdvancedPasteAdditionalAction additionalAction &&
-                    string.IsNullOrEmpty(additionalAction.Shortcut.HotkeyName))
+                if (action is AdvancedPasteAdditionalAction additionalAction)
                 {
-                    additionalAction.Shortcut.HotkeyName = action.IsShown ? GetNextHotkeyID().ToString(CultureInfo.InvariantCulture) : string.Empty;
+                    additionalAction.Shortcut.HotkeyName = GetNextHotkeyID().ToString(CultureInfo.InvariantCulture);
                     additionalAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
                 }
 
@@ -124,7 +122,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             foreach (var customAction in _customActions)
             {
-                customAction.Shortcut.HotkeyName = customAction.IsShown ? GetNextHotkeyID().ToString(CultureInfo.InvariantCulture) : string.Empty;
+                customAction.Shortcut.HotkeyName = GetNextHotkeyID().ToString(CultureInfo.InvariantCulture);
                 customAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
 
                 customAction.PropertyChanged += OnCustomActionPropertyChanged;
@@ -137,8 +135,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         }
 
         public int GetNextHotkeyID() => ++_counter;
-
-        public void ResetHotkeyIDCounter() => _counter = 3;
 
         private void InitializeConflictPropertiesDefaults()
         {
@@ -524,7 +520,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_advancedPasteSettings.Properties.PasteAsMarkdownShortcut != value)
                 {
-                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings("PasteAsMarkdownShortcut", AdvancedPasteSettings.ModuleName);
+                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings(AdvancedPasteProperties.HotkeyOrder.PasteAsMarkdownHotkey.ToString(), AdvancedPasteSettings.ModuleName);
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
                     OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
                     SaveAndNotifySettings();
@@ -539,7 +535,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_advancedPasteSettings.Properties.PasteAsJsonShortcut != value)
                 {
-                    _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings("PasteAsJsonShortcut", AdvancedPasteSettings.ModuleName);
+                    _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings(AdvancedPasteProperties.HotkeyOrder.PasteAsJsonHotkey.ToString(), AdvancedPasteSettings.ModuleName);
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
                     OnPropertyChanged(nameof(PasteAsJsonShortcut));
                     SaveAndNotifySettings();

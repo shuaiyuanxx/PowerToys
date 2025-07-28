@@ -45,7 +45,8 @@ public:
         bool shift = false;
         bool alt = false;
         unsigned char key = 0;
-        const wchar_t* name = nullptr;
+        const wchar_t* name = nullptr; // TODO: rename it to ID
+        bool isShown = true;
 
         std::strong_ordering operator<=>(const Hotkey& other) const
         {

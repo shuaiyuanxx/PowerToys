@@ -112,7 +112,7 @@ private:
         return {};
     }
 
-    static Hotkey parse_single_hotkey(const winrt::Windows::Data::Json::JsonObject& jsonHotkeyObject)
+    static Hotkey parse_single_hotkey(const winrt::Windows::Data::Json::JsonObject& jsonHotkeyObject, bool isShown = true)
     {
         try
         {
@@ -122,6 +122,7 @@ private:
             hotkey.shift = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_SHIFT);
             hotkey.ctrl = jsonHotkeyObject.GetNamedBoolean(JSON_KEY_CTRL);
             hotkey.key = static_cast<unsigned char>(jsonHotkeyObject.GetNamedNumber(JSON_KEY_CODE));
+            hotkey.isShown = isShown;
             return hotkey;
         }
         catch (...)
@@ -231,8 +232,10 @@ private:
         return false;
     }
 
-    void process_additional_action(const winrt::hstring& actionName, const winrt::Windows::Data::Json::IJsonValue& actionValue)
+    void process_additional_action(const winrt::hstring& actionName, const winrt::Windows::Data::Json::IJsonValue& actionValue, bool actionsGroupIsShown = true)
     {
+        bool actionIsShown = true;
+
         if (actionValue.ValueType() != winrt::Windows::Data::Json::JsonValueType::Object)
         {
             return;
@@ -240,9 +243,9 @@ private:
 
         const auto action = actionValue.GetObjectW();
 
-        if (!action.GetNamedBoolean(JSON_KEY_IS_SHOWN, false))
+        if (!action.GetNamedBoolean(JSON_KEY_IS_SHOWN, false) || !actionsGroupIsShown)
         {
-            return;
+            actionIsShown = false;
         }
 
         if (action.HasKey(JSON_KEY_SHORTCUT))
@@ -250,7 +253,7 @@ private:
             const AdditionalAction additionalAction
             {
                 actionName.c_str(),
-                parse_single_hotkey(action.GetNamedObject(JSON_KEY_SHORTCUT))
+                parse_single_hotkey(action.GetNamedObject(JSON_KEY_SHORTCUT), actionIsShown)
             };
 
             m_additional_actions.push_back(additionalAction);
@@ -259,7 +262,7 @@ private:
         {
             for (const auto& [subActionName, subAction] : action)
             {
-                process_additional_action(subActionName, subAction);
+                process_additional_action(subActionName, subAction, actionIsShown);
             }
         }
     }
@@ -331,17 +334,14 @@ private:
                             for (const auto& customAction : customActions)
                             {
                                 const auto object = customAction.GetObjectW();
+                                bool actionIsShown = object.GetNamedBoolean(JSON_KEY_IS_SHOWN, false);
 
-                                if (object.GetNamedBoolean(JSON_KEY_IS_SHOWN, false))
-                                {
-                                    const CustomAction customActionData
-                                    {
-                                        static_cast<int>(object.GetNamedNumber(JSON_KEY_ID)),
-                                        parse_single_hotkey(object.GetNamedObject(JSON_KEY_SHORTCUT))
-                                    };
+                                const CustomAction customActionData{
+                                    static_cast<int>(object.GetNamedNumber(JSON_KEY_ID)),
+                                    parse_single_hotkey(object.GetNamedObject(JSON_KEY_SHORTCUT), actionIsShown)
+                                };
 
-                                    m_custom_actions.push_back(customActionData);
-                                }
+                                m_custom_actions.push_back(customActionData);
                             }
                         }
                     }
