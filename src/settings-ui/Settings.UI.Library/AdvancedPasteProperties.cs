@@ -15,6 +15,19 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         public static readonly HotkeySettings DefaultPasteAsPlainTextShortcut = new HotkeySettings(true, true, true, false, 0x56, "PasteAsPlainTextShortcut", AdvancedPasteSettings.ModuleName); // Ctrl+Win+Alt+V
 
+        public enum HotkeyOrder
+        {
+            // This order should be align with the on_hotkey() function from the module interface file.
+            // Default hotkeys
+            PasteAsPlainHotkey,
+            AdvancedPasteUIHotkey,
+            PasteAsMarkdownHotkey,
+            PasteAsJsonHotkey,
+
+            // additional actions
+            // custom acttions
+        }
+
         public AdvancedPasteProperties()
         {
             AdvancedPasteUIShortcut = DefaultAdvancedPasteUIShortcut;

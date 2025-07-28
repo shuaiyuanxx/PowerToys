@@ -46,6 +46,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private bool _pasteAsJsonShortcutHasConflict;
         private string _pasteAsJsonShortcutTooltip;
 
+        // Counter for the increment method
+        private int _counter = 4;
+        private bool _isFirstCall = true;
+
         private bool disposedValue;
 
         // Delay saving of settings in order to avoid calling save multiple times and hitting file in use exception. If there is no other request to save settings in given interval, we proceed to save it; otherwise, we schedule saving it after this interval
@@ -106,30 +110,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _delayedTimer.Elapsed += DelayedTimer_Tick;
             _delayedTimer.AutoReset = false;
 
-            var actionNameMap = new Dictionary<IAdvancedPasteAction, string>
-            {
-                { _additionalActions.ImageToText, "ImageToTextShortcut" },
-                { _additionalActions.PasteAsFile.PasteAsTxtFile, "PasteAsTxtFileShortcut" },
-                { _additionalActions.PasteAsFile.PasteAsPngFile, "PasteAsPngFileShortcut" },
-                { _additionalActions.PasteAsFile.PasteAsHtmlFile, "PasteAsHtmlFileShortcut" },
-                { _additionalActions.Transcode.TranscodeToMp3, "TranscodeToMp3Shortcut" },
-                { _additionalActions.Transcode.TranscodeToMp4, "TranscodeToMp4Shortcut" },
-            };
-
             foreach (var action in _additionalActions.GetAllActions())
             {
-                action.PropertyChanged += OnAdditionalActionPropertyChanged;
-
                 if (action is AdvancedPasteAdditionalAction additionalAction &&
                     string.IsNullOrEmpty(additionalAction.Shortcut.HotkeyName))
                 {
-                    additionalAction.Shortcut.HotkeyName = actionNameMap[action];
+                    additionalAction.Shortcut.HotkeyName = action.IsShown ? GetNextHotkeyID().ToString(CultureInfo.InvariantCulture) : string.Empty;
                     additionalAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
                 }
+
+                action.PropertyChanged += OnAdditionalActionPropertyChanged;
             }
 
             foreach (var customAction in _customActions)
             {
+                customAction.Shortcut.HotkeyName = customAction.IsShown ? GetNextHotkeyID().ToString(CultureInfo.InvariantCulture) : string.Empty;
+                customAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+
                 customAction.PropertyChanged += OnCustomActionPropertyChanged;
             }
 
@@ -138,6 +135,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             InitializeConflictPropertiesDefaults();
         }
+
+        public int GetNextHotkeyID() => ++_counter;
+
+        public void ResetHotkeyIDCounter() => _counter = 3;
 
         private void InitializeConflictPropertiesDefaults()
         {
@@ -799,28 +800,28 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             bool updated = false;
             if (PasteAsJsonShortcut.HotkeyName == string.Empty)
             {
-                PasteAsJsonShortcut.HotkeyName = "PasteAsJsonShortcut";
+                PasteAsJsonShortcut.HotkeyName = AdvancedPasteProperties.HotkeyOrder.PasteAsJsonHotkey.ToString();
                 PasteAsJsonShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
                 updated = true;
             }
 
             if (PasteAsMarkdownShortcut.HotkeyName == string.Empty)
             {
-                PasteAsMarkdownShortcut.HotkeyName = "PasteAsMarkdownShortcut";
+                PasteAsMarkdownShortcut.HotkeyName = AdvancedPasteProperties.HotkeyOrder.PasteAsMarkdownHotkey.ToString();
                 PasteAsMarkdownShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
                 updated = true;
             }
 
             if (AdvancedPasteUIShortcut.HotkeyName == string.Empty)
             {
-                AdvancedPasteUIShortcut.HotkeyName = AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut.HotkeyName;
+                AdvancedPasteUIShortcut.HotkeyName = AdvancedPasteProperties.HotkeyOrder.AdvancedPasteUIHotkey.ToString();
                 AdvancedPasteUIShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
                 updated = true;
             }
 
             if (PasteAsPlainTextShortcut.HotkeyName == string.Empty)
             {
-                PasteAsPlainTextShortcut.HotkeyName = AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut.HotkeyName;
+                PasteAsPlainTextShortcut.HotkeyName = AdvancedPasteProperties.HotkeyOrder.PasteAsPlainHotkey.ToString();
                 PasteAsPlainTextShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
                 updated = true;
             }

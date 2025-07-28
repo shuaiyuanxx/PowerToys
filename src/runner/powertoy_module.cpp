@@ -40,7 +40,7 @@ json::JsonObject PowertoyModule::json_config() const
 }
 
 PowertoyModule::PowertoyModule(PowertoyModuleIface* pt_module, HMODULE handle) :
-    handle(handle), pt_module(pt_module)
+    handle(handle), pt_module(pt_module), hkmng(HotkeyConflictDetector::HotkeyConflictManager::GetInstance())
 {
     if (!pt_module)
     {
@@ -53,16 +53,10 @@ PowertoyModule::PowertoyModule(PowertoyModuleIface* pt_module, HMODULE handle) :
 
 void PowertoyModule::update_hotkeys()
 {
-    CentralizedKeyboardHook::ClearModuleHotkeys(pt_module->get_key());
+    auto moduleName = pt_module->get_key();
 
-    if (pt_module->is_enabled())
-    {
-        Logger::trace(L"{} module is enabled, registering hotkeys", pt_module->get_key());
-    }
-    else
-    {
-        Logger::trace(L"{} module is disabled, unregistering hotkeys", pt_module->get_key());
-    }
+    CentralizedKeyboardHook::ClearModuleHotkeys(moduleName);
+    hkmng.RemoveHotkeyByModule(moduleName);
 
     size_t hotkeyCount = pt_module->get_hotkeys(nullptr, 0);
     std::vector<PowertoyModuleIface::Hotkey> hotkeys(hotkeyCount);
@@ -72,7 +66,10 @@ void PowertoyModule::update_hotkeys()
 
     for (size_t i = 0; i < hotkeyCount; i++)
     {
-        CentralizedKeyboardHook::SetHotkeyAction(pt_module->get_key(), hotkeys[i], pt_module->is_enabled(), [modulePtr, i] {
+        
+        hkmng.AddHotkey(hotkeys[i], std::to_wstring(i).c_str(), hotkeys[i].name, pt_module->is_enabled());
+
+        CentralizedKeyboardHook::SetHotkeyAction(pt_module->get_key(), hotkeys[i], [modulePtr, i] {
             Logger::trace(L"{} hotkey is invoked from Centralized keyboard hook", modulePtr->get_key());
             return modulePtr->on_hotkey(i);
         });
