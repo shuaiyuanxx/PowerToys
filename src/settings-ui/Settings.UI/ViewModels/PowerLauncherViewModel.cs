@@ -85,9 +85,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         JsonSerializer.Serialize(s, SourceGenerationContextContext.Default.PowerLauncherSettings)));
             };
 
-            if (string.IsNullOrEmpty(settings.Properties.OpenPowerLauncher.HotkeyName))
+            if (settings.Properties.OpenPowerLauncher.HotkeyID != 0)
             {
-                settings.Properties.OpenPowerLauncher.HotkeyName = "0";
+                settings.Properties.OpenPowerLauncher.HotkeyID = 0;
                 settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
             }
 
@@ -142,8 +142,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                OpenPowerLauncherHasConflict = GetHotkeyConflictStatus("OpenPowerLauncher");
-                OpenPowerLauncherTooltip = GetHotkeyConflictTooltip("OpenPowerLauncher");
+                OpenPowerLauncherHasConflict = GetHotkeyConflictStatus(0);
+                OpenPowerLauncherTooltip = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>
@@ -759,23 +759,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private void CheckAndUpdateHotkeyName()
         {
             bool hasChange = false;
-            if (settings.Properties.OpenPowerLauncher.HotkeyName == string.Empty)
+            if (settings.Properties.OpenPowerLauncher.HotkeyID != 0)
             {
-                settings.Properties.OpenPowerLauncher.HotkeyName = "OpenPowerLauncher";
+                settings.Properties.OpenPowerLauncher.HotkeyID = 0;
                 settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (settings.Properties.OpenFileLocation.HotkeyName == string.Empty)
+            if (settings.Properties.OpenFileLocation.HotkeyID != 1)
             {
-                settings.Properties.OpenFileLocation.HotkeyName = "OpenFileLocation";
+                settings.Properties.OpenFileLocation.HotkeyID = 1;
                 settings.Properties.OpenFileLocation.OwnerModuleName = PowerLauncherSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (settings.Properties.CopyPathLocation.HotkeyName == string.Empty)
+            if (settings.Properties.CopyPathLocation.HotkeyID != 2)
             {
-                settings.Properties.CopyPathLocation.HotkeyName = "CopyPathLocation";
+                settings.Properties.CopyPathLocation.HotkeyID = 2;
                 settings.Properties.CopyPathLocation.OwnerModuleName = PowerLauncherSettings.ModuleName;
                 hasChange = true;
             }

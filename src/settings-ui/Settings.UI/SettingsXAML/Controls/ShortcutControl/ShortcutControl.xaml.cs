@@ -408,7 +408,7 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                     EnableKeys();
                     if (lastValidSettings.IsValid())
                     {
-                        lastValidSettings.HotkeyName = hotkeySettings.HotkeyName;
+                        lastValidSettings.HotkeyID = hotkeySettings.HotkeyID;
                         lastValidSettings.OwnerModuleName = hotkeySettings.OwnerModuleName;
                         CheckForConflicts(lastValidSettings);
                     }

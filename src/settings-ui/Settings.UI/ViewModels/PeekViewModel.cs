@@ -67,9 +67,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _peekSettings = _settingsUtils.GetSettingsOrDefault<PeekSettings>(PeekSettings.ModuleName);
             _peekPreviewSettings = _settingsUtils.GetSettingsOrDefault<PeekPreviewSettings>(PeekSettings.ModuleName, PeekPreviewSettings.FileName);
 
-            if (_peekSettings.Properties.ActivationShortcut.HotkeyName != "0")
+            if (_peekSettings.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                _peekSettings.Properties.ActivationShortcut.HotkeyName = "0";
+                _peekSettings.Properties.ActivationShortcut.HotkeyID = 0;
                 _peekSettings.Properties.ActivationShortcut.OwnerModuleName = PeekSettings.ModuleName;
                 _settingsUtils.SaveSettings(_peekSettings.ToJsonString(), PeekSettings.ModuleName);
             }
@@ -140,8 +140,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus("ActivationShortcut");
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip("ActivationShortcut");
+                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>

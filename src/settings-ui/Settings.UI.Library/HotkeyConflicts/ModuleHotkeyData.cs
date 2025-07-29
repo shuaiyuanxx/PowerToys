@@ -10,7 +10,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts
     public class ModuleHotkeyData : INotifyPropertyChanged
     {
         private string _moduleName;
-        private string _hotkeyName;
+        private int _hotkeyID;
         private HotkeySettings _hotkeySettings;
         private bool _isSystemConflict;
 
@@ -37,14 +37,14 @@ namespace Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts
             }
         }
 
-        public string HotkeyName
+        public int HotkeyID
         {
-            get => _hotkeyName;
+            get => _hotkeyID;
             set
             {
-                if (_hotkeyName != value)
+                if (_hotkeyID != value)
                 {
-                    _hotkeyName = value;
+                    _hotkeyID = value;
                 }
             }
         }

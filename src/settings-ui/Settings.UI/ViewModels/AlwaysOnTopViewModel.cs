@@ -65,7 +65,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _excludedApps = Settings.Properties.ExcludedApps.Value;
             _windows11 = OSVersionHelper.IsWindows11();
 
-            CheckAndUpdateHotkeyName();
+            CheckAndUpdateHotkeyID();
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
@@ -93,8 +93,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                HotkeyHasConflict = GetHotkeyConflictStatus(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyName);
-                HotkeyTooltip = GetHotkeyConflictTooltip(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyName);
+                HotkeyHasConflict = GetHotkeyConflictStatus(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID);
+                HotkeyTooltip = GetHotkeyConflictTooltip(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -363,11 +363,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             OnPropertyChanged(nameof(IsEnabled));
         }
 
-        private void CheckAndUpdateHotkeyName()
+        private void CheckAndUpdateHotkeyID()
         {
-            if (Settings.Properties.Hotkey.Value.HotkeyName != "0")
+            if (Settings.Properties.Hotkey.Value.HotkeyID != 0)
             {
-                Settings.Properties.Hotkey.Value.HotkeyName = AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyName;
+                Settings.Properties.Hotkey.Value.HotkeyID = AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID;
                 Settings.Properties.Hotkey.Value.OwnerModuleName = AlwaysOnTopSettings.ModuleName;
                 SettingsUtils.SaveSettings(Settings.ToJsonString(), AlwaysOnTopSettings.ModuleName);
             }

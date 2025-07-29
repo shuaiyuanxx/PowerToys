@@ -96,9 +96,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _highlightFadeDurationMs = MouseHighlighterSettingsConfig.Properties.HighlightFadeDurationMs.Value;
             _highlighterAutoActivate = MouseHighlighterSettingsConfig.Properties.AutoActivate.Value;
 
-            if (MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyName == string.Empty)
+            if (MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
                 MouseHighlighterSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = MouseHighlighterSettings.ModuleName;
                 SettingsUtils.SaveSettings(MouseHighlighterSettingsConfig.ToJsonString(), MouseHighlighterSettings.ModuleName);
             }
@@ -125,21 +125,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _mousePointerCrosshairsAutoActivate = MousePointerCrosshairsSettingsConfig.Properties.AutoActivate.Value;
 
             // Set the hotkey names
-            if (string.IsNullOrEmpty(MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.HotkeyName))
+            if (MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
                 MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = MousePointerCrosshairsSettings.ModuleName;
             }
 
-            if (string.IsNullOrEmpty(FindMyMouseSettingsConfig.Properties.ActivationShortcut.HotkeyName))
+            if (FindMyMouseSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                FindMyMouseSettingsConfig.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                FindMyMouseSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
                 FindMyMouseSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = FindMyMouseSettings.ModuleName;
             }
 
-            if (string.IsNullOrEmpty(MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyName))
+            if (MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
                 MouseHighlighterSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = MouseHighlighterSettings.ModuleName;
             }
 
@@ -233,7 +233,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 // For each involved MouseUtils module, mark the hotkey as having a conflict
                 foreach (var module in involvedMouseUtilsModules)
                 {
-                    string hotkeyKey = $"{module.ModuleName}_{module.HotkeyName}";
+                    string hotkeyKey = $"{module.ModuleName}_{module.HotkeyID}";
                     _hotkeyConflictStatus[hotkeyKey] = true;
                     _hotkeyConflictTooltips[hotkeyKey] = isSysConflict
                         ? ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText")
@@ -242,14 +242,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override bool GetHotkeyConflictStatus(string hotkeyName)
+        protected override bool GetHotkeyConflictStatus(string hotkeyID)
         {
-            return _hotkeyConflictStatus.ContainsKey(hotkeyName) && _hotkeyConflictStatus[hotkeyName];
+            return _hotkeyConflictStatus.ContainsKey(hotkeyID) && _hotkeyConflictStatus[hotkeyID];
         }
 
-        protected override string GetHotkeyConflictTooltip(string hotkeyName)
+        protected override string GetHotkeyConflictTooltip(int hotkeyID)
         {
-            return _hotkeyConflictTooltips.TryGetValue(hotkeyName, out string value) ? value : null;
+            return _hotkeyConflictTooltips.TryGetValue(hotkeyID, out string value) ? value : null;
         }
 
         protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)

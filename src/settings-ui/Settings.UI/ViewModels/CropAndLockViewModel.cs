@@ -81,16 +81,16 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             bool shoudUpdate = false;
 
-            if (Settings.Properties.ReparentHotkey.Value.HotkeyName != "0")
+            if (Settings.Properties.ReparentHotkey.Value.HotkeyID != 0)
             {
-                Settings.Properties.ReparentHotkey.Value.HotkeyName = "0";
+                Settings.Properties.ReparentHotkey.Value.HotkeyID = 0;
                 Settings.Properties.ReparentHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
                 shoudUpdate = true;
             }
 
-            if (Settings.Properties.ThumbnailHotkey.Value.HotkeyName != "1")
+            if (Settings.Properties.ThumbnailHotkey.Value.HotkeyID != 1)
             {
-                Settings.Properties.ThumbnailHotkey.Value.HotkeyName = "1";
+                Settings.Properties.ThumbnailHotkey.Value.HotkeyID = 1;
                 Settings.Properties.ThumbnailHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
                 shoudUpdate = true;
             }
@@ -108,11 +108,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ThumbnailHotkeyHasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyName);
-                ReparentHotkeyHasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyName);
+                ThumbnailHotkeyHasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
+                ReparentHotkeyHasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
 
-                ThumbnailHotkeyTooltip = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyName);
-                ReparentHotkeyTooltip = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyName);
+                ThumbnailHotkeyTooltip = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
+                ReparentHotkeyTooltip = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>

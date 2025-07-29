@@ -48,9 +48,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = measureToolSettingsRepository.SettingsConfig;
 
-            if (Settings.Properties.ActivationShortcut.HotkeyName != "0")
+            if (Settings.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                Settings.Properties.ActivationShortcut.HotkeyName = "0";
+                Settings.Properties.ActivationShortcut.HotkeyID = 0;
                 Settings.Properties.ActivationShortcut.OwnerModuleName = MeasureToolSettings.ModuleName;
                 settingsUtils.SaveSettings(Settings.ToJsonString(), MeasureToolSettings.ModuleName);
             }
@@ -80,8 +80,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus("ActivationShortcut");
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip("ActivationShortcut");
+                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>

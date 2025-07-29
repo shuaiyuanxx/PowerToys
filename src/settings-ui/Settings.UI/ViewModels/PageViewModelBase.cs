@@ -17,8 +17,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
     public abstract class PageViewModelBase : Observable
     {
-        private readonly Dictionary<string, bool> _hotkeyConflictStatus = new Dictionary<string, bool>();
-        private readonly Dictionary<string, string> _hotkeyConflictTooltips = new Dictionary<string, string>();
+        private readonly Dictionary<int, bool> _hotkeyConflictStatus = new Dictionary<int, bool>();
+        private readonly Dictionary<int, string> _hotkeyConflictTooltips = new Dictionary<int, string>();
 
         protected abstract string ModuleName { get; }
 
@@ -125,8 +125,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     foreach (var conflict in conflictGroup.Modules)
                     {
-                        _hotkeyConflictStatus[conflict.HotkeyName] = true;
-                        _hotkeyConflictTooltips[conflict.HotkeyName] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                        _hotkeyConflictStatus[conflict.HotkeyID] = true;
+                        _hotkeyConflictTooltips[conflict.HotkeyID] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
                     }
                 }
             }
@@ -137,21 +137,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     foreach (var conflict in conflictGroup.Modules)
                     {
-                        _hotkeyConflictStatus[conflict.HotkeyName] = true;
-                        _hotkeyConflictTooltips[conflict.HotkeyName] = ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText");
+                        _hotkeyConflictStatus[conflict.HotkeyID] = true;
+                        _hotkeyConflictTooltips[conflict.HotkeyID] = ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText");
                     }
                 }
             }
         }
 
-        protected virtual bool GetHotkeyConflictStatus(string hotkeyName)
+        protected virtual bool GetHotkeyConflictStatus(int hotkeyID)
         {
-            return _hotkeyConflictStatus.ContainsKey(hotkeyName) && _hotkeyConflictStatus[hotkeyName];
+            return _hotkeyConflictStatus.ContainsKey(hotkeyID) && _hotkeyConflictStatus[hotkeyID];
         }
 
-        protected virtual string GetHotkeyConflictTooltip(string hotkeyName)
+        protected virtual string GetHotkeyConflictTooltip(int hotkeyID)
         {
-            return _hotkeyConflictTooltips.TryGetValue(hotkeyName, out string value) ? value : null;
+            return _hotkeyConflictTooltips.TryGetValue(hotkeyID, out string value) ? value : null;
         }
 
         private bool IsModuleInvolved(HotkeyConflictGroupData conflict)
@@ -183,7 +183,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         {
                             var isCurrentModule = string.Equals(module.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase);
                             var marker = isCurrentModule ? " [THIS MODULE]" : string.Empty;
-                            Debug.WriteLine($"      - {module.ModuleName}:{module.HotkeyName}{marker}");
+                            Debug.WriteLine($"      - {module.ModuleName}:{module.HotkeyID}{marker}");
                         }
                     }
                 }
@@ -205,7 +205,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         {
                             var isCurrentModule = string.Equals(module.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase);
                             var marker = isCurrentModule ? " [THIS MODULE]" : string.Empty;
-                            Debug.WriteLine($"      - {module.ModuleName}:{module.HotkeyName}{marker}");
+                            Debug.WriteLine($"      - {module.ModuleName}:{module.HotkeyID}{marker}");
                         }
                     }
                 }

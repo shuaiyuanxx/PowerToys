@@ -535,15 +535,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ToggleEasyMouseShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyName);
-                LockMachinesShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyName);
-                HotKeySwitch2AllPCHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyName);
-                ReconnectShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyName);
+                ToggleEasyMouseShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
+                LockMachinesShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
+                HotKeySwitch2AllPCHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
+                ReconnectShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
 
-                ToggleEasyMouseShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyName);
-                LockMachinesShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyName);
-                HotKeySwitch2AllPCTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyName);
-                ReconnectShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyName);
+                ToggleEasyMouseShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
+                LockMachinesShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
+                HotKeySwitch2AllPCTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
+                ReconnectShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -1441,30 +1441,30 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private void CheckAndUpdateHotkeyName()
         {
             bool hasChange = false;
-            if (Settings.Properties.ToggleEasyMouseShortcut.HotkeyName != "0")
+            if (Settings.Properties.ToggleEasyMouseShortcut.HotkeyID != 0)
             {
-                Settings.Properties.ToggleEasyMouseShortcut.HotkeyName = "0";
+                Settings.Properties.ToggleEasyMouseShortcut.HotkeyID = 0;
                 Settings.Properties.ToggleEasyMouseShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.LockMachineShortcut.HotkeyName != "1")
+            if (Settings.Properties.LockMachineShortcut.HotkeyID != 1)
             {
-                Settings.Properties.LockMachineShortcut.HotkeyName = "1";
+                Settings.Properties.LockMachineShortcut.HotkeyID = 1;
                 Settings.Properties.LockMachineShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.ReconnectShortcut.HotkeyName != "3")
+            if (Settings.Properties.ReconnectShortcut.HotkeyID != 3)
             {
-                Settings.Properties.ReconnectShortcut.HotkeyName = "3";
+                Settings.Properties.ReconnectShortcut.HotkeyID = 3;
                 Settings.Properties.ReconnectShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.Switch2AllPCShortcut.HotkeyName != "2")
+            if (Settings.Properties.Switch2AllPCShortcut.HotkeyID != 2)
             {
-                Settings.Properties.Switch2AllPCShortcut.HotkeyName = "2";
+                Settings.Properties.Switch2AllPCShortcut.HotkeyID = 2;
                 Settings.Properties.Switch2AllPCShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }

@@ -37,11 +37,11 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             Code = 0;
 
             HasConflict = false;
-            HotkeyName = "-1";
+            HotkeyID = -1;
             OwnerModuleName = string.Empty;
         }
 
-        public HotkeySettings(string hotkeyName, string ownerModuleName)
+        public HotkeySettings(int hotkeyID, string ownerModuleName)
         {
             Win = false;
             Ctrl = false;
@@ -50,7 +50,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             Code = 0;
 
             HasConflict = false;
-            HotkeyName = hotkeyName;
+            HotkeyID = hotkeyID;
             OwnerModuleName = ownerModuleName;
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         /// <param name="alt">Should Alt key be used</param>
         /// <param name="shift">Should Shift key be used</param>
         /// <param name="code">Go to https://learn.microsoft.com/windows/win32/inputdev/virtual-key-codes to see list of v-keys</param>
-        public HotkeySettings(bool win, bool ctrl, bool alt, bool shift, int code, string hotkeyName = "", string ownerModuleName = "", bool hasConflict = false)
+        public HotkeySettings(bool win, bool ctrl, bool alt, bool shift, int code, int hotkeyID = 0, string ownerModuleName = "", bool hasConflict = false)
         {
             Win = win;
             Ctrl = ctrl;
@@ -70,7 +70,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             Shift = shift;
             Code = code;
             HasConflict = hasConflict;
-            HotkeyName = hotkeyName;
+            HotkeyID = hotkeyID;
             OwnerModuleName = ownerModuleName;
         }
 
@@ -133,8 +133,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         [JsonPropertyName("code")]
         public int Code { get; set; }
 
-        [JsonPropertyName("hotkeyName")]
-        public string HotkeyName { get; set; }
+        [JsonPropertyName("hotkeyID")]
+        public int HotkeyID { get; set; }
 
         [JsonPropertyName("ownerModuleName")]
         public string OwnerModuleName { get; set; }

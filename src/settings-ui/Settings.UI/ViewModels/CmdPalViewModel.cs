@@ -103,8 +103,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                HotkeyHasConflict = GetHotkeyConflictStatus(CmdPalProperties.DefaultHotkeyValue.HotkeyName);
-                HotkeyTooltip = GetHotkeyConflictTooltip(CmdPalProperties.DefaultHotkeyValue.HotkeyName);
+                HotkeyHasConflict = GetHotkeyConflictStatus(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
+                HotkeyTooltip = GetHotkeyConflictTooltip(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>

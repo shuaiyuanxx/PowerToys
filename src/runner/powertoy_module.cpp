@@ -66,7 +66,7 @@ void PowertoyModule::update_hotkeys()
     {
         if (hotkeys[i].isShown)
         {
-            hkmng.AddHotkey(hotkeys[i], pt_module->get_key(), hotkeys[i].name == nullptr ? std::to_wstring(i).c_str() : hotkeys[i].name, pt_module->is_enabled());
+            hkmng.AddHotkey(hotkeys[i], pt_module->get_key(), static_cast<int>(i), pt_module->is_enabled());
 
             CentralizedKeyboardHook::SetHotkeyAction(pt_module->get_key(), hotkeys[i], [modulePtr, i] {
                 Logger::trace(L"{} hotkey is invoked from Centralized keyboard hook", modulePtr->get_key());
@@ -91,8 +91,8 @@ void PowertoyModule::UpdateHotkeyEx()
             modulePtr->OnHotkeyEx();
         };
 
-        HotkeyConflictDetector::Hotkey _hotkey = HotkeyConflictDetector::ShortcutToHotkey({ hotkey.modifiersMask, hotkey.vkCode, hotkey.name });
-        hkmng.AddHotkey(_hotkey, pt_module->get_key(), L"0", pt_module->is_enabled()); // This is the only one activation hotkey, so we use "0" as the name.
+        HotkeyConflictDetector::Hotkey _hotkey = HotkeyConflictDetector::ShortcutToHotkey({ hotkey.modifiersMask, hotkey.vkCode });
+        hkmng.AddHotkey(_hotkey, pt_module->get_key(), 0, pt_module->is_enabled()); // This is the only one activation hotkey, so we use "0" as the name.
 
         CentralizedHotkeys::AddHotkeyAction({ hotkey.modifiersMask, hotkey.vkCode }, { pt_module->get_key(), action });
     }

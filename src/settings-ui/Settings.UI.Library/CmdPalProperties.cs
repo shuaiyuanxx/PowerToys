@@ -11,7 +11,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
     public class CmdPalProperties
     {
         // Default shortcut - Win + Alt + Space
-        public static readonly HotkeySettings DefaultHotkeyValue = new HotkeySettings(true, false, true, false, 32, "Hotkey", "CmdPal");
+        public static readonly HotkeySettings DefaultHotkeyValue = new HotkeySettings(true, false, true, false, 32, 0, "CmdPal");
 
 #pragma warning disable SA1401 // Fields should be private
 #pragma warning disable CA1051 // Do not declare visible instance fields
@@ -50,9 +50,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                         Hotkey = DefaultHotkeyValue;
                     }
 
-                    if (Hotkey.HotkeyName == string.Empty)
+                    if (Hotkey.HotkeyID == -1)
                     {
-                        Hotkey.HotkeyName = DefaultHotkeyValue.HotkeyName;
+                        Hotkey.HotkeyID = DefaultHotkeyValue.HotkeyID;
                         Hotkey.OwnerModuleName = DefaultHotkeyValue.OwnerModuleName;
                     }
                 }

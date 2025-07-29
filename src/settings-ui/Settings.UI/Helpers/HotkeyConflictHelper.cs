@@ -39,7 +39,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
                 ["alt"] = hotkeySettings.Alt,
                 ["key"] = hotkeySettings.Code,
                 ["moduleName"] = hotkeySettings.OwnerModuleName,
-                ["hotkeyName"] = hotkeySettings.HotkeyName,
+                ["hotkeyID"] = hotkeySettings.HotkeyID,
             };
 
             var requestObject = new JsonObject

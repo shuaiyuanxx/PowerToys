@@ -192,13 +192,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                EditorHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyName);
-                NextTabHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyName);
-                PrevTabHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyName);
+                EditorHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
+                NextTabHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
+                PrevTabHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
 
-                EditorHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyName);
-                NextTabHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyName);
-                PrevTabHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyName);
+                EditorHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
+                NextTabHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
+                PrevTabHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -1022,23 +1022,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private void CheckAndUpdateHotkeyName()
         {
             bool hasChange = false;
-            if (Settings.Properties.FancyzonesEditorHotkey.Value.HotkeyName == string.Empty)
+            if (Settings.Properties.FancyzonesEditorHotkey.Value.HotkeyID != 0)
             {
-                Settings.Properties.FancyzonesEditorHotkey.Value.HotkeyName = "EditorHotkey";
+                Settings.Properties.FancyzonesEditorHotkey.Value.HotkeyID = 0;
                 Settings.Properties.FancyzonesEditorHotkey.Value.OwnerModuleName = FancyZonesSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.FancyzonesNextTabHotkey.Value.HotkeyName == string.Empty)
+            if (Settings.Properties.FancyzonesNextTabHotkey.Value.HotkeyID != 1)
             {
-                Settings.Properties.FancyzonesNextTabHotkey.Value.HotkeyName = "NextTabHotkey";
+                Settings.Properties.FancyzonesNextTabHotkey.Value.HotkeyID = 1;
                 Settings.Properties.FancyzonesNextTabHotkey.Value.OwnerModuleName = FancyZonesSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.FancyzonesPrevTabHotkey.Value.HotkeyName == string.Empty)
+            if (Settings.Properties.FancyzonesPrevTabHotkey.Value.HotkeyID != 2)
             {
-                Settings.Properties.FancyzonesPrevTabHotkey.Value.HotkeyName = "PrevTabHotkey";
+                Settings.Properties.FancyzonesPrevTabHotkey.Value.HotkeyID = 2;
                 Settings.Properties.FancyzonesPrevTabHotkey.Value.OwnerModuleName = FancyZonesSettings.ModuleName;
                 hasChange = true;
             }
