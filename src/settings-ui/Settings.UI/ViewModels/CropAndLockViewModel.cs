@@ -53,21 +53,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = moduleSettingsRepository.SettingsConfig;
 
+            CheckAndUpdateHotkeySettings();
+
             _reparentHotkey = Settings.Properties.ReparentHotkey.Value;
             _thumbnailHotkey = Settings.Properties.ThumbnailHotkey.Value;
-            if (Settings.Properties.ReparentHotkey.Value.HotkeyName == string.Empty)
-            {
-                Settings.Properties.ReparentHotkey.Value.HotkeyName = "ReparentHotkey";
-                Settings.Properties.ReparentHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
-            }
-
-            if (Settings.Properties.ThumbnailHotkey.Value.HotkeyName == string.Empty)
-            {
-                Settings.Properties.ThumbnailHotkey.Value.HotkeyName = "ThumbnailHotkey";
-                Settings.Properties.ThumbnailHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
-            }
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
@@ -85,6 +74,30 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             else
             {
                 _isEnabled = GeneralSettingsConfig.Enabled.CropAndLock;
+            }
+        }
+
+        private void CheckAndUpdateHotkeySettings()
+        {
+            bool shoudUpdate = false;
+
+            if (Settings.Properties.ReparentHotkey.Value.HotkeyName != "0")
+            {
+                Settings.Properties.ReparentHotkey.Value.HotkeyName = "0";
+                Settings.Properties.ReparentHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
+                shoudUpdate = true;
+            }
+
+            if (Settings.Properties.ThumbnailHotkey.Value.HotkeyName != "1")
+            {
+                Settings.Properties.ThumbnailHotkey.Value.HotkeyName = "1";
+                Settings.Properties.ThumbnailHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
+                shoudUpdate = true;
+            }
+
+            if (shoudUpdate)
+            {
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
             }
         }
 
