@@ -1441,30 +1441,30 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private void CheckAndUpdateHotkeyName()
         {
             bool hasChange = false;
-            if (Settings.Properties.ToggleEasyMouseShortcut.HotkeyName == string.Empty)
+            if (Settings.Properties.ToggleEasyMouseShortcut.HotkeyName != "0")
             {
-                Settings.Properties.ToggleEasyMouseShortcut.HotkeyName = "HotKeyToggleEasyMouse";
+                Settings.Properties.ToggleEasyMouseShortcut.HotkeyName = "0";
                 Settings.Properties.ToggleEasyMouseShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.LockMachineShortcut.HotkeyName == string.Empty)
+            if (Settings.Properties.LockMachineShortcut.HotkeyName != "1")
             {
-                Settings.Properties.LockMachineShortcut.HotkeyName = "HotKeyLockMachine";
+                Settings.Properties.LockMachineShortcut.HotkeyName = "1";
                 Settings.Properties.LockMachineShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.ReconnectShortcut.HotkeyName == string.Empty)
+            if (Settings.Properties.ReconnectShortcut.HotkeyName != "3")
             {
-                Settings.Properties.ReconnectShortcut.HotkeyName = "HotKeyReconnect";
+                Settings.Properties.ReconnectShortcut.HotkeyName = "3";
                 Settings.Properties.ReconnectShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }
 
-            if (Settings.Properties.Switch2AllPCShortcut.HotkeyName == string.Empty)
+            if (Settings.Properties.Switch2AllPCShortcut.HotkeyName != "2")
             {
-                Settings.Properties.Switch2AllPCShortcut.HotkeyName = "HotKeySwitch2AllPC";
+                Settings.Properties.Switch2AllPCShortcut.HotkeyName = "2";
                 Settings.Properties.Switch2AllPCShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
                 hasChange = true;
             }

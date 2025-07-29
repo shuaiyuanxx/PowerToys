@@ -53,10 +53,8 @@ PowertoyModule::PowertoyModule(PowertoyModuleIface* pt_module, HMODULE handle) :
 
 void PowertoyModule::update_hotkeys()
 {
-    auto moduleName = pt_module->get_key();
-
-    CentralizedKeyboardHook::ClearModuleHotkeys(moduleName);
-    hkmng.RemoveHotkeyByModule(moduleName);
+    CentralizedKeyboardHook::ClearModuleHotkeys(pt_module->get_key());
+    hkmng.RemoveHotkeyByModule(pt_module->get_key());
 
     size_t hotkeyCount = pt_module->get_hotkeys(nullptr, 0);
     std::vector<PowertoyModuleIface::Hotkey> hotkeys(hotkeyCount);
@@ -81,6 +79,8 @@ void PowertoyModule::update_hotkeys()
 void PowertoyModule::UpdateHotkeyEx()
 {
     CentralizedHotkeys::UnregisterHotkeysForModule(pt_module->get_key());
+    hkmng.RemoveHotkeyByModule(pt_module->get_key());
+
     auto container = pt_module->GetHotkeyEx();
     if (container.has_value() && pt_module->is_enabled())
     {
@@ -91,7 +91,10 @@ void PowertoyModule::UpdateHotkeyEx()
             modulePtr->OnHotkeyEx();
         };
 
-        CentralizedHotkeys::AddHotkeyAction({ hotkey.modifiersMask, hotkey.vkCode, hotkey.name }, { pt_module->get_key(), action }, pt_module->get_name(), pt_module->is_enabled());
+        HotkeyConflictDetector::Hotkey _hotkey = HotkeyConflictDetector::ShortcutToHotkey({ hotkey.modifiersMask, hotkey.vkCode, hotkey.name });
+        hkmng.AddHotkey(_hotkey, pt_module->get_key(), L"0", pt_module->is_enabled()); // This is the only one activation hotkey, so we use "0" as the name.
+
+        CentralizedHotkeys::AddHotkeyAction({ hotkey.modifiersMask, hotkey.vkCode }, { pt_module->get_key(), action });
     }
 
     // HACK:

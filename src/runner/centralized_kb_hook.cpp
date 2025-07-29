@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "centralized_kb_hook.h"
-#include "hotkey_conflict_detector.h"
 #include <common/debug_control.h>
 #include <common/utils/winapi_error.h>
 #include <common/logger/logger.h>
@@ -192,7 +191,6 @@ namespace CentralizedKeyboardHook
     {
         Logger::trace(L"Register hotkey action for {}", moduleName);
         std::unique_lock lock{ mutex };
-
         hotkeyDescriptors.insert({ .hotkey = hotkey, .moduleName = moduleName, .action = std::move(action) });
     }
 
