@@ -95,7 +95,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public bool GenerateThumbnailsFromFiles { get; set; }
 
         [CmdConfigureIgnoreAttribute]
-        public HotkeySettings DefaultOpenPowerLauncher => new HotkeySettings(false, false, true, false, 32, "OpenPowerLauncher", PowerLauncherSettings.ModuleName);
+        public HotkeySettings DefaultOpenPowerLauncher => new HotkeySettings(false, false, true, false, 32, "0", PowerLauncherSettings.ModuleName);
 
         [CmdConfigureIgnoreAttribute]
         public HotkeySettings DefaultOpenFileLocation => new HotkeySettings("OpenFileLocation", PowerLauncherSettings.ModuleName);

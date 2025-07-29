@@ -365,7 +365,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private void CheckAndUpdateHotkeyName()
         {
-            if (Settings.Properties.Hotkey.Value.HotkeyName == string.Empty)
+            if (Settings.Properties.Hotkey.Value.HotkeyName != "0")
             {
                 Settings.Properties.Hotkey.Value.HotkeyName = AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyName;
                 Settings.Properties.Hotkey.Value.OwnerModuleName = AlwaysOnTopSettings.ModuleName;

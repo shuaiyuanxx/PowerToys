@@ -87,7 +87,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             if (string.IsNullOrEmpty(settings.Properties.OpenPowerLauncher.HotkeyName))
             {
-                settings.Properties.OpenPowerLauncher.HotkeyName = "OpenPowerLauncher";
+                settings.Properties.OpenPowerLauncher.HotkeyName = "0";
                 settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
             }
 

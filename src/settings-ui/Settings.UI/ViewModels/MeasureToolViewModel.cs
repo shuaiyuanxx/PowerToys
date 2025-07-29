@@ -48,9 +48,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = measureToolSettingsRepository.SettingsConfig;
 
-            if (Settings.Properties.ActivationShortcut.HotkeyName == string.Empty)
+            if (Settings.Properties.ActivationShortcut.HotkeyName != "0")
             {
-                Settings.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                Settings.Properties.ActivationShortcut.HotkeyName = "0";
                 Settings.Properties.ActivationShortcut.OwnerModuleName = MeasureToolSettings.ModuleName;
                 settingsUtils.SaveSettings(Settings.ToJsonString(), MeasureToolSettings.ModuleName);
             }

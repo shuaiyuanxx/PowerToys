@@ -95,7 +95,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _powerOcrSettings = powerOcrsettingsRepository.SettingsConfig;
 
-            if (string.IsNullOrEmpty(_powerOcrSettings.Properties.ActivationShortcut.HotkeyName))
+            if (_powerOcrSettings.Properties.ActivationShortcut.HotkeyName != "0")
             {
                 _powerOcrSettings.Properties.ActivationShortcut.HotkeyName = _powerOcrSettings.Properties.DefaultActivationShortcut.HotkeyName;
                 _powerOcrSettings.Properties.ActivationShortcut.OwnerModuleName = _powerOcrSettings.Properties.DefaultActivationShortcut.OwnerModuleName;

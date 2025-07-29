@@ -65,9 +65,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _colorPickerSettings = colorPickerSettingsRepository.SettingsConfig;
 
-            if (_colorPickerSettings.Properties.ActivationShortcut.HotkeyName == string.Empty)
+            if (_colorPickerSettings.Properties.ActivationShortcut.HotkeyName != "0")
             {
-                _colorPickerSettings.Properties.ActivationShortcut.HotkeyName = "ActivationShortcut";
+                _colorPickerSettings.Properties.ActivationShortcut.HotkeyName = "0";
                 _colorPickerSettings.Properties.ActivationShortcut.OwnerModuleName = ColorPickerSettings.ModuleName;
                 _settingsUtils.SaveSettings(_colorPickerSettings.ToJsonString(), ColorPickerSettings.ModuleName);
             }
