@@ -279,7 +279,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                 foreach (var customAction in _customActions)
                 {
-                    var hotkeyName = customAction.Name;
+                    var hotkeyName = customAction.Shortcut.HotkeyName;
                     customAction.HasConflict = GetHotkeyConflictStatus(hotkeyName);
                     customAction.Tooltip = GetHotkeyConflictTooltip(hotkeyName);
                 }
