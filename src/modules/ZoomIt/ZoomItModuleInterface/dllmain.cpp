@@ -2,6 +2,7 @@
 
 #include <modules/interface/powertoy_module_interface.h>
 #include <common/SettingsAPI/settings_objects.h>
+#include "winrt/PowerToys.ZoomItSettingsInterop.h"
 
 #include "trace.h"
 #include <common/logger/logger.h>
@@ -18,10 +19,10 @@ namespace NonLocalizable
     const inline wchar_t ModuleKey[] = L"ZoomIt";
 }
 
-BOOL APIENTRY DllMain( HMODULE /*hModule*/,
-                       DWORD  ul_reason_for_call,
-                       LPVOID /*lpReserved*/
-                     )
+BOOL APIENTRY DllMain(HMODULE /*hModule*/,
+                      DWORD ul_reason_for_call,
+                      LPVOID /*lpReserved*/
+)
 {
     switch (ul_reason_for_call)
     {
@@ -36,7 +37,6 @@ BOOL APIENTRY DllMain( HMODULE /*hModule*/,
         break;
     }
     return TRUE;
-
 }
 
 class ZoomItModuleInterface : public PowertoyModuleIface
@@ -89,17 +89,35 @@ public:
         }
     }
 
+    // Return the list of hotkeys for ZoomIt
+    /*
+    virtual size_t get_hotkeys(Hotkey* hotkeys, size_t buffer_size) override
+    {
+        if (hotkeys && buffer_size >= NUM_HOTKEYS)
+        {
+            hotkeys[0] = m_toggle_key;
+            hotkeys[1] = m_live_zoom_toggle_key;
+            hotkeys[2] = m_draw_toggle_key;
+            hotkeys[3] = m_record_toggle_key;
+            hotkeys[4] = m_snip_toggle_key;
+            hotkeys[5] = m_break_timer_key;
+            hotkeys[6] = m_demo_type_toggle_key;
+        }
+
+        return NUM_HOTKEYS;
+    }*/
+
     // Enable the powertoy
     virtual void enable()
     {
-        Logger::info("ZoomIt enabling");
+        Logger::info(L"ZoomIt enabling");
         Enable();
     }
 
     // Disable the powertoy
     virtual void disable()
     {
-        Logger::info("ZoomIt disabling");
+        Logger::info(L"ZoomIt disabling");
         Disable(true);
     }
 
@@ -123,9 +141,103 @@ public:
         LoggerHelpers::init_logger(app_key, L"ModuleInterface", LogSettings::zoomItLoggerName);
         m_reload_settings_event_handle = CreateDefaultEvent(CommonSharedConstants::ZOOMIT_REFRESH_SETTINGS_EVENT);
         m_exit_event_handle = CreateDefaultEvent(CommonSharedConstants::ZOOMIT_EXIT_EVENT);
+
+        // TODO: Add hotkey conflict detection for ZoomIt
+        // init_settings();
     }
 
 private:
+    static const constexpr int NUM_HOTKEYS = 7;
+
+    Hotkey m_toggle_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '1', .id = 0 };
+    Hotkey m_live_zoom_toggle_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '4', .id = 1 };
+    Hotkey m_draw_toggle_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '2', .id = 2 };
+    Hotkey m_record_toggle_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '5', .id = 3 };
+    Hotkey m_snip_toggle_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '6', .id = 4 };
+    Hotkey m_break_timer_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '3', .id = 5 };
+    Hotkey m_demo_type_toggle_key = { .win = false, .ctrl = true, .shift = false, .alt = false, .key = '7', .id = 6 };
+
+    void init_settings()
+    {
+        try
+        {
+            winrt::hstring settingsJson = winrt::PowerToys::ZoomItSettingsInterop::ZoomItSettings::LoadSettingsJson();
+
+            PowerToysSettings::PowerToyValues values =
+                PowerToysSettings::PowerToyValues::from_json_string(settingsJson.c_str(), get_key());
+
+            read_settings(values);
+        }
+        catch (...)
+        {
+            Logger::warn(L"An exception occurred while loading ZoomIt settings from registry. Using default values.");
+        }
+    }
+
+    void read_settings(PowerToysSettings::PowerToyValues& settings)
+    {
+        const auto settingsObject = settings.get_raw_json();
+        const auto properties_json = settingsObject.GetNamedObject(L"properties", json::JsonObject{});
+
+        if (properties_json.GetView().Size())
+        {
+            Logger::trace(L"ZoomIt reading settings from registry via ZoomItSettingsInterop");
+
+            const std::array<std::pair<const wchar_t*, std::pair<Hotkey*, int>>, NUM_HOTKEYS> hotkeyMappings = { { { L"ToggleKey", { &m_toggle_key, 0 } },
+                                                                                                                   { L"LiveZoomToggleKey", { &m_live_zoom_toggle_key, 1 } },
+                                                                                                                   { L"DrawToggleKey", { &m_draw_toggle_key, 2 } },
+                                                                                                                   { L"RecordToggleKey", { &m_record_toggle_key, 3 } },
+                                                                                                                   { L"SnipToggleKey", { &m_snip_toggle_key, 4 } },
+                                                                                                                   { L"BreakTimerKey", { &m_break_timer_key, 5 } },
+                                                                                                                   { L"DemoTypeToggleKey", { &m_demo_type_toggle_key, 6 } } } };
+
+            for (const auto& [keyName, hotkeyData] : hotkeyMappings)
+            {
+                auto [hotkeyPtr, index] = hotkeyData;
+                auto parsed_hotkey = parse_single_hotkey(keyName, properties_json, index);
+                if (parsed_hotkey.key != 0) // Valid hotkey parsed
+                {
+                    *hotkeyPtr = parsed_hotkey;
+                    Logger::trace(L"ZoomIt loaded hotkey from registry");
+                }
+                else
+                {
+                    Logger::trace(L"ZoomIt using default hotkey");
+                }
+            }
+        }
+        else
+        {
+            Logger::info(L"ZoomIt registry settings are empty, using default hotkeys");
+        }
+    }
+
+    Hotkey parse_single_hotkey(const wchar_t* keyName, const winrt::Windows::Data::Json::JsonObject& settingsObject, int hotkey_id)
+    {
+        try
+        {
+            if (settingsObject.HasKey(keyName))
+            {
+                const auto hotkeyObject = settingsObject.GetNamedObject(keyName);
+                const auto valueObject = hotkeyObject.GetNamedObject(L"value");
+
+                bool win = valueObject.GetNamedBoolean(L"win", false);
+                bool ctrl = valueObject.GetNamedBoolean(L"ctrl", false);
+                bool alt = valueObject.GetNamedBoolean(L"alt", false);
+                bool shift = valueObject.GetNamedBoolean(L"shift", false);
+                unsigned char key = static_cast<unsigned char>(valueObject.GetNamedNumber(L"code", 0));
+
+                return { win, ctrl, shift, alt, key, hotkey_id };
+            }
+        }
+        catch (...)
+        {
+            Logger::error(L"Failed to parse ZoomIt hotkey from registry settings. Using default value.");
+        }
+
+        return {};
+    }
+
     bool is_enabled_by_default() const override
     {
         return false;
@@ -164,7 +276,6 @@ private:
         {
             m_hProcess = sei.hProcess;
         }
-
     }
 
     void Disable(bool const traceEvent)
@@ -191,7 +302,6 @@ private:
             TerminateProcess(m_hProcess, 0);
             m_hProcess = nullptr;
         }
-
     }
 
     bool is_process_running()
@@ -208,12 +318,13 @@ private:
 
             if (action_object.get_name() == L"refresh_settings")
             {
+                init_settings();
                 SetEvent(m_reload_settings_event_handle);
             }
         }
         catch (std::exception&)
         {
-            Logger::error(L"Failed to parse action. {}", action);
+            Logger::error(L"Failed to parse action.");
         }
     }
 
