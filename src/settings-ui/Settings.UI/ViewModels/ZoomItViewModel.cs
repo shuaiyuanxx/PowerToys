@@ -122,6 +122,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             SelectTypeFontCommand = new ButtonClickCommand(SelectTypeFontAction);
 
             LoadMicrophoneList();
+
+            CheckAndUpdateHotkeyID();
         }
 
         private void InitializeEnabledValue()
@@ -1002,6 +1004,65 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             InitializeEnabledValue();
             OnPropertyChanged(nameof(IsEnabled));
+        }
+
+        private void CheckAndUpdateHotkeyID()
+        {
+            bool needUpdate = false;
+
+            if (ZoomToggleKey.HotkeyID != 0)
+            {
+                ZoomToggleKey.HotkeyID = 0;
+                ZoomToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (LiveZoomToggleKey.HotkeyID != 1)
+            {
+                LiveZoomToggleKey.HotkeyID = 1;
+                LiveZoomToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (DrawToggleKey.HotkeyID != 2)
+            {
+                DrawToggleKey.HotkeyID = 2;
+                DrawToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (RecordToggleKey.HotkeyID != 3)
+            {
+                RecordToggleKey.HotkeyID = 3;
+                RecordToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (SnipToggleKey.HotkeyID != 4)
+            {
+                SnipToggleKey.HotkeyID = 4;
+                SnipToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (BreakTimerKey.HotkeyID != 5)
+            {
+                BreakTimerKey.HotkeyID = 5;
+                BreakTimerKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (DemoTypeToggleKey.HotkeyID != 6)
+            {
+                DemoTypeToggleKey.HotkeyID = 6;
+                DemoTypeToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
+                needUpdate = true;
+            }
+
+            if (needUpdate)
+            {
+                NotifySettingsChanged();
+            }
         }
 
         private GpoRuleConfigured _enabledGpoRuleConfiguration;

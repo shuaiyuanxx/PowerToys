@@ -175,8 +175,9 @@ private:
     void read_settings(PowerToysSettings::PowerToyValues& settings)
     {
         const auto settingsObject = settings.get_raw_json();
+        const auto properties_json = settingsObject.GetNamedObject(L"properties", json::JsonObject{});
 
-        if (settingsObject.GetView().Size())
+        if (properties_json.GetView().Size())
         {
             Logger::trace(L"ZoomIt reading settings from registry via ZoomItSettingsInterop");
 
@@ -191,7 +192,7 @@ private:
             for (const auto& [keyName, hotkeyData] : hotkeyMappings)
             {
                 auto [hotkeyPtr, index] = hotkeyData;
-                auto parsed_hotkey = parse_single_hotkey(keyName, settingsObject, index);
+                auto parsed_hotkey = parse_single_hotkey(keyName, properties_json, index);
                 if (parsed_hotkey.key != 0) // Valid hotkey parsed
                 {
                     *hotkeyPtr = parsed_hotkey;
@@ -216,12 +217,13 @@ private:
             if (settingsObject.HasKey(keyName))
             {
                 const auto hotkeyObject = settingsObject.GetNamedObject(keyName);
+                const auto valueObject = hotkeyObject.GetNamedObject(L"value");
 
-                bool win = hotkeyObject.GetNamedBoolean(L"win", false);
-                bool ctrl = hotkeyObject.GetNamedBoolean(L"ctrl", false);
-                bool alt = hotkeyObject.GetNamedBoolean(L"alt", false);
-                bool shift = hotkeyObject.GetNamedBoolean(L"shift", false);
-                unsigned char key = static_cast<unsigned char>(hotkeyObject.GetNamedNumber(L"code", 0));
+                bool win = valueObject.GetNamedBoolean(L"win", false);
+                bool ctrl = valueObject.GetNamedBoolean(L"ctrl", false);
+                bool alt = valueObject.GetNamedBoolean(L"alt", false);
+                bool shift = valueObject.GetNamedBoolean(L"shift", false);
+                unsigned char key = static_cast<unsigned char>(valueObject.GetNamedNumber(L"code", 0));
 
                 return { win, ctrl, shift, alt, key, hotkey_id };
             }

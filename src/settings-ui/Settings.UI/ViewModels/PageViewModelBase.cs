@@ -125,8 +125,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     foreach (var conflict in conflictGroup.Modules)
                     {
-                        _hotkeyConflictStatus[conflict.HotkeyID] = true;
-                        _hotkeyConflictTooltips[conflict.HotkeyID] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                        if (string.Equals(conflict.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _hotkeyConflictStatus[conflict.HotkeyID] = true;
+                            _hotkeyConflictTooltips[conflict.HotkeyID] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                        }
                     }
                 }
             }
@@ -137,8 +140,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     foreach (var conflict in conflictGroup.Modules)
                     {
-                        _hotkeyConflictStatus[conflict.HotkeyID] = true;
-                        _hotkeyConflictTooltips[conflict.HotkeyID] = ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText");
+                        if (string.Equals(conflict.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _hotkeyConflictStatus[conflict.HotkeyID] = true;
+                            _hotkeyConflictTooltips[conflict.HotkeyID] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                        }
                     }
                 }
             }
