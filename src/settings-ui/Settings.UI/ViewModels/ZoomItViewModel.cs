@@ -3,19 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Threading.Tasks;
 using AllExperiments;
 using global::PowerToys.GPOWrapper;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
-using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 using Microsoft.PowerToys.Settings.UI.Library.ViewModels.Commands;
@@ -25,25 +22,8 @@ using Windows.Devices.Enumeration;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
-    public class ZoomItViewModel : PageViewModelBase
+    public class ZoomItViewModel : Observable
     {
-        protected override string ModuleName => ZoomItSettings.ModuleName;
-
-        private bool _zoomToggleKeyHasConflict;
-        private string _zoomToggleKeyTooltip;
-        private bool _liveZoomToggleKeyHasConflict;
-        private string _liveZoomToggleKeyTooltip;
-        private bool _drawToggleKeyHasConflict;
-        private string _drawToggleKeyTooltip;
-        private bool _demoTypeToggleKeyHasConflict;
-        private string _demoTypeToggleKeyTooltip;
-        private bool _breakTimerKeyHasConflict;
-        private string _breakTimerKeyTooltip;
-        private bool _recordToggleKeyHasConflict;
-        private string _recordToggleKeyTooltip;
-        private bool _snipToggleKeyHasConflict;
-        private string _snipToggleKeyTooltip;
-
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -122,8 +102,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             SelectTypeFontCommand = new ButtonClickCommand(SelectTypeFontAction);
 
             LoadMicrophoneList();
-
-            CheckAndUpdateHotkeyID();
         }
 
         private void InitializeEnabledValue()
@@ -138,233 +116,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             else
             {
                 _isEnabled = GeneralSettingsConfig.Enabled.ZoomIt;
-            }
-        }
-
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
-        {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
-            {
-                ZoomToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultToggleKey.HotkeyID);
-                LiveZoomToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyID);
-                DrawToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDrawToggleKey.HotkeyID);
-                DemoTypeToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyID);
-                BreakTimerKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultBreakTimerKey.HotkeyID);
-                RecordToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultRecordToggleKey.HotkeyID);
-                SnipToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultSnipToggleKey.HotkeyID);
-
-                ZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultToggleKey.HotkeyID);
-                LiveZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyID);
-                DrawToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDrawToggleKey.HotkeyID);
-                DemoTypeToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyID);
-                BreakTimerKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultBreakTimerKey.HotkeyID);
-                RecordToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultRecordToggleKey.HotkeyID);
-                SnipToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultSnipToggleKey.HotkeyID);
-            }
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
-        }
-
-        public bool ZoomToggleKeyHasConflict
-        {
-            get => _zoomToggleKeyHasConflict;
-            set
-            {
-                if (_zoomToggleKeyHasConflict != value)
-                {
-                    _zoomToggleKeyHasConflict = value;
-                    OnPropertyChanged(nameof(ZoomToggleKeyHasConflict));
-                }
-            }
-        }
-
-        public string ZoomToggleKeyTooltip
-        {
-            get => _zoomToggleKeyTooltip;
-            set
-            {
-                if (_zoomToggleKeyTooltip != value)
-                {
-                    _zoomToggleKeyTooltip = value;
-                    OnPropertyChanged(nameof(ZoomToggleKeyTooltip));
-                }
-            }
-        }
-
-        public bool LiveZoomToggleKeyHasConflict
-        {
-            get => _liveZoomToggleKeyHasConflict;
-            set
-            {
-                if (_liveZoomToggleKeyHasConflict != value)
-                {
-                    _liveZoomToggleKeyHasConflict = value;
-                    OnPropertyChanged(nameof(LiveZoomToggleKeyHasConflict));
-                }
-            }
-        }
-
-        public string LiveZoomToggleKeyTooltip
-        {
-            get => _liveZoomToggleKeyTooltip;
-            set
-            {
-                if (_liveZoomToggleKeyTooltip != value)
-                {
-                    _liveZoomToggleKeyTooltip = value;
-                    OnPropertyChanged(nameof(LiveZoomToggleKeyTooltip));
-                }
-            }
-        }
-
-        public bool DrawToggleKeyHasConflict
-        {
-            get => _drawToggleKeyHasConflict;
-            set
-            {
-                if (_drawToggleKeyHasConflict != value)
-                {
-                    _drawToggleKeyHasConflict = value;
-                    OnPropertyChanged(nameof(DrawToggleKeyHasConflict));
-                }
-            }
-        }
-
-        public string DrawToggleKeyTooltip
-        {
-            get => _drawToggleKeyTooltip;
-            set
-            {
-                if (_drawToggleKeyTooltip != value)
-                {
-                    _drawToggleKeyTooltip = value;
-                    OnPropertyChanged(nameof(DrawToggleKeyTooltip));
-                }
-            }
-        }
-
-        public bool DemoTypeToggleKeyHasConflict
-        {
-            get => _demoTypeToggleKeyHasConflict;
-            set
-            {
-                if (_demoTypeToggleKeyHasConflict != value)
-                {
-                    _demoTypeToggleKeyHasConflict = value;
-                    OnPropertyChanged(nameof(DemoTypeToggleKeyHasConflict));
-                }
-            }
-        }
-
-        public string DemoTypeToggleKeyTooltip
-        {
-            get => _demoTypeToggleKeyTooltip;
-            set
-            {
-                if (_demoTypeToggleKeyTooltip != value)
-                {
-                    _demoTypeToggleKeyTooltip = value;
-                    OnPropertyChanged(nameof(DemoTypeToggleKeyTooltip));
-                }
-            }
-        }
-
-        public bool BreakTimerKeyHasConflict
-        {
-            get => _breakTimerKeyHasConflict;
-            set
-            {
-                if (_breakTimerKeyHasConflict != value)
-                {
-                    _breakTimerKeyHasConflict = value;
-                    OnPropertyChanged(nameof(BreakTimerKeyHasConflict));
-                }
-            }
-        }
-
-        public string BreakTimerKeyTooltip
-        {
-            get => _breakTimerKeyTooltip;
-            set
-            {
-                if (_breakTimerKeyTooltip != value)
-                {
-                    _breakTimerKeyTooltip = value;
-                    OnPropertyChanged(nameof(BreakTimerKeyTooltip));
-                }
-            }
-        }
-
-        public bool RecordToggleKeyHasConflict
-        {
-            get => _recordToggleKeyHasConflict;
-            set
-            {
-                if (_recordToggleKeyHasConflict != value)
-                {
-                    _recordToggleKeyHasConflict = value;
-                    OnPropertyChanged(nameof(RecordToggleKeyHasConflict));
-                }
-            }
-        }
-
-        public string RecordToggleKeyTooltip
-        {
-            get => _recordToggleKeyTooltip;
-            set
-            {
-                if (_recordToggleKeyTooltip != value)
-                {
-                    _recordToggleKeyTooltip = value;
-                    OnPropertyChanged(nameof(RecordToggleKeyTooltip));
-                }
-            }
-        }
-
-        public bool SnipToggleKeyHasConflict
-        {
-            get => _snipToggleKeyHasConflict;
-            set
-            {
-                if (_snipToggleKeyHasConflict != value)
-                {
-                    _snipToggleKeyHasConflict = value;
-                    OnPropertyChanged(nameof(SnipToggleKeyHasConflict));
-                }
-            }
-        }
-
-        public string SnipToggleKeyTooltip
-        {
-            get => _snipToggleKeyTooltip;
-            set
-            {
-                if (_snipToggleKeyTooltip != value)
-                {
-                    _snipToggleKeyTooltip = value;
-                    OnPropertyChanged(nameof(SnipToggleKeyTooltip));
-                }
             }
         }
 
@@ -1004,65 +755,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             InitializeEnabledValue();
             OnPropertyChanged(nameof(IsEnabled));
-        }
-
-        private void CheckAndUpdateHotkeyID()
-        {
-            bool needUpdate = false;
-
-            if (ZoomToggleKey.HotkeyID != 0)
-            {
-                ZoomToggleKey.HotkeyID = 0;
-                ZoomToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (LiveZoomToggleKey.HotkeyID != 1)
-            {
-                LiveZoomToggleKey.HotkeyID = 1;
-                LiveZoomToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (DrawToggleKey.HotkeyID != 2)
-            {
-                DrawToggleKey.HotkeyID = 2;
-                DrawToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (RecordToggleKey.HotkeyID != 3)
-            {
-                RecordToggleKey.HotkeyID = 3;
-                RecordToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (SnipToggleKey.HotkeyID != 4)
-            {
-                SnipToggleKey.HotkeyID = 4;
-                SnipToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (BreakTimerKey.HotkeyID != 5)
-            {
-                BreakTimerKey.HotkeyID = 5;
-                BreakTimerKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (DemoTypeToggleKey.HotkeyID != 6)
-            {
-                DemoTypeToggleKey.HotkeyID = 6;
-                DemoTypeToggleKey.OwnerModuleName = ZoomItSettings.ModuleName;
-                needUpdate = true;
-            }
-
-            if (needUpdate)
-            {
-                NotifySettingsChanged();
-            }
         }
 
         private GpoRuleConfigured _enabledGpoRuleConfiguration;
