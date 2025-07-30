@@ -45,10 +45,17 @@ public:
 
     void UpdateHotkeyEx();
 
+    inline void remove_hotkey_records()
+    {
+        hkmng.RemoveHotkeyByModule(pt_module->get_key());
+    }
+
 private:
     HotkeyConflictDetector::HotkeyConflictManager& hkmng;
     std::unique_ptr<HMODULE, PowertoyModuleDLLDeleter> handle;
     std::unique_ptr<PowertoyModuleIface, PowertoyModuleDeleter> pt_module;
+
+    
 };
 
 PowertoyModule load_powertoy(const std::wstring_view filename);

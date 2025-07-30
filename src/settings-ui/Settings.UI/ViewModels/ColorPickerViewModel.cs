@@ -128,8 +128,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus("ActivationShortcut");
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip("ActivationShortcut");
+                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
             }
 
             _ = System.Threading.Tasks.Task.Run(() =>

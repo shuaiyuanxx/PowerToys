@@ -154,6 +154,8 @@ void send_json_config_to_module(const std::wstring& module_key, const std::wstri
     if (moduleIt != modules().end())
     {
         moduleIt->second->set_config(settings.c_str());
+
+        moduleIt->second.remove_hotkey_records();
         moduleIt->second.update_hotkeys();
         moduleIt->second.UpdateHotkeyEx();
     }

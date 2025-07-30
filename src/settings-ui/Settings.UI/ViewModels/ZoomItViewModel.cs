@@ -146,17 +146,17 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ZoomToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultToggleKey.HotkeyName);
-                LiveZoomToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyName);
-                DrawToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDrawToggleKey.HotkeyName);
-                DemoTypeToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyName);
-                BreakTimerKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultBreakTimerKey.HotkeyName);
+                ZoomToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultToggleKey.HotkeyID);
+                LiveZoomToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyID);
+                DrawToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDrawToggleKey.HotkeyID);
+                DemoTypeToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyID);
+                BreakTimerKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultBreakTimerKey.HotkeyID);
 
-                ZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultToggleKey.HotkeyName);
-                LiveZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyName);
-                DrawToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDrawToggleKey.HotkeyName);
-                DemoTypeToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyName);
-                BreakTimerKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultBreakTimerKey.HotkeyName);
+                ZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultToggleKey.HotkeyID);
+                LiveZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyID);
+                DrawToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDrawToggleKey.HotkeyID);
+                DemoTypeToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyID);
+                BreakTimerKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultBreakTimerKey.HotkeyID);
             }
 
             _ = Task.Run(() =>

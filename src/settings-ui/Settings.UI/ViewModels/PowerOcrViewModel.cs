@@ -95,9 +95,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _powerOcrSettings = powerOcrsettingsRepository.SettingsConfig;
 
-            if (_powerOcrSettings.Properties.ActivationShortcut.HotkeyName != "0")
+            if (_powerOcrSettings.Properties.ActivationShortcut.HotkeyID != 0)
             {
-                _powerOcrSettings.Properties.ActivationShortcut.HotkeyName = _powerOcrSettings.Properties.DefaultActivationShortcut.HotkeyName;
+                _powerOcrSettings.Properties.ActivationShortcut.HotkeyID = _powerOcrSettings.Properties.DefaultActivationShortcut.HotkeyID;
                 _powerOcrSettings.Properties.ActivationShortcut.OwnerModuleName = _powerOcrSettings.Properties.DefaultActivationShortcut.OwnerModuleName;
             }
 
@@ -134,8 +134,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus("ActivationShortcut");
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip("ActivationShortcut");
+                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>

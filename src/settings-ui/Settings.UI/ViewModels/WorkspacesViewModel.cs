@@ -55,9 +55,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _hotkey = Settings.Properties.Hotkey.Value;
 
-            if (string.IsNullOrEmpty(_hotkey.HotkeyName))
+            if (_hotkey.HotkeyID != 0)
             {
-                _hotkey.HotkeyName = WorkspacesProperties.DefaultHotkeyValue.HotkeyName;
+                _hotkey.HotkeyID = WorkspacesProperties.DefaultHotkeyValue.HotkeyID;
                 _hotkey.OwnerModuleName = WorkspacesProperties.DefaultHotkeyValue.OwnerModuleName;
             }
 
@@ -95,8 +95,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                HotkeyHasConflict = GetHotkeyConflictStatus(WorkspacesProperties.DefaultHotkeyValue.HotkeyName);
-                HotkeyTooltip = GetHotkeyConflictTooltip(WorkspacesProperties.DefaultHotkeyValue.HotkeyName);
+                HotkeyHasConflict = GetHotkeyConflictStatus(WorkspacesProperties.DefaultHotkeyValue.HotkeyID);
+                HotkeyTooltip = GetHotkeyConflictTooltip(WorkspacesProperties.DefaultHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>

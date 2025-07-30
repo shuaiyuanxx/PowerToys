@@ -242,14 +242,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override bool GetHotkeyConflictStatus(string hotkeyID)
+        private bool GetHotkeyConflictStatus(string hotkeyName)
         {
-            return _hotkeyConflictStatus.ContainsKey(hotkeyID) && _hotkeyConflictStatus[hotkeyID];
+            return _hotkeyConflictStatus.ContainsKey(hotkeyName) && _hotkeyConflictStatus[hotkeyName];
         }
 
-        protected override string GetHotkeyConflictTooltip(int hotkeyID)
+        private string GetHotkeyConflictTooltip(string hotkeyName)
         {
-            return _hotkeyConflictTooltips.TryGetValue(hotkeyID, out string value) ? value : null;
+            return _hotkeyConflictTooltips.TryGetValue(hotkeyName, out string value) ? value : null;
         }
 
         protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)

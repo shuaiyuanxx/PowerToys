@@ -52,9 +52,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = moduleSettingsRepository.SettingsConfig;
 
-            if (string.IsNullOrEmpty(Settings.Properties.OpenShortcutGuide.HotkeyName))
+            if (Settings.Properties.OpenShortcutGuide.HotkeyID != 0)
             {
-                Settings.Properties.OpenShortcutGuide.HotkeyName = Settings.Properties.DefaultOpenShortcutGuide.HotkeyName;
+                Settings.Properties.OpenShortcutGuide.HotkeyID = Settings.Properties.DefaultOpenShortcutGuide.HotkeyID;
                 Settings.Properties.OpenShortcutGuide.OwnerModuleName = Settings.Properties.DefaultOpenShortcutGuide.OwnerModuleName;
             }
 
@@ -99,8 +99,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                OpenShortcutGuideHasConflict = GetHotkeyConflictStatus("OpenShortcutGuide");
-                OpenShortcutGuideTooltip = GetHotkeyConflictTooltip("OpenShortcutGuide");
+                OpenShortcutGuideHasConflict = GetHotkeyConflictStatus(0);
+                OpenShortcutGuideTooltip = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>

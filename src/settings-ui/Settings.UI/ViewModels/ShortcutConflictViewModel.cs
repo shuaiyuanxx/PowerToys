@@ -257,14 +257,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 module.PropertyChanged += OnModuleHotkeyDataPropertyChanged;
 
-                module.HotkeySettings = GetHotkeySettingsFromViewModel(module.ModuleName, module.HotkeyName);
+                module.HotkeySettings = GetHotkeySettingsFromViewModel(module.ModuleName, module.HotkeyID);
 
-                module.Header = LocalizationHelper.GetLocalizedHotkeyHeader(module.ModuleName, module.HotkeyName);
+                module.Header = LocalizationHelper.GetLocalizedHotkeyHeader(module.ModuleName, module.HotkeyID);
 
                 if (module.HotkeySettings != null)
                 {
                     // Store original settings for rollback
-                    var key = $"{module.ModuleName}_{module.HotkeyName}";
+                    var key = $"{module.ModuleName}_{module.HotkeyID}";
                     _originalSettings[key] = module.HotkeySettings with { };
 
                     // Set conflict properties
@@ -280,11 +280,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             if (sender is ModuleHotkeyData moduleData && e.PropertyName == nameof(ModuleHotkeyData.HotkeySettings))
             {
-                UpdateModuleViewModelHotkeySettings(moduleData.ModuleName, moduleData.HotkeyName, moduleData.HotkeySettings);
+                UpdateModuleViewModelHotkeySettings(moduleData.ModuleName, moduleData.HotkeyID, moduleData.HotkeySettings);
             }
         }
 
-        private void UpdateModuleViewModelHotkeySettings(string moduleName, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateModuleViewModelHotkeySettings(string moduleName, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             try
             {
@@ -299,46 +299,46 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 switch (moduleKey)
                 {
                     case "advancedpaste":
-                        UpdateAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyName, newHotkeySettings);
+                        UpdateAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "alwaysontop":
-                        UpdateAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyName, newHotkeySettings);
+                        UpdateAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "colorpicker":
-                        UpdateColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyName, newHotkeySettings);
+                        UpdateColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "cropandlock":
-                        UpdateCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyName, newHotkeySettings);
+                        UpdateCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "fancyzones":
-                        UpdateFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyName, newHotkeySettings);
+                        UpdateFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "measure tool":
-                        UpdateMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyName, newHotkeySettings);
+                        UpdateMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "shortcut guide":
-                        UpdateShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyName, newHotkeySettings);
+                        UpdateShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "textextractor":
-                        UpdatePowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyName, newHotkeySettings);
+                        UpdatePowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "workspaces":
-                        UpdateWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyName, newHotkeySettings);
+                        UpdateWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "peek":
-                        UpdatePeekHotkeySettings(viewModel as PeekViewModel, hotkeyName, newHotkeySettings);
+                        UpdatePeekHotkeySettings(viewModel as PeekViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "powertoys run":
-                        UpdatePowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyName, newHotkeySettings);
+                        UpdatePowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "cmdpal":
-                        UpdateCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyName, newHotkeySettings);
+                        UpdateCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "mousewithoutborders":
-                        UpdateMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyName, newHotkeySettings);
+                        UpdateMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyID, newHotkeySettings);
                         break;
                     case "mouseutils":
-                        UpdateMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyName, newHotkeySettings);
+                        UpdateMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID, newHotkeySettings);
                         break;
                     default:
                         System.Diagnostics.Debug.WriteLine($"Unknown module key: {moduleKey}");
@@ -347,11 +347,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error updating hotkey settings for {moduleName}.{hotkeyName}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error updating hotkey settings for {moduleName}.{hotkeyID}: {ex.Message}");
             }
         }
 
-        private void UpdateCmdPalHotkeySettings(CmdPalViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateCmdPalHotkeySettings(CmdPalViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -366,16 +366,16 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }*/
         }
 
-        private void UpdateMouseWithoutBordersHotkeySettings(MouseWithoutBordersViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateMouseWithoutBordersHotkeySettings(MouseWithoutBordersViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
                 return;
             }
 
-            switch (hotkeyName?.ToLowerInvariant())
+            switch (hotkeyID)
             {
-                case "hotkeytoggleeasymouse":
+                case 0:
                     if (!AreHotkeySettingsEqual(viewModel.ToggleEasyMouseShortcut, newHotkeySettings))
                     {
                         viewModel.ToggleEasyMouseShortcut = newHotkeySettings;
@@ -384,7 +384,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "hotkeylockmachine":
+                case 1:
                     if (!AreHotkeySettingsEqual(viewModel.LockMachinesShortcut, newHotkeySettings))
                     {
                         viewModel.LockMachinesShortcut = newHotkeySettings;
@@ -393,16 +393,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "hotkeyreconnect":
-                    if (!AreHotkeySettingsEqual(viewModel.ReconnectShortcut, newHotkeySettings))
-                    {
-                        viewModel.ReconnectShortcut = newHotkeySettings;
-                        System.Diagnostics.Debug.WriteLine($"Updated MouseWithoutBorders ReconnectShortcut");
-                    }
-
-                    break;
-
-                case "hotkeyswitch2allpc":
+                case 2:
                     if (!AreHotkeySettingsEqual(viewModel.HotKeySwitch2AllPC, newHotkeySettings))
                     {
                         viewModel.HotKeySwitch2AllPC = newHotkeySettings;
@@ -411,23 +402,32 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
+                case 3:
+                    if (!AreHotkeySettingsEqual(viewModel.ReconnectShortcut, newHotkeySettings))
+                    {
+                        viewModel.ReconnectShortcut = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated MouseWithoutBorders ReconnectShortcut");
+                    }
+
+                    break;
+
                 default:
-                    System.Diagnostics.Debug.WriteLine($"Unknown MouseWithoutBorders hotkey name: {hotkeyName}");
+                    System.Diagnostics.Debug.WriteLine($"Unknown MouseWithoutBorders hotkey name: {hotkeyID}");
                     break;
             }
         }
 
         // Update methods for each module
-        private void UpdateAdvancedPasteHotkeySettings(AdvancedPasteViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateAdvancedPasteHotkeySettings(AdvancedPasteViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
                 return;
             }
 
-            switch (hotkeyName?.ToLowerInvariant())
+            switch (hotkeyID)
             {
-                case "advancedpasteui" or "advancedpasteuishortcut" or "activation_shortcut":
+                case 1:
                     if (!AreHotkeySettingsEqual(viewModel.AdvancedPasteUIShortcut, newHotkeySettings))
                     {
                         viewModel.AdvancedPasteUIShortcut = newHotkeySettings;
@@ -436,7 +436,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "pasteasplaintext" or "pasteasplaintextshortcut":
+                case 0:
                     if (!AreHotkeySettingsEqual(viewModel.PasteAsPlainTextShortcut, newHotkeySettings))
                     {
                         viewModel.PasteAsPlainTextShortcut = newHotkeySettings;
@@ -445,7 +445,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "pasteasmarkdown" or "pasteasmarkdownshortcut":
+                case 2:
                     if (!AreHotkeySettingsEqual(viewModel.PasteAsMarkdownShortcut, newHotkeySettings))
                     {
                         viewModel.PasteAsMarkdownShortcut = newHotkeySettings;
@@ -454,7 +454,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "pasteasjson" or "pasteasjsonshortcut":
+                case 3:
                     if (!AreHotkeySettingsEqual(viewModel.PasteAsJsonShortcut, newHotkeySettings))
                     {
                         viewModel.PasteAsJsonShortcut = newHotkeySettings;
@@ -463,7 +463,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "imagetotext" or "imagetotextshortcut":
+                case 4:
                     if (viewModel.AdditionalActions?.ImageToText != null &&
                         !AreHotkeySettingsEqual(viewModel.AdditionalActions.ImageToText.Shortcut, newHotkeySettings))
                     {
@@ -473,7 +473,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "pasteastxtfile" or "pasteastxtfileshortcut":
+                case 5:
                     if (viewModel.AdditionalActions?.PasteAsFile?.PasteAsTxtFile != null &&
                         !AreHotkeySettingsEqual(viewModel.AdditionalActions.PasteAsFile.PasteAsTxtFile.Shortcut, newHotkeySettings))
                     {
@@ -483,7 +483,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "pasteaspngfile" or "pasteaspngfileshortcut":
+                case 6:
                     if (viewModel.AdditionalActions?.PasteAsFile?.PasteAsPngFile != null &&
                         !AreHotkeySettingsEqual(viewModel.AdditionalActions.PasteAsFile.PasteAsPngFile.Shortcut, newHotkeySettings))
                     {
@@ -493,7 +493,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "pasteashtmlfile" or "pasteashtmlfileshortcut":
+                case 7:
                     if (viewModel.AdditionalActions?.PasteAsFile?.PasteAsHtmlFile != null &&
                         !AreHotkeySettingsEqual(viewModel.AdditionalActions.PasteAsFile.PasteAsHtmlFile.Shortcut, newHotkeySettings))
                     {
@@ -503,7 +503,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "transcodetomp3" or "transcodetomp3shortcut":
+                case 8:
                     if (viewModel.AdditionalActions?.Transcode?.TranscodeToMp3 != null &&
                         !AreHotkeySettingsEqual(viewModel.AdditionalActions.Transcode.TranscodeToMp3.Shortcut, newHotkeySettings))
                     {
@@ -513,7 +513,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "transcodetomp4" or "transcodetomp4shortcut":
+                case 9:
                     if (viewModel.AdditionalActions?.Transcode?.TranscodeToMp4 != null &&
                         !AreHotkeySettingsEqual(viewModel.AdditionalActions.Transcode.TranscodeToMp4.Shortcut, newHotkeySettings))
                     {
@@ -523,27 +523,24 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case var customActionName when customActionName.StartsWith("customaction_", StringComparison.OrdinalIgnoreCase):
-                    var parts = customActionName.Split('_');
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int customActionId))
+                case var _ when hotkeyID > 9:
+                    var customActionId = hotkeyID - 10;
+                    var customAction = viewModel.CustomActions?.FirstOrDefault(ca => ca.Id == customActionId);
+                    if (customAction != null && !AreHotkeySettingsEqual(customAction.Shortcut, newHotkeySettings))
                     {
-                        var customAction = viewModel.CustomActions?.FirstOrDefault(ca => ca.Id == customActionId);
-                        if (customAction != null && !AreHotkeySettingsEqual(customAction.Shortcut, newHotkeySettings))
-                        {
-                            customAction.Shortcut = newHotkeySettings;
-                            System.Diagnostics.Debug.WriteLine($"Updated AdvancedPaste CustomAction_{customActionId} shortcut");
-                        }
+                        customAction.Shortcut = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated AdvancedPaste CustomAction {customActionId} shortcut");
                     }
 
                     break;
 
                 default:
-                    System.Diagnostics.Debug.WriteLine($"Unknown AdvancedPaste hotkey name: {hotkeyName}");
+                    System.Diagnostics.Debug.WriteLine($"Unknown AdvancedPaste hotkey name: {hotkeyID}");
                     break;
             }
         }
 
-        private void UpdateAlwaysOnTopHotkeySettings(AlwaysOnTopViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateAlwaysOnTopHotkeySettings(AlwaysOnTopViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -558,7 +555,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdateColorPickerHotkeySettings(ColorPickerViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateColorPickerHotkeySettings(ColorPickerViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -573,7 +570,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdateCropAndLockHotkeySettings(CropAndLockViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateCropAndLockHotkeySettings(CropAndLockViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -581,9 +578,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
 
             // Update based on hotkey name for CropAndLock module
-            switch (hotkeyName?.ToLowerInvariant())
+            switch (hotkeyID)
             {
-                case "thumbnail" or "thumbnailhotkey":
+                case 1:
                     if (!AreHotkeySettingsEqual(viewModel.ThumbnailActivationShortcut, newHotkeySettings))
                     {
                         viewModel.ThumbnailActivationShortcut = newHotkeySettings;
@@ -592,7 +589,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "reparent" or "reparenthotkey":
+                case 0:
                     if (!AreHotkeySettingsEqual(viewModel.ReparentActivationShortcut, newHotkeySettings))
                     {
                         viewModel.ReparentActivationShortcut = newHotkeySettings;
@@ -602,12 +599,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     break;
 
                 default:
-                    System.Diagnostics.Debug.WriteLine($"Unknown CropAndLock hotkey name: {hotkeyName}");
+                    System.Diagnostics.Debug.WriteLine($"Unknown CropAndLock hotkey name: {hotkeyID}");
                     break;
             }
         }
 
-        private void UpdateFancyZonesHotkeySettings(FancyZonesViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateFancyZonesHotkeySettings(FancyZonesViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -622,7 +619,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdateMeasureToolHotkeySettings(MeasureToolViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateMeasureToolHotkeySettings(MeasureToolViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -637,7 +634,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdateShortcutGuideHotkeySettings(ShortcutGuideViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateShortcutGuideHotkeySettings(ShortcutGuideViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -652,7 +649,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdatePowerOcrHotkeySettings(PowerOcrViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdatePowerOcrHotkeySettings(PowerOcrViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -667,7 +664,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdateWorkspacesHotkeySettings(WorkspacesViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateWorkspacesHotkeySettings(WorkspacesViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -682,7 +679,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdatePeekHotkeySettings(PeekViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdatePeekHotkeySettings(PeekViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -697,7 +694,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdatePowerLauncherHotkeySettings(PowerLauncherViewModel viewModel, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdatePowerLauncherHotkeySettings(PowerLauncherViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -712,7 +709,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private void UpdateMouseUtilsHotkeySettings(MouseUtilsViewModel viewModel, string moduleName, string hotkeyName, HotkeySettings newHotkeySettings)
+        private void UpdateMouseUtilsHotkeySettings(MouseUtilsViewModel viewModel, string moduleName, int hotkeyID, HotkeySettings newHotkeySettings)
         {
             if (viewModel == null)
             {
@@ -784,7 +781,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                    settings1.Code == settings2.Code;
         }
 
-        private HotkeySettings GetHotkeySettingsFromViewModel(string moduleName, string hotkeyName)
+        private HotkeySettings GetHotkeySettingsFromViewModel(string moduleName, int hotkeyID)
         {
             try
             {
@@ -797,43 +794,43 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                 return moduleKey switch
                 {
-                    "advancedpaste" => GetAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyName),
-                    "alwaysontop" => GetAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyName),
-                    "colorpicker" => GetColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyName),
-                    "cropandlock" => GetCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyName),
-                    "fancyzones" => GetFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyName),
-                    "measure tool" => GetMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyName),
-                    "shortcut guide" => GetShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyName),
-                    "powerocr" or "textextractor" => GetPowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyName),
-                    "workspaces" => GetWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyName),
-                    "peek" => GetPeekHotkeySettings(viewModel as PeekViewModel, hotkeyName),
-                    "powertoys run" => GetPowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyName),
-                    "cmdpal" => GetCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyName),
-                    "mousewithoutborders" => GetMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyName),
-                    "mouseutils" => GetMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyName),
+                    "advancedpaste" => GetAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyID),
+                    "alwaysontop" => GetAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyID),
+                    "colorpicker" => GetColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyID),
+                    "cropandlock" => GetCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyID),
+                    "fancyzones" => GetFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyID),
+                    "measure tool" => GetMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyID),
+                    "shortcut guide" => GetShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyID),
+                    "powerocr" or "textextractor" => GetPowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyID),
+                    "workspaces" => GetWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyID),
+                    "peek" => GetPeekHotkeySettings(viewModel as PeekViewModel, hotkeyID),
+                    "powertoys run" => GetPowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyID),
+                    "cmdpal" => GetCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyID),
+                    "mousewithoutborders" => GetMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyID),
+                    "mouseutils" => GetMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID),
                     _ => null,
                 };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error getting hotkey settings for {moduleName}.{hotkeyName}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error getting hotkey settings for {moduleName}.{hotkeyID}: {ex.Message}");
                 return null;
             }
         }
 
-        private HotkeySettings GetMouseWithoutBordersHotkeySettings(MouseWithoutBordersViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetMouseWithoutBordersHotkeySettings(MouseWithoutBordersViewModel viewModel, int hotkeyID)
         {
             if (viewModel == null)
             {
                 return null;
             }
 
-            return hotkeyName?.ToLowerInvariant() switch
+            return hotkeyID switch
             {
-                "hotkeytoggleeasymouse" => viewModel.ToggleEasyMouseShortcut,
-                "hotkeylockmachine" => viewModel.LockMachinesShortcut,
-                "hotkeyreconnect" => viewModel.ReconnectShortcut,
-                "hotkeyswitch2allpc" => viewModel.HotKeySwitch2AllPC,
+                0 => viewModel.ToggleEasyMouseShortcut,
+                1 => viewModel.LockMachinesShortcut,
+                2 => viewModel.HotKeySwitch2AllPC,
+                3 => viewModel.ReconnectShortcut,
                 _ => null,
             };
         }
@@ -848,127 +845,102 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         }
 
         // Get methods that return direct references to ViewModel properties for two-way binding
-        private HotkeySettings GetAdvancedPasteHotkeySettings(AdvancedPasteViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetAdvancedPasteHotkeySettings(AdvancedPasteViewModel viewModel, int hotkeyID)
         {
             if (viewModel == null)
             {
                 return null;
             }
 
-            return hotkeyName?.ToLowerInvariant() switch
+            return hotkeyID switch
             {
-                "advancedpasteuishortcut" => viewModel.AdvancedPasteUIShortcut,
-                "pasteasplaintextshortcut" => viewModel.PasteAsPlainTextShortcut,
-                "pasteasmarkdownshortcut" => viewModel.PasteAsMarkdownShortcut,
-                "pasteasjsonshortcut" => viewModel.PasteAsJsonShortcut,
-                "imagetotextshortcut" => GetAdditionalActionShortcut(viewModel, "ImageToText"),
-                "pasteastxtfileshortcut" => GetAdditionalActionShortcut(viewModel, "PasteAsTxtFile"),
-                "pasteaspngfileshortcut" => GetAdditionalActionShortcut(viewModel, "PasteAsPngFile"),
-                "pasteashtmlfileshortcut" => GetAdditionalActionShortcut(viewModel, "PasteAsHtmlFile"),
-                "transcodetomp3shortcut" => GetAdditionalActionShortcut(viewModel, "TranscodeToMp3"),
-                "transcodetomp4shortcut" => GetAdditionalActionShortcut(viewModel, "TranscodeToMp4"),
-                _ when hotkeyName.StartsWith("customaction_", StringComparison.OrdinalIgnoreCase) => GetCustomActionShortcut(viewModel, hotkeyName),
+                0 => viewModel.PasteAsPlainTextShortcut,
+                1 => viewModel.AdvancedPasteUIShortcut,
+                2 => viewModel.PasteAsMarkdownShortcut,
+                3 => viewModel.PasteAsJsonShortcut,
+                4 => viewModel.AdditionalActions?.ImageToText?.Shortcut,
+                5 => viewModel.AdditionalActions?.PasteAsFile?.PasteAsTxtFile?.Shortcut,
+                6 => viewModel.AdditionalActions?.PasteAsFile?.PasteAsPngFile?.Shortcut,
+                7 => viewModel.AdditionalActions?.PasteAsFile?.PasteAsHtmlFile?.Shortcut,
+                8 => viewModel.AdditionalActions?.Transcode?.TranscodeToMp3?.Shortcut,
+                9 => viewModel.AdditionalActions?.Transcode?.TranscodeToMp4?.Shortcut,
+                _ when hotkeyID > 9 => GetCustomActionShortcut(viewModel, hotkeyID - 10),
                 _ => null,
             };
         }
 
-        private HotkeySettings GetAdditionalActionShortcut(AdvancedPasteViewModel viewModel, string actionName)
-        {
-            if (viewModel?.AdditionalActions == null)
-            {
-                return null;
-            }
-
-            return actionName switch
-            {
-                "ImageToText" => viewModel.AdditionalActions.ImageToText?.Shortcut,
-                "PasteAsTxtFile" => viewModel.AdditionalActions.PasteAsFile?.PasteAsTxtFile?.Shortcut,
-                "PasteAsPngFile" => viewModel.AdditionalActions.PasteAsFile?.PasteAsPngFile?.Shortcut,
-                "PasteAsHtmlFile" => viewModel.AdditionalActions.PasteAsFile?.PasteAsHtmlFile?.Shortcut,
-                "TranscodeToMp3" => viewModel.AdditionalActions.Transcode?.TranscodeToMp3?.Shortcut,
-                "TranscodeToMp4" => viewModel.AdditionalActions.Transcode?.TranscodeToMp4?.Shortcut,
-                _ => null,
-            };
-        }
-
-        private HotkeySettings GetCustomActionShortcut(AdvancedPasteViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetCustomActionShortcut(AdvancedPasteViewModel viewModel, int customActionID)
         {
             if (viewModel?.CustomActions == null)
             {
                 return null;
             }
 
-            var parts = hotkeyName.Split('_');
-            if (parts.Length == 2 && int.TryParse(parts[1], out int customActionId))
-            {
-                var customAction = viewModel.CustomActions.FirstOrDefault(ca => ca.Id == customActionId);
-                return customAction?.Shortcut;
-            }
-
-            return null;
+            var customAction = viewModel.CustomActions.FirstOrDefault(ca => ca.Id == customActionID);
+            return customAction?.Shortcut;
         }
 
-        private HotkeySettings GetAlwaysOnTopHotkeySettings(AlwaysOnTopViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetAlwaysOnTopHotkeySettings(AlwaysOnTopViewModel viewModel, int hotkeyID)
         {
             return viewModel?.Hotkey;
         }
 
-        private HotkeySettings GetColorPickerHotkeySettings(ColorPickerViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetColorPickerHotkeySettings(ColorPickerViewModel viewModel, int hotkeyID)
         {
             return viewModel?.ActivationShortcut;
         }
 
-        private HotkeySettings GetCropAndLockHotkeySettings(CropAndLockViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetCropAndLockHotkeySettings(CropAndLockViewModel viewModel, int hotkeyID)
         {
             if (viewModel == null)
             {
                 return null;
             }
 
-            return hotkeyName?.ToLowerInvariant() switch
+            return hotkeyID switch
             {
-                "thumbnail" or "thumbnailhotkey" => viewModel.ThumbnailActivationShortcut,
-                "reparent" or "reparenthotkey" => viewModel.ReparentActivationShortcut,
+                0 => viewModel.ReparentActivationShortcut,
+                1 => viewModel.ThumbnailActivationShortcut,
                 _ => null,
             };
         }
 
-        private HotkeySettings GetFancyZonesHotkeySettings(FancyZonesViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetFancyZonesHotkeySettings(FancyZonesViewModel viewModel, int hotkeyID)
         {
             return viewModel?.EditorHotkey;
         }
 
-        private HotkeySettings GetMeasureToolHotkeySettings(MeasureToolViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetMeasureToolHotkeySettings(MeasureToolViewModel viewModel, int hotkeyID)
         {
             return viewModel?.ActivationShortcut;
         }
 
-        private HotkeySettings GetShortcutGuideHotkeySettings(ShortcutGuideViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetShortcutGuideHotkeySettings(ShortcutGuideViewModel viewModel, int hotkeyID)
         {
             return viewModel?.OpenShortcutGuide;
         }
 
-        private HotkeySettings GetPowerOcrHotkeySettings(PowerOcrViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetPowerOcrHotkeySettings(PowerOcrViewModel viewModel, int hotkeyID)
         {
             return viewModel?.ActivationShortcut;
         }
 
-        private HotkeySettings GetWorkspacesHotkeySettings(WorkspacesViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetWorkspacesHotkeySettings(WorkspacesViewModel viewModel, int hotkeyID)
         {
             return viewModel?.Hotkey;
         }
 
-        private HotkeySettings GetPeekHotkeySettings(PeekViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetPeekHotkeySettings(PeekViewModel viewModel, int hotkeyID)
         {
             return viewModel?.ActivationShortcut;
         }
 
-        private HotkeySettings GetPowerLauncherHotkeySettings(PowerLauncherViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetPowerLauncherHotkeySettings(PowerLauncherViewModel viewModel, int hotkeyID)
         {
             return viewModel?.OpenPowerLauncher;
         }
 
-        private HotkeySettings GetMouseUtilsHotkeySettings(MouseUtilsViewModel viewModel, string moduleName, string hotkeyName)
+        private HotkeySettings GetMouseUtilsHotkeySettings(MouseUtilsViewModel viewModel, string moduleName, int hotkeyID)
         {
             if (viewModel == null)
             {
@@ -985,7 +957,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             };
         }
 
-        private HotkeySettings GetCmdPalHotkeySettings(CmdPalViewModel viewModel, string hotkeyName)
+        private HotkeySettings GetCmdPalHotkeySettings(CmdPalViewModel viewModel, int hotkeyID)
         {
             return viewModel?.Hotkey;
         }

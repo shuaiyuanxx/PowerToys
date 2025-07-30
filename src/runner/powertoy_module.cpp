@@ -47,6 +47,7 @@ PowertoyModule::PowertoyModule(PowertoyModuleIface* pt_module, HMODULE handle) :
         throw std::runtime_error("Module not initialized");
     }
 
+    remove_hotkey_records();
     update_hotkeys();
     UpdateHotkeyEx();
 }
@@ -54,7 +55,6 @@ PowertoyModule::PowertoyModule(PowertoyModuleIface* pt_module, HMODULE handle) :
 void PowertoyModule::update_hotkeys()
 {
     CentralizedKeyboardHook::ClearModuleHotkeys(pt_module->get_key());
-    hkmng.RemoveHotkeyByModule(pt_module->get_key());
 
     size_t hotkeyCount = pt_module->get_hotkeys(nullptr, 0);
     std::vector<PowertoyModuleIface::Hotkey> hotkeys(hotkeyCount);
@@ -79,7 +79,6 @@ void PowertoyModule::update_hotkeys()
 void PowertoyModule::UpdateHotkeyEx()
 {
     CentralizedHotkeys::UnregisterHotkeysForModule(pt_module->get_key());
-    hkmng.RemoveHotkeyByModule(pt_module->get_key());
 
     auto container = pt_module->GetHotkeyEx();
     if (container.has_value() && pt_module->is_enabled())
