@@ -151,12 +151,16 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 DrawToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDrawToggleKey.HotkeyID);
                 DemoTypeToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyID);
                 BreakTimerKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultBreakTimerKey.HotkeyID);
+                RecordToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultRecordToggleKey.HotkeyID);
+                SnipToggleKeyHasConflict = GetHotkeyConflictStatus(ZoomItProperties.DefaultSnipToggleKey.HotkeyID);
 
                 ZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultToggleKey.HotkeyID);
                 LiveZoomToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultLiveZoomToggleKey.HotkeyID);
                 DrawToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDrawToggleKey.HotkeyID);
                 DemoTypeToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultDemoTypeToggleKey.HotkeyID);
                 BreakTimerKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultBreakTimerKey.HotkeyID);
+                RecordToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultRecordToggleKey.HotkeyID);
+                SnipToggleKeyTooltip = GetHotkeyConflictTooltip(ZoomItProperties.DefaultSnipToggleKey.HotkeyID);
             }
 
             _ = Task.Run(() =>

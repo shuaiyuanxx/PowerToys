@@ -83,6 +83,8 @@ void PowertoyModule::UpdateHotkeyEx()
     auto container = pt_module->GetHotkeyEx();
     if (container.has_value() && pt_module->is_enabled())
     {
+        hkmng.RemoveHotkeyByModule(pt_module->get_key());
+
         auto hotkey = container.value();
         auto modulePtr = pt_module.get();
         auto action = [modulePtr](WORD /*modifiersMask*/, WORD /*vkCode*/) {

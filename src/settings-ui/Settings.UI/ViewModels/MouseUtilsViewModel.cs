@@ -259,15 +259,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                FindMyMouseActivationShortcutHasConflict = GetHotkeyConflictStatus($"{FindMyMouseSettings.ModuleName}_ActivationShortcut");
-                MouseHighlighterActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MouseHighlighterSettings.ModuleName}_ActivationShortcut");
-                MousePointerCrosshairsActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MousePointerCrosshairsSettings.ModuleName}_ActivationShortcut");
-                MouseJumpActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MouseJumpSettings.ModuleName}_ActivationShortcut");
+                FindMyMouseActivationShortcutHasConflict = GetHotkeyConflictStatus($"{FindMyMouseSettings.ModuleName}_0");
+                MouseHighlighterActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MouseHighlighterSettings.ModuleName}_0");
+                MousePointerCrosshairsActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MousePointerCrosshairsSettings.ModuleName}_0");
+                MouseJumpActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MouseJumpSettings.ModuleName}_0");
 
-                FindMyMouseActivationShortcutTooltip = GetHotkeyConflictTooltip($"{FindMyMouseSettings.ModuleName}_ActivationShortcut");
-                MouseHighlighterActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MouseHighlighterSettings.ModuleName}_ActivationShortcut");
-                MousePointerCrosshairsActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MousePointerCrosshairsSettings.ModuleName}_ActivationShortcut");
-                MouseJumpActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MouseJumpSettings.ModuleName}_ActivationShortcut");
+                FindMyMouseActivationShortcutTooltip = GetHotkeyConflictTooltip($"{FindMyMouseSettings.ModuleName}_0");
+                MouseHighlighterActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MouseHighlighterSettings.ModuleName}_0");
+                MousePointerCrosshairsActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MousePointerCrosshairsSettings.ModuleName}_0");
+                MouseJumpActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MouseJumpSettings.ModuleName}_0");
             }
 
             _ = Task.Run(() =>
