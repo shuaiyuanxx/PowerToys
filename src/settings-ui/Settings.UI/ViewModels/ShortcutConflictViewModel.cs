@@ -161,6 +161,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     _generalSettingsRepository,
                     SendConfigMSG,
                     Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
+
+                // zoomit
+                _viewModelFactories["zoomit"] = () => new ZoomItViewModel(
+                    _settingsUtils,
+                    _generalSettingsRepository,
+                    SendConfigMSG,
+                    null, // PickFileDialog
+                    null); // PickFontDialog
             }
             catch (Exception ex)
             {
@@ -339,6 +347,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         break;
                     case "mouseutils":
                         UpdateMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID, newHotkeySettings);
+                        break;
+                    case "zoomit":
+                        UpdateZoomItHotkeySettings(viewModel as ZoomItViewModel, hotkeyID, newHotkeySettings);
                         break;
                     default:
                         System.Diagnostics.Debug.WriteLine($"Unknown module key: {moduleKey}");
@@ -761,6 +772,84 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        private void UpdateZoomItHotkeySettings(ZoomItViewModel viewModel, int hotkeyID, HotkeySettings newHotkeySettings)
+        {
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            switch (hotkeyID)
+            {
+                case 0:
+                    if (!AreHotkeySettingsEqual(viewModel.ZoomToggleKey, newHotkeySettings))
+                    {
+                        viewModel.ZoomToggleKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt ZoomToggleKey");
+                    }
+
+                    break;
+
+                case 1:
+                    if (!AreHotkeySettingsEqual(viewModel.LiveZoomToggleKey, newHotkeySettings))
+                    {
+                        viewModel.LiveZoomToggleKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt LiveZoomToggleKey");
+                    }
+
+                    break;
+
+                case 2:
+                    if (!AreHotkeySettingsEqual(viewModel.DrawToggleKey, newHotkeySettings))
+                    {
+                        viewModel.DrawToggleKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt DrawToggleKey");
+                    }
+
+                    break;
+
+                case 3:
+                    if (!AreHotkeySettingsEqual(viewModel.RecordToggleKey, newHotkeySettings))
+                    {
+                        viewModel.RecordToggleKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt RecordToggleKey");
+                    }
+
+                    break;
+
+                case 4:
+                    if (!AreHotkeySettingsEqual(viewModel.SnipToggleKey, newHotkeySettings))
+                    {
+                        viewModel.SnipToggleKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt SnipToggleKey");
+                    }
+
+                    break;
+
+                case 5:
+                    if (!AreHotkeySettingsEqual(viewModel.BreakTimerKey, newHotkeySettings))
+                    {
+                        viewModel.BreakTimerKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt BreakTimerKey");
+                    }
+
+                    break;
+
+                case 6:
+                    if (!AreHotkeySettingsEqual(viewModel.DemoTypeToggleKey, newHotkeySettings))
+                    {
+                        viewModel.DemoTypeToggleKey = newHotkeySettings;
+                        System.Diagnostics.Debug.WriteLine($"Updated ZoomIt DemoTypeToggleKey");
+                    }
+
+                    break;
+
+                default:
+                    System.Diagnostics.Debug.WriteLine($"Unknown ZoomIt hotkey ID: {hotkeyID}");
+                    break;
+            }
+        }
+
         // Helper methods
         private bool AreHotkeySettingsEqual(HotkeySettings settings1, HotkeySettings settings2)
         {
@@ -808,6 +897,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     "cmdpal" => GetCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyID),
                     "mousewithoutborders" => GetMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyID),
                     "mouseutils" => GetMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID),
+                    "zoomit" => GetZoomItHotkeySettings(viewModel as ZoomItViewModel, hotkeyID),
                     _ => null,
                 };
             }
@@ -960,6 +1050,26 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private HotkeySettings GetCmdPalHotkeySettings(CmdPalViewModel viewModel, int hotkeyID)
         {
             return viewModel?.Hotkey;
+        }
+
+        private HotkeySettings GetZoomItHotkeySettings(ZoomItViewModel viewModel, int hotkeyID)
+        {
+            if (viewModel == null)
+            {
+                return null;
+            }
+
+            return hotkeyID switch
+            {
+                0 => viewModel.ZoomToggleKey,
+                1 => viewModel.LiveZoomToggleKey,
+                2 => viewModel.DrawToggleKey,
+                3 => viewModel.RecordToggleKey,
+                4 => viewModel.SnipToggleKey,
+                5 => viewModel.BreakTimerKey,
+                6 => viewModel.DemoTypeToggleKey,
+                _ => null,
+            };
         }
 
         public override void Dispose()

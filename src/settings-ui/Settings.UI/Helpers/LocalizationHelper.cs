@@ -64,6 +64,15 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
             { ("mousewithoutborders", 1), "MouseWithoutBorders_LockMachinesShortcut" },
             { ("mousewithoutborders", 2), "MouseWithoutBorders_Switch2AllPcShortcut" },
             { ("mousewithoutborders", 3), "MouseWithoutBorders_ReconnectShortcut" },
+
+            // ZoomIt module mappings
+            { ("zoomit", 0), "ZoomIt_Zoom_Shortcut" },
+            { ("zoomit", 1), "ZoomIt_LiveZoom_Shortcut" },
+            { ("zoomit", 2), "ZoomIt_Draw_Shortcut" },
+            { ("zoomit", 3), "ZoomIt_Record_Shortcut" },
+            { ("zoomit", 4), "ZoomIt_Snip_Shortcut" },
+            { ("zoomit", 5), "ZoomIt_Break_Shortcut" },
+            { ("zoomit", 6), "ZoomIt_DemoType_Shortcut" },
         };
 
         // Delegate for getting custom action names
