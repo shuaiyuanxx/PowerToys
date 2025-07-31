@@ -79,23 +79,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private void CheckAndUpdateHotkeySettings()
         {
-            bool shoudUpdate = false;
+            bool shouldUpdate = false;
 
             if (Settings.Properties.ReparentHotkey.Value.HotkeyID != 0)
             {
                 Settings.Properties.ReparentHotkey.Value.HotkeyID = 0;
                 Settings.Properties.ReparentHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
-                shoudUpdate = true;
+                shouldUpdate = true;
             }
 
             if (Settings.Properties.ThumbnailHotkey.Value.HotkeyID != 1)
             {
                 Settings.Properties.ThumbnailHotkey.Value.HotkeyID = 1;
                 Settings.Properties.ThumbnailHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
-                shoudUpdate = true;
+                shouldUpdate = true;
             }
 
-            if (shoudUpdate)
+            if (shouldUpdate)
             {
                 SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
             }
