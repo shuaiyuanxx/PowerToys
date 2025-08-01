@@ -26,9 +26,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => PeekSettings.ModuleName;
 
-        private bool _activationShortcutHasConflict;
-        private string _activationShortcutTooltip;
-
         private bool _isEnabled;
 
         private bool _settingsUpdating;
@@ -140,8 +137,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
+                ActivationShortcut.HasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>
@@ -163,32 +160,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool ActivationShortcutHasConflict
-        {
-            get => _activationShortcutHasConflict;
-            set
-            {
-                if (_activationShortcutHasConflict != value)
-                {
-                    _activationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(ActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public string ActivationShortcutTooltip
-        {
-            get => _activationShortcutTooltip;
-            set
-            {
-                if (_activationShortcutTooltip != value)
-                {
-                    _activationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(ActivationShortcutTooltip));
-                }
-            }
         }
 
         public bool IsEnabled

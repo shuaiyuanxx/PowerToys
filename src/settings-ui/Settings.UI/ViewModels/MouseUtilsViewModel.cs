@@ -26,13 +26,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private readonly Dictionary<string, bool> _hotkeyConflictStatus = new Dictionary<string, bool>();
         private readonly Dictionary<string, string> _hotkeyConflictTooltips = new Dictionary<string, string>();
 
-        private bool _findMyMouseActivationShortcutHasConflict;
-        private bool _mouseHighlighterActivationShortcutHasConflict;
-        private bool _mousePointerCrosshairsActivationShortcutHasConflict;
-        private string _findMyMouseActivationShortcutTooltip;
-        private string _mouseHighlighterActivationShortcutTooltip;
-        private string _mousePointerCrosshairsActivationShortcutTooltip;
-
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -259,15 +252,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                FindMyMouseActivationShortcutHasConflict = GetHotkeyConflictStatus($"{FindMyMouseSettings.ModuleName}_0");
-                MouseHighlighterActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MouseHighlighterSettings.ModuleName}_0");
-                MousePointerCrosshairsActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MousePointerCrosshairsSettings.ModuleName}_0");
-                MouseJumpActivationShortcutHasConflict = GetHotkeyConflictStatus($"{MouseJumpSettings.ModuleName}_0");
+                FindMyMouseActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{FindMyMouseSettings.ModuleName}_0");
+                MouseHighlighterActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{MouseHighlighterSettings.ModuleName}_0");
+                MousePointerCrosshairsActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{MousePointerCrosshairsSettings.ModuleName}_0");
+                MouseJumpActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{MouseJumpSettings.ModuleName}_0");
 
-                FindMyMouseActivationShortcutTooltip = GetHotkeyConflictTooltip($"{FindMyMouseSettings.ModuleName}_0");
-                MouseHighlighterActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MouseHighlighterSettings.ModuleName}_0");
-                MousePointerCrosshairsActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MousePointerCrosshairsSettings.ModuleName}_0");
-                MouseJumpActivationShortcutTooltip = GetHotkeyConflictTooltip($"{MouseJumpSettings.ModuleName}_0");
+                FindMyMouseActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{FindMyMouseSettings.ModuleName}_0");
+                MouseHighlighterActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{MouseHighlighterSettings.ModuleName}_0");
+                MousePointerCrosshairsActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{MousePointerCrosshairsSettings.ModuleName}_0");
+                MouseJumpActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{MouseJumpSettings.ModuleName}_0");
             }
 
             _ = Task.Run(() =>
@@ -289,84 +282,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool FindMyMouseActivationShortcutHasConflict
-        {
-            get => _findMyMouseActivationShortcutHasConflict;
-            set
-            {
-                if (_findMyMouseActivationShortcutHasConflict != value)
-                {
-                    _findMyMouseActivationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(FindMyMouseActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public bool MouseHighlighterActivationShortcutHasConflict
-        {
-            get => _mouseHighlighterActivationShortcutHasConflict;
-            set
-            {
-                if (_mouseHighlighterActivationShortcutHasConflict != value)
-                {
-                    _mouseHighlighterActivationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(MouseHighlighterActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public bool MousePointerCrosshairsActivationShortcutHasConflict
-        {
-            get => _mousePointerCrosshairsActivationShortcutHasConflict;
-            set
-            {
-                if (_mousePointerCrosshairsActivationShortcutHasConflict != value)
-                {
-                    _mousePointerCrosshairsActivationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(MousePointerCrosshairsActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public string FindMyMouseActivationShortcutTooltip
-        {
-            get => _findMyMouseActivationShortcutTooltip;
-            set
-            {
-                if (_findMyMouseActivationShortcutTooltip != value)
-                {
-                    _findMyMouseActivationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(FindMyMouseActivationShortcutTooltip));
-                }
-            }
-        }
-
-        public string MouseHighlighterActivationShortcutTooltip
-        {
-            get => _mouseHighlighterActivationShortcutTooltip;
-            set
-            {
-                if (_mouseHighlighterActivationShortcutTooltip != value)
-                {
-                    _mouseHighlighterActivationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(MouseHighlighterActivationShortcutTooltip));
-                }
-            }
-        }
-
-        public string MousePointerCrosshairsActivationShortcutTooltip
-        {
-            get => _mousePointerCrosshairsActivationShortcutTooltip;
-            set
-            {
-                if (_mousePointerCrosshairsActivationShortcutTooltip != value)
-                {
-                    _mousePointerCrosshairsActivationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(MousePointerCrosshairsActivationShortcutTooltip));
-                }
-            }
         }
 
         public bool IsFindMyMouseEnabled

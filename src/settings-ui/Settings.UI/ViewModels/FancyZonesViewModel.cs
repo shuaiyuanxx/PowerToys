@@ -20,13 +20,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => FancyZonesSettings.ModuleName;
 
-        private bool _editorHotkeyHasConflict;
-        private bool _nextTabHotkeyHasConflict;
-        private bool _prevTabHotkeyHasConflict;
-        private string _editorHotkeyTooltip;
-        private string _nextTabHotkeyTooltip;
-        private string _prevTabHotkeyTooltip;
-
         private SettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -192,13 +185,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                EditorHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
-                NextTabHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
-                PrevTabHotkeyHasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
+                EditorHotkey.HasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
+                NextTabHotkey.HasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
+                PrevTabHotkey.HasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
 
-                EditorHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
-                NextTabHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
-                PrevTabHotkeyTooltip = GetHotkeyConflictTooltip(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
+                EditorHotkey.ConflictDescription = GetHotkeyConflictTooltip(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
+                NextTabHotkey.ConflictDescription = GetHotkeyConflictTooltip(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
+                PrevTabHotkey.ConflictDescription = GetHotkeyConflictTooltip(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -220,84 +213,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool EditorHotkeyHasConflict
-        {
-            get => _editorHotkeyHasConflict;
-            set
-            {
-                if (_editorHotkeyHasConflict != value)
-                {
-                    _editorHotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(EditorHotkeyHasConflict));
-                }
-            }
-        }
-
-        public bool NextTabHotkeyHasConflict
-        {
-            get => _nextTabHotkeyHasConflict;
-            set
-            {
-                if (_nextTabHotkeyHasConflict != value)
-                {
-                    _nextTabHotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(NextTabHotkeyHasConflict));
-                }
-            }
-        }
-
-        public bool PrevTabHotkeyHasConflict
-        {
-            get => _prevTabHotkeyHasConflict;
-            set
-            {
-                if (_prevTabHotkeyHasConflict != value)
-                {
-                    _prevTabHotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(PrevTabHotkeyHasConflict));
-                }
-            }
-        }
-
-        public string EditorHotkeyTooltip
-        {
-            get => _editorHotkeyTooltip;
-            set
-            {
-                if (_editorHotkeyTooltip != value)
-                {
-                    _editorHotkeyTooltip = value;
-                    OnPropertyChanged(nameof(EditorHotkeyTooltip));
-                }
-            }
-        }
-
-        public string NextTabHotkeyTooltip
-        {
-            get => _nextTabHotkeyTooltip;
-            set
-            {
-                if (_nextTabHotkeyTooltip != value)
-                {
-                    _nextTabHotkeyTooltip = value;
-                    OnPropertyChanged(nameof(NextTabHotkeyTooltip));
-                }
-            }
-        }
-
-        public string PrevTabHotkeyTooltip
-        {
-            get => _prevTabHotkeyTooltip;
-            set
-            {
-                if (_prevTabHotkeyTooltip != value)
-                {
-                    _prevTabHotkeyTooltip = value;
-                    OnPropertyChanged(nameof(PrevTabHotkeyTooltip));
-                }
-            }
         }
 
         public bool IsEnabled

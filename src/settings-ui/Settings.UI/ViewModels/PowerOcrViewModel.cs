@@ -26,9 +26,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => PowerOcrSettings.ModuleName;
 
-        private bool _activationShortcutHasConflict;
-        private string _activationShortcutTooltip;
-
         private bool disposedValue;
 
         // Delay saving of settings in order to avoid calling save multiple times and hitting file in use exception. If there is no other request to save settings in given interval, we proceed to save it; otherwise, we schedule saving it after this interval
@@ -134,8 +131,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
+                ActivationShortcut.HasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>
@@ -157,32 +154,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool ActivationShortcutHasConflict
-        {
-            get => _activationShortcutHasConflict;
-            set
-            {
-                if (_activationShortcutHasConflict != value)
-                {
-                    _activationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(ActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public string ActivationShortcutTooltip
-        {
-            get => _activationShortcutTooltip;
-            set
-            {
-                if (_activationShortcutTooltip != value)
-                {
-                    _activationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(ActivationShortcutTooltip));
-                }
-            }
         }
 
         public bool IsEnabled

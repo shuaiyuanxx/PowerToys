@@ -42,10 +42,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private bool _isEnabled;
         private int _colorFormatPreviewIndex;
 
-        // Conflict detection properties
-        private bool _activationShortcutHasConflict;
-        private string _activationShortcutTooltip;
-
         private Func<string, int> SendConfigMSG { get; }
 
         private Dictionary<string, string> _colorFormatsPreview;
@@ -83,42 +79,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _delayedTimer.AutoReset = false;
 
             InitializeColorFormats();
-
-            // Initialize conflict properties
-            InitializeConflictPropertiesDefaults();
-        }
-
-        private void InitializeConflictPropertiesDefaults()
-        {
-            ActivationShortcutHasConflict = false;
-            ActivationShortcutTooltip = null;
-        }
-
-        // Conflict detection properties
-        public bool ActivationShortcutHasConflict
-        {
-            get => _activationShortcutHasConflict;
-            set
-            {
-                if (_activationShortcutHasConflict != value)
-                {
-                    _activationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(ActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public string ActivationShortcutTooltip
-        {
-            get => _activationShortcutTooltip;
-            set
-            {
-                if (_activationShortcutTooltip != value)
-                {
-                    _activationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(ActivationShortcutTooltip));
-                }
-            }
         }
 
         protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
@@ -128,8 +88,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ActivationShortcutHasConflict = GetHotkeyConflictStatus(0);
-                ActivationShortcutTooltip = GetHotkeyConflictTooltip(0);
+                ActivationShortcut.HasConflict = GetHotkeyConflictStatus(0);
+                ActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(0);
             }
 
             _ = System.Threading.Tasks.Task.Run(() =>

@@ -24,9 +24,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => AlwaysOnTopSettings.ModuleName;
 
-        private bool _hotkeyHasConflict;
-        private string _hotkeyTooltip;
-
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -93,8 +90,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                HotkeyHasConflict = GetHotkeyConflictStatus(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID);
-                HotkeyTooltip = GetHotkeyConflictTooltip(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID);
+                Hotkey.HasConflict = GetHotkeyConflictStatus(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID);
+                Hotkey.ConflictDescription = GetHotkeyConflictTooltip(AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -116,32 +113,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool HotkeyHasConflict
-        {
-            get => _hotkeyHasConflict;
-            set
-            {
-                if (_hotkeyHasConflict != value)
-                {
-                    _hotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(HotkeyHasConflict));
-                }
-            }
-        }
-
-        public string HotkeyTooltip
-        {
-            get => _hotkeyTooltip;
-            set
-            {
-                if (_hotkeyTooltip != value)
-                {
-                    _hotkeyTooltip = value;
-                    OnPropertyChanged(nameof(HotkeyTooltip));
-                }
-            }
         }
 
         public bool IsEnabled

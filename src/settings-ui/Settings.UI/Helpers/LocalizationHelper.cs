@@ -4,8 +4,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using AllExperiments;
 using Microsoft.PowerToys.Settings.UI.Helpers;
+using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 
 namespace Microsoft.PowerToys.Settings.UI.Helpers
 {
@@ -14,65 +17,65 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
         private static readonly Dictionary<(string ModuleName, int HotkeyID), string> HotkeyToResourceKeyMap = new()
         {
             // AdvancedPaste module mappings
-            { ("advancedpaste", 0), "PasteAsPlainText_Shortcut" },
-            { ("advancedpaste", 1), "AdvancedPasteUI_Shortcut" },
-            { ("advancedpaste", 2), "PasteAsMarkdown_Shortcut" },
-            { ("advancedpaste", 3), "PasteAsJson_Shortcut" },
-            { ("advancedpaste", 4), "ImageToText" },
-            { ("advancedpaste", 5), "PasteAsTxtFile" },
-            { ("advancedpaste", 6), "PasteAsPngFile" },
-            { ("advancedpaste", 7), "PasteAsHtmlFile" },
-            { ("advancedpaste", 8), "TranscodeToMp3" },
-            { ("advancedpaste", 9), "TranscodeToMp4" },
+            { (ModuleNames.AdvancedPaste, 0), "PasteAsPlainText_Shortcut" },
+            { (ModuleNames.AdvancedPaste, 1), "AdvancedPasteUI_Shortcut" },
+            { (ModuleNames.AdvancedPaste, 2), "PasteAsMarkdown_Shortcut" },
+            { (ModuleNames.AdvancedPaste, 3), "PasteAsJson_Shortcut" },
+            { (ModuleNames.AdvancedPaste, 4), "ImageToText" },
+            { (ModuleNames.AdvancedPaste, 5), "PasteAsTxtFile" },
+            { (ModuleNames.AdvancedPaste, 6), "PasteAsPngFile" },
+            { (ModuleNames.AdvancedPaste, 7), "PasteAsHtmlFile" },
+            { (ModuleNames.AdvancedPaste, 8), "TranscodeToMp3" },
+            { (ModuleNames.AdvancedPaste, 9), "TranscodeToMp4" },
 
             // AlwaysOnTop module mappings
-            { ("alwaysontop", 0), "AlwaysOnTop_ActivationShortcut" },
+            { (ModuleNames.AlwaysOnTop, 0), "AlwaysOnTop_ActivationShortcut" },
 
             // ColorPicker module mappings
-            { ("colorpicker", 0), "Activation_Shortcut" },
+            { (ModuleNames.ColorPicker, 0), "Activation_Shortcut" },
 
             // CropAndLock module mappings
-            { ("cropandlock", 0), "CropAndLock_ReparentActivation_Shortcut" },
-            { ("cropandlock", 1), "CropAndLock_ThumbnailActivation_Shortcut" },
+            { (ModuleNames.CropAndLock, 0), "CropAndLock_ReparentActivation_Shortcut" },
+            { (ModuleNames.CropAndLock, 1), "CropAndLock_ThumbnailActivation_Shortcut" },
 
             // MeasureTool module mappings
-            { ("measure tool", 0), "MeasureTool_ActivationShortcut" },
+            { (ModuleNames.MeasureTool, 0), "MeasureTool_ActivationShortcut" },
 
             // ShortcutGuide module mappings
-            { ("shortcut guide", 0), "Activation_Shortcut" },
+            { (ModuleNames.ShortcutGuide, 0), "Activation_Shortcut" },
 
             // PowerOCR/TextExtractor module mappings
-            { ("textextractor", 0), "Activation_Shortcut" },
+            { (ModuleNames.PowerOcr, 0), "Activation_Shortcut" },
 
             // Workspaces module mappings
-            { ("workspaces", 0), "Workspaces_ActivationShortcut" },
+            { (ModuleNames.Workspaces, 0), "Workspaces_ActivationShortcut" },
 
             // Peek module mappings
-            { ("peek", 0), "Activation_Shortcut" },
+            { (ModuleNames.Peek, 0), "Activation_Shortcut" },
 
             // PowerLauncher module mappings
-            { ("powertoys run", 0), "PowerLauncher_OpenPowerLauncher" },
+            { (ModuleNames.PowerLauncher, 0), "PowerLauncher_OpenPowerLauncher" },
 
             // MouseUtils module mappings
-            { ("mousehighlighter", 0), "MouseUtils_MouseHighlighter_ActivationShortcut" },
-            { ("mousejump", 0), "MouseUtils_MouseJump_ActivationShortcut" },
-            { ("mousepointercrosshairs", 0), "MouseUtils_MousePointerCrosshairs_ActivationShortcut" },
-            { ("findmymouse", 0), "MouseUtils_FindMyMouse_ActivationShortcut" },
+            { (ModuleNames.MouseHighlighter, 0), "MouseUtils_MouseHighlighter_ActivationShortcut" },
+            { (ModuleNames.MouseJump, 0), "MouseUtils_MouseJump_ActivationShortcut" },
+            { (ModuleNames.MousePointerCrosshairs, 0), "MouseUtils_MousePointerCrosshairs_ActivationShortcut" },
+            { (ModuleNames.FindMyMouse, 0), "MouseUtils_FindMyMouse_ActivationShortcut" },
 
             // Mouse without borders module mappings
-            { ("mousewithoutborders", 0), "MouseWithoutBorders_ToggleEasyMouseShortcut" },
-            { ("mousewithoutborders", 1), "MouseWithoutBorders_LockMachinesShortcut" },
-            { ("mousewithoutborders", 2), "MouseWithoutBorders_Switch2AllPcShortcut" },
-            { ("mousewithoutborders", 3), "MouseWithoutBorders_ReconnectShortcut" },
+            { (ModuleNames.MouseWithoutBorders, 0), "MouseWithoutBorders_ToggleEasyMouseShortcut" },
+            { (ModuleNames.MouseWithoutBorders, 1), "MouseWithoutBorders_LockMachinesShortcut" },
+            { (ModuleNames.MouseWithoutBorders, 2), "MouseWithoutBorders_Switch2AllPcShortcut" },
+            { (ModuleNames.MouseWithoutBorders, 3), "MouseWithoutBorders_ReconnectShortcut" },
 
             // ZoomIt module mappings
-            { ("zoomit", 0), "ZoomIt_Zoom_Shortcut" },
-            { ("zoomit", 1), "ZoomIt_LiveZoom_Shortcut" },
-            { ("zoomit", 2), "ZoomIt_Draw_Shortcut" },
-            { ("zoomit", 3), "ZoomIt_Record_Shortcut" },
-            { ("zoomit", 4), "ZoomIt_Snip_Shortcut" },
-            { ("zoomit", 5), "ZoomIt_Break_Shortcut" },
-            { ("zoomit", 6), "ZoomIt_DemoType_Shortcut" },
+            { (ModuleNames.ZoomIt, 0), "ZoomIt_Zoom_Shortcut" },
+            { (ModuleNames.ZoomIt, 1), "ZoomIt_LiveZoom_Shortcut" },
+            { (ModuleNames.ZoomIt, 2), "ZoomIt_Draw_Shortcut" },
+            { (ModuleNames.ZoomIt, 3), "ZoomIt_Record_Shortcut" },
+            { (ModuleNames.ZoomIt, 4), "ZoomIt_Snip_Shortcut" },
+            { (ModuleNames.ZoomIt, 5), "ZoomIt_Break_Shortcut" },
+            { (ModuleNames.ZoomIt, 6), "ZoomIt_DemoType_Shortcut" },
         };
 
         // Delegate for getting custom action names
@@ -104,7 +107,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
             }
 
             // Handle custom actions for AdvancedPaste, whose IDs start from 10
-            if (moduleName.Equals("advancedpaste", StringComparison.OrdinalIgnoreCase) && hotkeyID > 9)
+            if (moduleName.Equals(ModuleNames.AdvancedPaste, StringComparison.OrdinalIgnoreCase) && hotkeyID > 9)
             {
                 // Try to get the custom action name using the delegate
                 if (GetCustomActionNameDelegate != null)
@@ -144,38 +147,14 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
             try
             {
                 var resourceLoader = ResourceLoaderInstance.ResourceLoader;
-                if (resourceLoader != null)
+                var result = resourceLoader.GetString($"{resourceKey}/Header");
+                if (!string.IsNullOrEmpty(result))
                 {
-                    // Try different variations of the resource key
-                    string[] keyVariations =
-                    {
-                        $"{resourceKey}.Header",  // Try with .Header suffix first
-                        resourceKey,              // Try the key as-is
-                        $"{resourceKey}/Header",  // Try with /Header suffix (some resources use this format)
-                        $"{resourceKey}_Header",   // Try with _Header suffix
-                    };
-
-                    foreach (var keyVariation in keyVariations)
-                    {
-                        try
-                        {
-                            var result = resourceLoader.GetString(keyVariation);
-                            if (!string.IsNullOrEmpty(result))
-                            {
-                                return result;
-                            }
-                        }
-                        catch
-                        {
-                            // Continue to next variation
-                            continue;
-                        }
-                    }
+                    return result;
                 }
             }
             catch (Exception)
             {
-                // If resource loading fails, return null to allow fallback
             }
 
             return null;

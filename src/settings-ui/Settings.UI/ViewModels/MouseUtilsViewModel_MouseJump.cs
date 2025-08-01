@@ -31,9 +31,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private bool _jumpEnabledStateIsGPOConfigured;
         private bool _isMouseJumpEnabled;
 
-        private bool _mouseJumpActivationShortcutHasConflict;
-        private string _mouseJumpActivationShortcutTooltip;
-
         internal MouseJumpSettings MouseJumpSettingsConfig { get; set; }
 
         private void InitializeMouseJumpSettings(ISettingsRepository<MouseJumpSettings> mouseJumpSettingsRepository)
@@ -110,32 +107,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     MouseJumpSettingsConfig.Properties.ActivationShortcut = value ?? MouseJumpSettingsConfig.Properties.DefaultActivationShortcut;
                     NotifyMouseJumpPropertyChanged();
-                }
-            }
-        }
-
-        public bool MouseJumpActivationShortcutHasConflict
-        {
-            get => _mouseJumpActivationShortcutHasConflict;
-            set
-            {
-                if (_mouseJumpActivationShortcutHasConflict != value)
-                {
-                    _mouseJumpActivationShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(MouseJumpActivationShortcutHasConflict));
-                }
-            }
-        }
-
-        public string MouseJumpActivationShortcutTooltip
-        {
-            get => _mouseJumpActivationShortcutTooltip;
-            set
-            {
-                if (_mouseJumpActivationShortcutTooltip != value)
-                {
-                    _mouseJumpActivationShortcutTooltip = value;
-                    OnPropertyChanged(nameof(MouseJumpActivationShortcutTooltip));
                 }
             }
         }

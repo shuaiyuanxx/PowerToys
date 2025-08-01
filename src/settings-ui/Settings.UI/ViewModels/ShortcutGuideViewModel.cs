@@ -18,9 +18,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => ShortcutGuideSettings.ModuleName;
 
-        private bool _openShortcutGuideHasConflict;
-        private string _openShortcutGuideTooltip;
-
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -99,8 +96,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                OpenShortcutGuideHasConflict = GetHotkeyConflictStatus(0);
-                OpenShortcutGuideTooltip = GetHotkeyConflictTooltip(0);
+                OpenShortcutGuide.HasConflict = GetHotkeyConflictStatus(0);
+                OpenShortcutGuide.ConflictDescription = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>
@@ -122,32 +119,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool OpenShortcutGuideHasConflict
-        {
-            get => _openShortcutGuideHasConflict;
-            set
-            {
-                if (_openShortcutGuideHasConflict != value)
-                {
-                    _openShortcutGuideHasConflict = value;
-                    OnPropertyChanged(nameof(OpenShortcutGuideHasConflict));
-                }
-            }
-        }
-
-        public string OpenShortcutGuideTooltip
-        {
-            get => _openShortcutGuideTooltip;
-            set
-            {
-                if (_openShortcutGuideTooltip != value)
-                {
-                    _openShortcutGuideTooltip = value;
-                    OnPropertyChanged(nameof(OpenShortcutGuideTooltip));
-                }
-            }
         }
 
         private GpoRuleConfigured _enabledGpoRuleConfiguration;

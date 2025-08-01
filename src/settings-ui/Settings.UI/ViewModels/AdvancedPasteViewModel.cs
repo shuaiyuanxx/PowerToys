@@ -36,16 +36,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         private static readonly HashSet<string> WarnHotkeys = ["Ctrl + V", "Ctrl + Shift + V"];
 
-        // Private backing fields for conflict properties
-        private bool _advancedPasteUIShortcutHasConflict;
-        private string _advancedPasteUIShortcutTooltip;
-        private bool _pasteAsPlainTextShortcutHasConflict;
-        private string _pasteAsPlainTextShortcutTooltip;
-        private bool _pasteAsMarkdownShortcutHasConflict;
-        private string _pasteAsMarkdownShortcutTooltip;
-        private bool _pasteAsJsonShortcutHasConflict;
-        private string _pasteAsJsonShortcutTooltip;
-
         // Counter for the increment method
         private int _counter = 3;
 
@@ -111,23 +101,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _customActions.CollectionChanged += OnCustomActionsCollectionChanged;
             UpdateCustomActionsCanMoveUpDown();
-
-            InitializeConflictPropertiesDefaults();
         }
 
         public int GetNextHotkeyID() => ++_counter;
-
-        private void InitializeConflictPropertiesDefaults()
-        {
-            AdvancedPasteUIShortcutHasConflict = false;
-            AdvancedPasteUIShortcutTooltip = null;
-            PasteAsPlainTextShortcutHasConflict = false;
-            PasteAsPlainTextShortcutTooltip = null;
-            PasteAsMarkdownShortcutHasConflict = false;
-            PasteAsMarkdownShortcutTooltip = null;
-            PasteAsJsonShortcutHasConflict = false;
-            PasteAsJsonShortcutTooltip = null;
-        }
 
         private void InitializeEnabledValue()
         {
@@ -153,111 +129,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        // Conflict status properties for main shortcuts with getter/setter pattern
-        public bool AdvancedPasteUIShortcutHasConflict
-        {
-            get => _advancedPasteUIShortcutHasConflict;
-            set
-            {
-                if (_advancedPasteUIShortcutHasConflict != value)
-                {
-                    _advancedPasteUIShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(AdvancedPasteUIShortcutHasConflict));
-                }
-            }
-        }
-
-        public string AdvancedPasteUIShortcutTooltip
-        {
-            get => _advancedPasteUIShortcutTooltip;
-            set
-            {
-                if (_advancedPasteUIShortcutTooltip != value)
-                {
-                    _advancedPasteUIShortcutTooltip = value;
-                    OnPropertyChanged(nameof(AdvancedPasteUIShortcutTooltip));
-                }
-            }
-        }
-
-        public bool PasteAsPlainTextShortcutHasConflict
-        {
-            get => _pasteAsPlainTextShortcutHasConflict;
-            set
-            {
-                if (_pasteAsPlainTextShortcutHasConflict != value)
-                {
-                    _pasteAsPlainTextShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(PasteAsPlainTextShortcutHasConflict));
-                }
-            }
-        }
-
-        public string PasteAsPlainTextShortcutTooltip
-        {
-            get => _pasteAsPlainTextShortcutTooltip;
-            set
-            {
-                if (_pasteAsPlainTextShortcutTooltip != value)
-                {
-                    _pasteAsPlainTextShortcutTooltip = value;
-                    OnPropertyChanged(nameof(PasteAsPlainTextShortcutTooltip));
-                }
-            }
-        }
-
-        public bool PasteAsMarkdownShortcutHasConflict
-        {
-            get => _pasteAsMarkdownShortcutHasConflict;
-            set
-            {
-                if (_pasteAsMarkdownShortcutHasConflict != value)
-                {
-                    _pasteAsMarkdownShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(PasteAsMarkdownShortcutHasConflict));
-                }
-            }
-        }
-
-        public string PasteAsMarkdownShortcutTooltip
-        {
-            get => _pasteAsMarkdownShortcutTooltip;
-            set
-            {
-                if (_pasteAsMarkdownShortcutTooltip != value)
-                {
-                    _pasteAsMarkdownShortcutTooltip = value;
-                    OnPropertyChanged(nameof(PasteAsMarkdownShortcutTooltip));
-                }
-            }
-        }
-
-        public bool PasteAsJsonShortcutHasConflict
-        {
-            get => _pasteAsJsonShortcutHasConflict;
-            set
-            {
-                if (_pasteAsJsonShortcutHasConflict != value)
-                {
-                    _pasteAsJsonShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(PasteAsJsonShortcutHasConflict));
-                }
-            }
-        }
-
-        public string PasteAsJsonShortcutTooltip
-        {
-            get => _pasteAsJsonShortcutTooltip;
-            set
-            {
-                if (_pasteAsJsonShortcutTooltip != value)
-                {
-                    _pasteAsJsonShortcutTooltip = value;
-                    OnPropertyChanged(nameof(PasteAsJsonShortcutTooltip));
-                }
-            }
-        }
-
         protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
         {
             UpdateHotkeyConflictStatus(e.Conflicts);
@@ -265,23 +136,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                AdvancedPasteUIShortcutHasConflict = GetHotkeyConflictStatus(1);
-                AdvancedPasteUIShortcutTooltip = GetHotkeyConflictTooltip(1);
+                AdvancedPasteUIShortcut.HasConflict = GetHotkeyConflictStatus(1);
+                AdvancedPasteUIShortcut.ConflictDescription = GetHotkeyConflictTooltip(1);
 
-                PasteAsPlainTextShortcutHasConflict = GetHotkeyConflictStatus(0);
-                PasteAsPlainTextShortcutTooltip = GetHotkeyConflictTooltip(0);
+                PasteAsPlainTextShortcut.HasConflict = GetHotkeyConflictStatus(0);
+                PasteAsPlainTextShortcut.ConflictDescription = GetHotkeyConflictTooltip(0);
 
-                PasteAsMarkdownShortcutHasConflict = GetHotkeyConflictStatus(2);
-                PasteAsMarkdownShortcutTooltip = GetHotkeyConflictTooltip(2);
+                PasteAsMarkdownShortcut.HasConflict = GetHotkeyConflictStatus(2);
+                PasteAsMarkdownShortcut.ConflictDescription = GetHotkeyConflictTooltip(2);
 
-                PasteAsJsonShortcutHasConflict = GetHotkeyConflictStatus(3);
-                PasteAsJsonShortcutTooltip = GetHotkeyConflictTooltip(3);
+                PasteAsJsonShortcut.HasConflict = GetHotkeyConflictStatus(3);
+                PasteAsJsonShortcut.ConflictDescription = GetHotkeyConflictTooltip(3);
 
                 foreach (var customAction in _customActions)
                 {
                     var hotkeyID = customAction.Shortcut.HotkeyID;
-                    customAction.HasConflict = GetHotkeyConflictStatus(hotkeyID);
-                    customAction.Tooltip = GetHotkeyConflictTooltip(hotkeyID);
+                    customAction.Shortcut.HasConflict = GetHotkeyConflictStatus(hotkeyID);
+                    customAction.Shortcut.ConflictDescription = GetHotkeyConflictTooltip(hotkeyID);
                 }
 
                 UpdateAdditionalActionsConflicts();
@@ -324,8 +195,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (kvp.Key is AdvancedPasteAdditionalAction additionalAction)
                 {
-                    additionalAction.HasConflict = GetHotkeyConflictStatus(kvp.Value);
-                    additionalAction.Tooltip = GetHotkeyConflictTooltip(kvp.Value);
+                    additionalAction.Shortcut.HasConflict = GetHotkeyConflictStatus(kvp.Value);
+                    additionalAction.Shortcut.ConflictDescription = GetHotkeyConflictTooltip(kvp.Value);
                 }
             }
         }

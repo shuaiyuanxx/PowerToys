@@ -28,9 +28,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => "CmdPal";
 
-        private bool _hotkeyHasConflict;
-        private string _hotkeyTooltip;
-
         private GpoRuleConfigured _enabledGpoRuleConfiguration;
         private bool _isEnabled;
         private HotkeySettings _hotkey;
@@ -103,8 +100,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                HotkeyHasConflict = GetHotkeyConflictStatus(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
-                HotkeyTooltip = GetHotkeyConflictTooltip(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
+                Hotkey.HasConflict = GetHotkeyConflictStatus(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
+                Hotkey.ConflictDescription = GetHotkeyConflictTooltip(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -126,32 +123,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool HotkeyHasConflict
-        {
-            get => _hotkeyHasConflict;
-            set
-            {
-                if (_hotkeyHasConflict != value)
-                {
-                    _hotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(HotkeyHasConflict));
-                }
-            }
-        }
-
-        public string HotkeyTooltip
-        {
-            get => _hotkeyTooltip;
-            set
-            {
-                if (_hotkeyTooltip != value)
-                {
-                    _hotkeyTooltip = value;
-                    OnPropertyChanged(nameof(HotkeyTooltip));
-                }
-            }
         }
 
         public bool IsEnabled

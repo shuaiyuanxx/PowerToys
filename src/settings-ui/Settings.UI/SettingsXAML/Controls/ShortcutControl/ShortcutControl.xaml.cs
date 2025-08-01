@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
@@ -143,11 +144,51 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             {
                 if (hotkeySettings != value)
                 {
+                    // Unsubscribe from old settings
+                    if (hotkeySettings != null)
+                    {
+                        hotkeySettings.PropertyChanged -= OnHotkeySettingsPropertyChanged;
+                    }
+
                     hotkeySettings = value;
                     SetValue(HotkeySettingsProperty, value);
+
+                    // Subscribe to new settings
+                    if (hotkeySettings != null)
+                    {
+                        hotkeySettings.PropertyChanged += OnHotkeySettingsPropertyChanged;
+
+                        // Update UI based on conflict properties
+                        UpdateConflictStatusFromHotkeySettings();
+                    }
+
                     SetKeys();
-                    c.Keys = HotkeySettings.GetKeysList();
+                    c.Keys = HotkeySettings?.GetKeysList();
                 }
+            }
+        }
+
+        private void OnHotkeySettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(HotkeySettings.HasConflict) ||
+                e.PropertyName == nameof(HotkeySettings.ConflictDescription))
+            {
+                UpdateConflictStatusFromHotkeySettings();
+            }
+        }
+
+        private void UpdateConflictStatusFromHotkeySettings()
+        {
+            if (hotkeySettings != null)
+            {
+                // Update the ShortcutControl's conflict properties from HotkeySettings
+                HasConflict = hotkeySettings.HasConflict;
+                Tooltip = hotkeySettings.HasConflict ? hotkeySettings.ConflictDescription : null;
+            }
+            else
+            {
+                HasConflict = false;
+                Tooltip = null;
             }
         }
 
@@ -210,6 +251,12 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
             if (App.GetSettingsWindow() != null)
             {
                 App.GetSettingsWindow().Activated -= ShortcutDialog_SettingsWindow_Activated;
+            }
+
+            // Unsubscribe from HotkeySettings property changes
+            if (hotkeySettings != null)
+            {
+                hotkeySettings.PropertyChanged -= OnHotkeySettingsPropertyChanged;
             }
 
             // Dispose the HotkeySettingsControlHook object to terminate the hook threads when the textbox is unloaded

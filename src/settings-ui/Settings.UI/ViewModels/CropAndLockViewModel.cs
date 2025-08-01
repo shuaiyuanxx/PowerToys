@@ -22,11 +22,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => CropAndLockSettings.ModuleName;
 
-        private bool _thumbnailHotkeyHasConflict;
-        private string _thumbnailHotkeyTooltip;
-        private bool _reparentHotkeyHasConflict;
-        private string _reparentHotkeyTooltip;
-
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -108,11 +103,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ThumbnailHotkeyHasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
-                ReparentHotkeyHasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
+                ThumbnailActivationShortcut.HasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
+                ReparentActivationShortcut.HasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
 
-                ThumbnailHotkeyTooltip = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
-                ReparentHotkeyTooltip = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
+                ThumbnailActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
+                ReparentActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -134,58 +129,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool ThumbnailHotkeyHasConflict
-        {
-            get => _thumbnailHotkeyHasConflict;
-            set
-            {
-                if (_thumbnailHotkeyHasConflict != value)
-                {
-                    _thumbnailHotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(ThumbnailHotkeyHasConflict));
-                }
-            }
-        }
-
-        public string ThumbnailHotkeyTooltip
-        {
-            get => _thumbnailHotkeyTooltip;
-            set
-            {
-                if (_thumbnailHotkeyTooltip != value)
-                {
-                    _thumbnailHotkeyTooltip = value;
-                    OnPropertyChanged(nameof(ThumbnailHotkeyTooltip));
-                }
-            }
-        }
-
-        public bool ReparentHotkeyHasConflict
-        {
-            get => _reparentHotkeyHasConflict;
-            set
-            {
-                if (_reparentHotkeyHasConflict != value)
-                {
-                    _reparentHotkeyHasConflict = value;
-                    OnPropertyChanged(nameof(ReparentHotkeyHasConflict));
-                }
-            }
-        }
-
-        public string ReparentHotkeyTooltip
-        {
-            get => _reparentHotkeyTooltip;
-            set
-            {
-                if (_reparentHotkeyTooltip != value)
-                {
-                    _reparentHotkeyTooltip = value;
-                    OnPropertyChanged(nameof(ReparentHotkeyTooltip));
-                }
-            }
         }
 
         public bool IsEnabled

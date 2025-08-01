@@ -76,49 +76,49 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             try
             {
-                _viewModelFactories["advancedpaste"] = () => new AdvancedPasteViewModel(
+                _viewModelFactories[ModuleNames.AdvancedPaste] = () => new AdvancedPasteViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<AdvancedPasteSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
-                _viewModelFactories["alwaysontop"] = () => new AlwaysOnTopViewModel(
+                _viewModelFactories[ModuleNames.AlwaysOnTop] = () => new AlwaysOnTopViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<AlwaysOnTopSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
-                _viewModelFactories["colorpicker"] = () => new ColorPickerViewModel(
+                _viewModelFactories[ModuleNames.ColorPicker] = () => new ColorPickerViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<ColorPickerSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
-                _viewModelFactories["cropandlock"] = () => new CropAndLockViewModel(
+                _viewModelFactories[ModuleNames.CropAndLock] = () => new CropAndLockViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<CropAndLockSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
-                _viewModelFactories["powerocr"] = () => new PowerOcrViewModel(
+                _viewModelFactories[ModuleNames.PowerOcr] = () => new PowerOcrViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<PowerOcrSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
-                _viewModelFactories["workspaces"] = () => new WorkspacesViewModel(
+                _viewModelFactories[ModuleNames.Workspaces] = () => new WorkspacesViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<WorkspacesSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
-                _viewModelFactories["peek"] = () => new PeekViewModel(
+                _viewModelFactories[ModuleNames.Peek] = () => new PeekViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SendConfigMSG,
                     Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
 
-                _viewModelFactories["mouseutils"] = () => new MouseUtilsViewModel(
+                _viewModelFactories[ModuleNames.MouseUtils] = () => new MouseUtilsViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<FindMyMouseSettings>.GetInstance(_settingsUtils),
@@ -128,35 +128,35 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     SendConfigMSG);
 
                 // powertoys run
-                _viewModelFactories["powertoys run"] = () => new PowerLauncherViewModel(
+                _viewModelFactories[ModuleNames.PowerLauncher] = () => new PowerLauncherViewModel(
                     powerLauncherSettings,
                     SettingsRepository<GeneralSettings>.GetInstance(_settingsUtils),
                     ShellPage.SendDefaultIPCMessage,
                     App.IsDarkTheme);
 
                 // measure tool
-                _viewModelFactories["measure tool"] = () => new MeasureToolViewModel(
+                _viewModelFactories[ModuleNames.MeasureTool] = () => new MeasureToolViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<MeasureToolSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
                 // shortcut guide
-                _viewModelFactories["shortcut guide"] = () => new ShortcutGuideViewModel(
+                _viewModelFactories[ModuleNames.ShortcutGuide] = () => new ShortcutGuideViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<ShortcutGuideSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
                 // textextractor
-                _viewModelFactories["textextractor"] = () => new PowerOcrViewModel(
+                _viewModelFactories[ModuleNames.TextExtractor] = () => new PowerOcrViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SettingsRepository<PowerOcrSettings>.GetInstance(_settingsUtils),
                     SendConfigMSG);
 
                 // mousewithoutborders
-                _viewModelFactories["mousewithoutborders"] = () => new MouseWithoutBordersViewModel(
+                _viewModelFactories[ModuleNames.MouseWithoutBorders] = () => new MouseWithoutBordersViewModel(
                     _settingsUtils,
                     _generalSettingsRepository,
                     SendConfigMSG,
@@ -172,7 +172,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             try
             {
-                var advancedPasteViewModel = GetOrCreateViewModel("advancedpaste") as AdvancedPasteViewModel;
+                var advancedPasteViewModel = GetOrCreateViewModel(ModuleNames.AdvancedPaste) as AdvancedPasteViewModel;
                 if (advancedPasteViewModel?.CustomActions != null)
                 {
                     var customAction = advancedPasteViewModel.CustomActions.FirstOrDefault(ca => ca.Id == actionId);
@@ -298,46 +298,46 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                 switch (moduleKey)
                 {
-                    case "advancedpaste":
+                    case ModuleNames.AdvancedPaste:
                         UpdateAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "alwaysontop":
+                    case ModuleNames.AlwaysOnTop:
                         UpdateAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "colorpicker":
+                    case ModuleNames.ColorPicker:
                         UpdateColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "cropandlock":
+                    case ModuleNames.CropAndLock:
                         UpdateCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "fancyzones":
+                    case ModuleNames.FancyZones:
                         UpdateFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "measure tool":
+                    case ModuleNames.MeasureTool:
                         UpdateMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "shortcut guide":
+                    case ModuleNames.ShortcutGuide:
                         UpdateShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "textextractor":
+                    case ModuleNames.TextExtractor:
                         UpdatePowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "workspaces":
+                    case ModuleNames.Workspaces:
                         UpdateWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "peek":
+                    case ModuleNames.Peek:
                         UpdatePeekHotkeySettings(viewModel as PeekViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "powertoys run":
+                    case ModuleNames.PowerLauncher:
                         UpdatePowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "cmdpal":
+                    case ModuleNames.CmdPal:
                         UpdateCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "mousewithoutborders":
+                    case ModuleNames.MouseWithoutBorders:
                         UpdateMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyID, newHotkeySettings);
                         break;
-                    case "mouseutils":
+                    case ModuleNames.MouseUtils:
                         UpdateMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID, newHotkeySettings);
                         break;
                     default:
@@ -719,7 +719,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update based on specific mouse utility module name
             switch (moduleName?.ToLowerInvariant())
             {
-                case "mousehighlighter":
+                case ModuleNames.MouseHighlighter:
                     if (!AreHotkeySettingsEqual(viewModel.MouseHighlighterActivationShortcut, newHotkeySettings))
                     {
                         viewModel.MouseHighlighterActivationShortcut = newHotkeySettings;
@@ -728,7 +728,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "mousejump":
+                case ModuleNames.MouseJump:
                     if (!AreHotkeySettingsEqual(viewModel.MouseJumpActivationShortcut, newHotkeySettings))
                     {
                         viewModel.MouseJumpActivationShortcut = newHotkeySettings;
@@ -737,7 +737,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "mousepointercrosshairs":
+                case ModuleNames.MousePointerCrosshairs:
                     if (!AreHotkeySettingsEqual(viewModel.MousePointerCrosshairsActivationShortcut, newHotkeySettings))
                     {
                         viewModel.MousePointerCrosshairsActivationShortcut = newHotkeySettings;
@@ -746,7 +746,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     break;
 
-                case "findmymouse":
+                case ModuleNames.FindMyMouse:
                     if (!AreHotkeySettingsEqual(viewModel.FindMyMouseActivationShortcut, newHotkeySettings))
                     {
                         viewModel.FindMyMouseActivationShortcut = newHotkeySettings;
@@ -794,20 +794,20 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                 return moduleKey switch
                 {
-                    "advancedpaste" => GetAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyID),
-                    "alwaysontop" => GetAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyID),
-                    "colorpicker" => GetColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyID),
-                    "cropandlock" => GetCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyID),
-                    "fancyzones" => GetFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyID),
-                    "measure tool" => GetMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyID),
-                    "shortcut guide" => GetShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyID),
-                    "powerocr" or "textextractor" => GetPowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyID),
-                    "workspaces" => GetWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyID),
-                    "peek" => GetPeekHotkeySettings(viewModel as PeekViewModel, hotkeyID),
-                    "powertoys run" => GetPowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyID),
-                    "cmdpal" => GetCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyID),
-                    "mousewithoutborders" => GetMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyID),
-                    "mouseutils" => GetMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID),
+                    ModuleNames.AdvancedPaste => GetAdvancedPasteHotkeySettings(viewModel as AdvancedPasteViewModel, hotkeyID),
+                    ModuleNames.AlwaysOnTop => GetAlwaysOnTopHotkeySettings(viewModel as AlwaysOnTopViewModel, hotkeyID),
+                    ModuleNames.ColorPicker => GetColorPickerHotkeySettings(viewModel as ColorPickerViewModel, hotkeyID),
+                    ModuleNames.CropAndLock => GetCropAndLockHotkeySettings(viewModel as CropAndLockViewModel, hotkeyID),
+                    ModuleNames.FancyZones => GetFancyZonesHotkeySettings(viewModel as FancyZonesViewModel, hotkeyID),
+                    ModuleNames.MeasureTool => GetMeasureToolHotkeySettings(viewModel as MeasureToolViewModel, hotkeyID),
+                    ModuleNames.ShortcutGuide => GetShortcutGuideHotkeySettings(viewModel as ShortcutGuideViewModel, hotkeyID),
+                    ModuleNames.PowerOcr or ModuleNames.TextExtractor => GetPowerOcrHotkeySettings(viewModel as PowerOcrViewModel, hotkeyID),
+                    ModuleNames.Workspaces => GetWorkspacesHotkeySettings(viewModel as WorkspacesViewModel, hotkeyID),
+                    ModuleNames.Peek => GetPeekHotkeySettings(viewModel as PeekViewModel, hotkeyID),
+                    ModuleNames.PowerLauncher => GetPowerLauncherHotkeySettings(viewModel as PowerLauncherViewModel, hotkeyID),
+                    ModuleNames.CmdPal => GetCmdPalHotkeySettings(viewModel as CmdPalViewModel, hotkeyID),
+                    ModuleNames.MouseWithoutBorders => GetMouseWithoutBordersHotkeySettings(viewModel as MouseWithoutBordersViewModel, hotkeyID),
+                    ModuleNames.MouseUtils => GetMouseUtilsHotkeySettings(viewModel as MouseUtilsViewModel, moduleName, hotkeyID),
                     _ => null,
                 };
             }
@@ -839,7 +839,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             return moduleName?.ToLowerInvariant() switch
             {
-                "mousehighlighter" or "mousejump" or "mousepointercrosshairs" or "findmymouse" => "mouseutils",
+                ModuleNames.MouseHighlighter or ModuleNames.MouseJump or ModuleNames.MousePointerCrosshairs or ModuleNames.FindMyMouse => ModuleNames.MouseUtils,
                 _ => moduleName?.ToLowerInvariant(),
             };
         }
@@ -949,10 +949,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             return moduleName?.ToLowerInvariant() switch
             {
-                "mousehighlighter" => viewModel.MouseHighlighterActivationShortcut,
-                "mousejump" => viewModel.MouseJumpActivationShortcut,
-                "mousepointercrosshairs" => viewModel.MousePointerCrosshairsActivationShortcut,
-                "findmymouse" => viewModel.FindMyMouseActivationShortcut,
+                ModuleNames.MouseHighlighter => viewModel.MouseHighlighterActivationShortcut,
+                ModuleNames.MouseJump => viewModel.MouseJumpActivationShortcut,
+                ModuleNames.MousePointerCrosshairs => viewModel.MousePointerCrosshairsActivationShortcut,
+                ModuleNames.FindMyMouse => viewModel.FindMyMouseActivationShortcut,
                 _ => null,
             };
         }

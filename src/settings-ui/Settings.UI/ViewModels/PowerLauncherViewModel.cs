@@ -25,9 +25,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
     public partial class PowerLauncherViewModel : PageViewModelBase, IDisposable
     {
-        private bool _openPowerLauncherHasConflict;
-        private string _openPowerLauncherTooltip;
-
         private int _themeIndex;
         private int _monitorPositionIndex;
 
@@ -142,8 +139,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                OpenPowerLauncherHasConflict = GetHotkeyConflictStatus(0);
-                OpenPowerLauncherTooltip = GetHotkeyConflictTooltip(0);
+                OpenPowerLauncher.HasConflict = GetHotkeyConflictStatus(0);
+                OpenPowerLauncher.ConflictDescription = GetHotkeyConflictTooltip(0);
             }
 
             _ = Task.Run(() =>
@@ -165,32 +162,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool OpenPowerLauncherHasConflict
-        {
-            get => _openPowerLauncherHasConflict;
-            set
-            {
-                if (_openPowerLauncherHasConflict != value)
-                {
-                    _openPowerLauncherHasConflict = value;
-                    OnPropertyChanged(nameof(OpenPowerLauncherHasConflict));
-                }
-            }
-        }
-
-        public string OpenPowerLauncherTooltip
-        {
-            get => _openPowerLauncherTooltip;
-            set
-            {
-                if (_openPowerLauncherTooltip != value)
-                {
-                    _openPowerLauncherTooltip = value;
-                    OnPropertyChanged(nameof(OpenPowerLauncherTooltip));
-                }
-            }
         }
 
         private void OnPluginInfoChange(object sender, PropertyChangedEventArgs e)

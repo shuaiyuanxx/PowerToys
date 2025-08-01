@@ -89,7 +89,7 @@ namespace Microsoft.PowerToys.Settings.UI.SettingsXAML.Controls.Dashboard
         /// <returns>The custom action name, or null if not found</returns>
         private string GetCustomActionName(string moduleName, int actionId)
         {
-            if (!moduleName.Equals("advancedpaste", StringComparison.OrdinalIgnoreCase))
+            if (!moduleName.Equals(ModuleNames.AdvancedPaste, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }

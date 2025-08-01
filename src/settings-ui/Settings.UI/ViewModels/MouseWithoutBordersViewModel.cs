@@ -58,15 +58,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             { SocketStatus.Connected, new SolidColorBrush(Colors.Green) },
         };
 
-        private bool _toggleEasyMouseShortcutHasConflict;
-        private string _toggleEasyMouseShortcutTooltip;
-        private bool _lockMachinesShortcutHasConflict;
-        private string _lockMachinesShortcutTooltip;
-        private bool _hotKeySwitch2AllPCHasConflict;
-        private string _hotKeySwitch2AllPCTooltip;
-        private bool _reconnectShortcutHasConflict;
-        private string _reconnectShortcutTooltip;
-
         private bool _connectFieldsVisible;
 
         public bool IsElevated { get => GeneralSettingsConfig.IsElevated; }
@@ -535,15 +526,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Update properties using setters to trigger PropertyChanged
             void UpdateConflictProperties()
             {
-                ToggleEasyMouseShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
-                LockMachinesShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
-                HotKeySwitch2AllPCHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
-                ReconnectShortcutHasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
+                ToggleEasyMouseShortcut.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
+                LockMachinesShortcut.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
+                HotKeySwitch2AllPC.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
+                ReconnectShortcut.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
 
-                ToggleEasyMouseShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
-                LockMachinesShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
-                HotKeySwitch2AllPCTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
-                ReconnectShortcutTooltip = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
+                ToggleEasyMouseShortcut.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
+                LockMachinesShortcut.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
+                HotKeySwitch2AllPC.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
+                ReconnectShortcut.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
             }
 
             _ = Task.Run(() =>
@@ -565,110 +556,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     UpdateConflictProperties();
                 }
             });
-        }
-
-        public bool ToggleEasyMouseShortcutHasConflict
-        {
-            get => _toggleEasyMouseShortcutHasConflict;
-            set
-            {
-                if (_toggleEasyMouseShortcutHasConflict != value)
-                {
-                    _toggleEasyMouseShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(ToggleEasyMouseShortcutHasConflict));
-                }
-            }
-        }
-
-        public string ToggleEasyMouseShortcutTooltip
-        {
-            get => _toggleEasyMouseShortcutTooltip;
-            set
-            {
-                if (_toggleEasyMouseShortcutTooltip != value)
-                {
-                    _toggleEasyMouseShortcutTooltip = value;
-                    OnPropertyChanged(nameof(ToggleEasyMouseShortcutTooltip));
-                }
-            }
-        }
-
-        public bool LockMachinesShortcutHasConflict
-        {
-            get => _lockMachinesShortcutHasConflict;
-            set
-            {
-                if (_lockMachinesShortcutHasConflict != value)
-                {
-                    _lockMachinesShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(LockMachinesShortcutHasConflict));
-                }
-            }
-        }
-
-        public string LockMachinesShortcutTooltip
-        {
-            get => _lockMachinesShortcutTooltip;
-            set
-            {
-                if (_lockMachinesShortcutTooltip != value)
-                {
-                    _lockMachinesShortcutTooltip = value;
-                    OnPropertyChanged(nameof(LockMachinesShortcutTooltip));
-                }
-            }
-        }
-
-        public bool HotKeySwitch2AllPCHasConflict
-        {
-            get => _hotKeySwitch2AllPCHasConflict;
-            set
-            {
-                if (_hotKeySwitch2AllPCHasConflict != value)
-                {
-                    _hotKeySwitch2AllPCHasConflict = value;
-                    OnPropertyChanged(nameof(HotKeySwitch2AllPCHasConflict));
-                }
-            }
-        }
-
-        public string HotKeySwitch2AllPCTooltip
-        {
-            get => _hotKeySwitch2AllPCTooltip;
-            set
-            {
-                if (_hotKeySwitch2AllPCTooltip != value)
-                {
-                    _hotKeySwitch2AllPCTooltip = value;
-                    OnPropertyChanged(nameof(HotKeySwitch2AllPCTooltip));
-                }
-            }
-        }
-
-        public bool ReconnectShortcutHasConflict
-        {
-            get => _reconnectShortcutHasConflict;
-            set
-            {
-                if (_reconnectShortcutHasConflict != value)
-                {
-                    _reconnectShortcutHasConflict = value;
-                    OnPropertyChanged(nameof(ReconnectShortcutHasConflict));
-                }
-            }
-        }
-
-        public string ReconnectShortcutTooltip
-        {
-            get => _reconnectShortcutTooltip;
-            set
-            {
-                if (_reconnectShortcutTooltip != value)
-                {
-                    _reconnectShortcutTooltip = value;
-                    OnPropertyChanged(nameof(ReconnectShortcutTooltip));
-                }
-            }
         }
 
         private void InitializePolicyValues()
