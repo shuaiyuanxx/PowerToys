@@ -519,45 +519,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
-        {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
-            {
-                ToggleEasyMouseShortcut.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
-                LockMachinesShortcut.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
-                HotKeySwitch2AllPC.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
-                ReconnectShortcut.HasConflict = GetHotkeyConflictStatus(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
-
-                ToggleEasyMouseShortcut.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse.HotkeyID);
-                LockMachinesShortcut.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyLockMachine.HotkeyID);
-                HotKeySwitch2AllPC.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC.HotkeyID);
-                ReconnectShortcut.ConflictDescription = GetHotkeyConflictTooltip(MouseWithoutBordersProperties.DefaultHotKeyReconnect.HotkeyID);
-            }
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
-        }
-
         private void InitializePolicyValues()
         {
             // Policies supporting only enabled state
@@ -585,6 +546,24 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Special policies
             _policyDefinedIpMappingRulesGPOData = GPOWrapper.GetConfiguredMwbPolicyDefinedIpMappingRules();
             _policyDefinedIpMappingRulesIsGPOConfigured = !string.IsNullOrWhiteSpace(_policyDefinedIpMappingRulesGPOData);
+        }
+
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                ToggleEasyMouseShortcut,
+                LockMachinesShortcut,
+                HotKeySwitch2AllPC,
+                ReconnectShortcut,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.MouseWithoutBorders] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         private void LoadViewModelFromSettings(MouseWithoutBordersSettings moduleSettings)

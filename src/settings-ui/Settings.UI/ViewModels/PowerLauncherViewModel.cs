@@ -132,36 +132,19 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
         {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
+            var hotkeysList = new List<HotkeySettings>
             {
-                OpenPowerLauncher.HasConflict = GetHotkeyConflictStatus(0);
-                OpenPowerLauncher.ConflictDescription = GetHotkeyConflictTooltip(0);
-            }
+                OpenPowerLauncher,
+            };
 
-            _ = Task.Run(() =>
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
+                [ModuleNames.PowerLauncher] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         private void OnPluginInfoChange(object sender, PropertyChangedEventArgs e)

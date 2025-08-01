@@ -178,41 +178,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
         {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
+            var hotkeysList = new List<HotkeySettings>
             {
-                EditorHotkey.HasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
-                NextTabHotkey.HasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
-                PrevTabHotkey.HasConflict = GetHotkeyConflictStatus(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
+                EditorHotkey,
+                NextTabHotkey,
+                PrevTabHotkey,
+            };
 
-                EditorHotkey.ConflictDescription = GetHotkeyConflictTooltip(FZConfigProperties.DefaultEditorHotkeyValue.HotkeyID);
-                NextTabHotkey.ConflictDescription = GetHotkeyConflictTooltip(FZConfigProperties.DefaultNextTabHotkeyValue.HotkeyID);
-                PrevTabHotkey.ConflictDescription = GetHotkeyConflictTooltip(FZConfigProperties.DefaultPrevTabHotkeyValue.HotkeyID);
-            }
-
-            _ = Task.Run(() =>
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
+                [ModuleNames.FancyZones] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         public bool IsEnabled

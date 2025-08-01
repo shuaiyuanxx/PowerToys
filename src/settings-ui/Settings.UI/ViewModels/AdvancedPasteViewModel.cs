@@ -103,6 +103,37 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             UpdateCustomActionsCanMoveUpDown();
         }
 
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                PasteAsPlainTextShortcut,
+                AdvancedPasteUIShortcut,
+                PasteAsMarkdownShortcut,
+                PasteAsJsonShortcut,
+            };
+
+            foreach (var action in _additionalActions.GetAllActions())
+            {
+                if (action is AdvancedPasteAdditionalAction additionalAction)
+                {
+                    hotkeysList.Add(additionalAction.Shortcut);
+                }
+            }
+
+            foreach (var customAction in _customActions)
+            {
+                hotkeysList.Add(customAction.Shortcut);
+            }
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.AdvancedPaste] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
+        }
+
         public int GetNextHotkeyID() => ++_counter;
 
         private void InitializeEnabledValue()
@@ -126,78 +157,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                 // disable AI if it was enabled
                 DisableAI();
-            }
-        }
-
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
-        {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
-            {
-                AdvancedPasteUIShortcut.HasConflict = GetHotkeyConflictStatus(1);
-                AdvancedPasteUIShortcut.ConflictDescription = GetHotkeyConflictTooltip(1);
-
-                PasteAsPlainTextShortcut.HasConflict = GetHotkeyConflictStatus(0);
-                PasteAsPlainTextShortcut.ConflictDescription = GetHotkeyConflictTooltip(0);
-
-                PasteAsMarkdownShortcut.HasConflict = GetHotkeyConflictStatus(2);
-                PasteAsMarkdownShortcut.ConflictDescription = GetHotkeyConflictTooltip(2);
-
-                PasteAsJsonShortcut.HasConflict = GetHotkeyConflictStatus(3);
-                PasteAsJsonShortcut.ConflictDescription = GetHotkeyConflictTooltip(3);
-
-                foreach (var customAction in _customActions)
-                {
-                    var hotkeyID = customAction.Shortcut.HotkeyID;
-                    customAction.Shortcut.HasConflict = GetHotkeyConflictStatus(hotkeyID);
-                    customAction.Shortcut.ConflictDescription = GetHotkeyConflictTooltip(hotkeyID);
-                }
-
-                UpdateAdditionalActionsConflicts();
-            }
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
-        }
-
-        private void UpdateAdditionalActionsConflicts()
-        {
-            var actionToHotkeyMap = new Dictionary<IAdvancedPasteAction, int>
-            {
-                { _additionalActions.ImageToText, 4 },
-                { _additionalActions.PasteAsFile.PasteAsTxtFile, 5 },
-                { _additionalActions.PasteAsFile.PasteAsPngFile, 6 },
-                { _additionalActions.PasteAsFile.PasteAsHtmlFile, 7 },
-                { _additionalActions.Transcode.TranscodeToMp3, 8 },
-                { _additionalActions.Transcode.TranscodeToMp4, 9 },
-            };
-
-            foreach (var kvp in actionToHotkeyMap)
-            {
-                if (kvp.Key is AdvancedPasteAdditionalAction additionalAction)
-                {
-                    additionalAction.Shortcut.HasConflict = GetHotkeyConflictStatus(kvp.Value);
-                    additionalAction.Shortcut.ConflictDescription = GetHotkeyConflictTooltip(kvp.Value);
-                }
             }
         }
 

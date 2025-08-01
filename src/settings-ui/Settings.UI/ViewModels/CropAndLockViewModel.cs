@@ -72,6 +72,22 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                ReparentActivationShortcut,
+                ThumbnailActivationShortcut,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.CropAndLock] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
+        }
+
         private void CheckAndUpdateHotkeySettings()
         {
             bool shouldUpdate = false;
@@ -94,41 +110,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
             }
-        }
-
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
-        {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
-            {
-                ThumbnailActivationShortcut.HasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
-                ReparentActivationShortcut.HasConflict = GetHotkeyConflictStatus(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
-
-                ThumbnailActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultThumbnailHotkeyValue.HotkeyID);
-                ReparentActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(CropAndLockProperties.DefaultReparentHotkeyValue.HotkeyID);
-            }
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
         }
 
         public bool IsEnabled

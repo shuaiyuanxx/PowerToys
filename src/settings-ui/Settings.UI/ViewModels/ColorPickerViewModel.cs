@@ -81,38 +81,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             InitializeColorFormats();
         }
 
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
-        {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
-            {
-                ActivationShortcut.HasConflict = GetHotkeyConflictStatus(0);
-                ActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip(0);
-            }
-
-            _ = System.Threading.Tasks.Task.Run(() =>
-            {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
-        }
-
         private void InitializeEnabledValue()
         {
             _enabledGpoRuleConfiguration = GPOWrapper.GetConfiguredColorPickerEnabledValue();
@@ -126,6 +94,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 _isEnabled = GeneralSettingsConfig.Enabled.ColorPicker;
             }
+        }
+
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                ActivationShortcut,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.ColorPicker] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         public bool IsEnabled

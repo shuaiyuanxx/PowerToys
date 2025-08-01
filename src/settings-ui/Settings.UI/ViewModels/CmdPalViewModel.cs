@@ -93,36 +93,19 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
         {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
+            var hotkeysList = new List<HotkeySettings>
             {
-                Hotkey.HasConflict = GetHotkeyConflictStatus(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
-                Hotkey.ConflictDescription = GetHotkeyConflictTooltip(CmdPalProperties.DefaultHotkeyValue.HotkeyID);
-            }
+                Hotkey,
+            };
 
-            _ = Task.Run(() =>
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
+                [ModuleNames.CmdPal] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         public bool IsEnabled
