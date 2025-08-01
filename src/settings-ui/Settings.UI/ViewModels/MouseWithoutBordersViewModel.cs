@@ -13,12 +13,12 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
+using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.ViewModels.Commands;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
@@ -30,8 +30,10 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
-    public partial class MouseWithoutBordersViewModel : Observable, IDisposable
+    public partial class MouseWithoutBordersViewModel : PageViewModelBase, IDisposable
     {
+        protected override string ModuleName => MouseWithoutBordersSettings.ModuleName;
+
         // These should be in the same order as the ComboBoxItems in MouseWithoutBordersPage.xaml switch machine shortcut options
         private readonly int[] _switchBetweenMachineShortcutOptions =
         {
@@ -43,18 +45,18 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private readonly Lock _machineMatrixStringLock = new();
 
         private static readonly Dictionary<SocketStatus, Brush> StatusColors = new Dictionary<SocketStatus, Brush>()
-{
-    { SocketStatus.NA, new SolidColorBrush(ColorHelper.FromArgb(0, 0x71, 0x71, 0x71)) },
-    { SocketStatus.Resolving, new SolidColorBrush(Colors.Yellow) },
-    { SocketStatus.Connecting, new SolidColorBrush(Colors.Orange) },
-    { SocketStatus.Handshaking, new SolidColorBrush(Colors.Blue) },
-    { SocketStatus.Error, new SolidColorBrush(Colors.Red) },
-    { SocketStatus.ForceClosed, new SolidColorBrush(Colors.Purple) },
-    { SocketStatus.InvalidKey, new SolidColorBrush(Colors.Brown) },
-    { SocketStatus.Timeout, new SolidColorBrush(Colors.Pink) },
-    { SocketStatus.SendError, new SolidColorBrush(Colors.Maroon) },
-    { SocketStatus.Connected, new SolidColorBrush(Colors.Green) },
-};
+        {
+            { SocketStatus.NA, new SolidColorBrush(ColorHelper.FromArgb(0, 0x71, 0x71, 0x71)) },
+            { SocketStatus.Resolving, new SolidColorBrush(Colors.Yellow) },
+            { SocketStatus.Connecting, new SolidColorBrush(Colors.Orange) },
+            { SocketStatus.Handshaking, new SolidColorBrush(Colors.Blue) },
+            { SocketStatus.Error, new SolidColorBrush(Colors.Red) },
+            { SocketStatus.ForceClosed, new SolidColorBrush(Colors.Purple) },
+            { SocketStatus.InvalidKey, new SolidColorBrush(Colors.Brown) },
+            { SocketStatus.Timeout, new SolidColorBrush(Colors.Pink) },
+            { SocketStatus.SendError, new SolidColorBrush(Colors.Maroon) },
+            { SocketStatus.Connected, new SolidColorBrush(Colors.Green) },
+        };
 
         private bool _connectFieldsVisible;
 
@@ -441,6 +443,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             moduleSettings = SettingsUtils.GetSettingsOrDefault<MouseWithoutBordersSettings>("MouseWithoutBorders");
 
             LoadViewModelFromSettings(moduleSettings);
+            CheckAndUpdateHotkeyName();
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
@@ -543,6 +546,24 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Special policies
             _policyDefinedIpMappingRulesGPOData = GPOWrapper.GetConfiguredMwbPolicyDefinedIpMappingRules();
             _policyDefinedIpMappingRulesIsGPOConfigured = !string.IsNullOrWhiteSpace(_policyDefinedIpMappingRulesGPOData);
+        }
+
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                ToggleEasyMouseShortcut,
+                LockMachinesShortcut,
+                HotKeySwitch2AllPC,
+                ReconnectShortcut,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.MouseWithoutBorders] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         private void LoadViewModelFromSettings(MouseWithoutBordersSettings moduleSettings)
@@ -998,6 +1019,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 {
                     Settings.Properties.ToggleEasyMouseShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse;
                     NotifyPropertyChanged();
+                    NotifyModuleUpdatedSettings();
                 }
             }
         }
@@ -1013,6 +1035,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     Settings.Properties.LockMachineShortcut = value;
                     Settings.Properties.LockMachineShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeyLockMachine;
                     NotifyPropertyChanged();
+                    NotifyModuleUpdatedSettings();
                 }
             }
         }
@@ -1028,6 +1051,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     Settings.Properties.ReconnectShortcut = value;
                     Settings.Properties.ReconnectShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeyReconnect;
                     NotifyPropertyChanged();
+                    NotifyModuleUpdatedSettings();
                 }
             }
         }
@@ -1043,6 +1067,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     Settings.Properties.Switch2AllPCShortcut = value;
                     Settings.Properties.Switch2AllPCShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC;
                     NotifyPropertyChanged();
+                    NotifyModuleUpdatedSettings();
                 }
             }
         }
@@ -1201,11 +1226,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private void NotifyModuleUpdatedSettings()
         {
             SendConfigMSG(
-        string.Format(
-        CultureInfo.InvariantCulture,
-        "{{ \"powertoys\": {{ \"{0}\": {1} }} }}",
-        MouseWithoutBordersSettings.ModuleName,
-        JsonSerializer.Serialize(Settings, SourceGenerationContextContext.Default.MouseWithoutBordersSettings)));
+                string.Format(
+                CultureInfo.InvariantCulture,
+                "{{ \"powertoys\": {{ \"{0}\": {1} }} }}",
+                MouseWithoutBordersSettings.ModuleName,
+                JsonSerializer.Serialize(Settings, SourceGenerationContextContext.Default.MouseWithoutBordersSettings)));
         }
 
         public void NotifyUpdatedSettings()
@@ -1241,9 +1266,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             Clipboard.SetContent(data);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            GC.SuppressFinalize(this);
+            base.Dispose();
         }
 
         internal void UninstallService()
@@ -1277,6 +1302,43 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         public bool ShowInfobarRunAsAdminText
         {
             get { return !CanToggleUseService && IsEnabled && !ShowPolicyConfiguredInfoForServiceSettings; }
+        }
+
+        private void CheckAndUpdateHotkeyName()
+        {
+            bool hasChange = false;
+            if (Settings.Properties.ToggleEasyMouseShortcut.HotkeyID != 0)
+            {
+                Settings.Properties.ToggleEasyMouseShortcut.HotkeyID = 0;
+                Settings.Properties.ToggleEasyMouseShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (Settings.Properties.LockMachineShortcut.HotkeyID != 1)
+            {
+                Settings.Properties.LockMachineShortcut.HotkeyID = 1;
+                Settings.Properties.LockMachineShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (Settings.Properties.ReconnectShortcut.HotkeyID != 3)
+            {
+                Settings.Properties.ReconnectShortcut.HotkeyID = 3;
+                Settings.Properties.ReconnectShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (Settings.Properties.Switch2AllPCShortcut.HotkeyID != 2)
+            {
+                Settings.Properties.Switch2AllPCShortcut.HotkeyID = 2;
+                Settings.Properties.Switch2AllPCShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (hasChange)
+            {
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), MouseWithoutBordersSettings.ModuleName);
+            }
         }
     }
 }

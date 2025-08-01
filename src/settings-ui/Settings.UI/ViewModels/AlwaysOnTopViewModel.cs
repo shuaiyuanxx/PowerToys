@@ -3,21 +3,27 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading.Tasks;
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
+using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
-    public partial class AlwaysOnTopViewModel : Observable
+    public partial class AlwaysOnTopViewModel : PageViewModelBase
     {
+        protected override string ModuleName => AlwaysOnTopSettings.ModuleName;
+
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -56,6 +62,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _excludedApps = Settings.Properties.ExcludedApps.Value;
             _windows11 = OSVersionHelper.IsWindows11();
 
+            CheckAndUpdateHotkeyID();
+
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
         }
@@ -73,6 +81,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 _isEnabled = GeneralSettingsConfig.Enabled.AlwaysOnTop;
             }
+        }
+
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                Hotkey,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.AlwaysOnTop] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         public bool IsEnabled
@@ -292,6 +315,16 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             InitializeEnabledValue();
             OnPropertyChanged(nameof(IsEnabled));
+        }
+
+        private void CheckAndUpdateHotkeyID()
+        {
+            if (Settings.Properties.Hotkey.Value.HotkeyID != 0)
+            {
+                Settings.Properties.Hotkey.Value.HotkeyID = AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID;
+                Settings.Properties.Hotkey.Value.OwnerModuleName = AlwaysOnTopSettings.ModuleName;
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), AlwaysOnTopSettings.ModuleName);
+            }
         }
 
         private GpoRuleConfigured _enabledGpoRuleConfiguration;

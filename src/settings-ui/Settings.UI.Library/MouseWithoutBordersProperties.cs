@@ -26,16 +26,16 @@ namespace Microsoft.PowerToys.Settings.UI.Library
     public class MouseWithoutBordersProperties : ICloneable
     {
         [CmdConfigureIgnore]
-        public static HotkeySettings DefaultHotKeySwitch2AllPC => new HotkeySettings();
+        public static HotkeySettings DefaultHotKeySwitch2AllPC => new HotkeySettings(2, MouseWithoutBordersSettings.ModuleName);
 
         [CmdConfigureIgnore]
-        public static HotkeySettings DefaultHotKeyLockMachine => new HotkeySettings(true, true, true, false, 0x4C);
+        public static HotkeySettings DefaultHotKeyLockMachine => new HotkeySettings(true, true, true, false, 0x4C, 1, MouseWithoutBordersSettings.ModuleName);
 
         [CmdConfigureIgnore]
-        public static HotkeySettings DefaultHotKeyReconnect => new HotkeySettings(true, true, true, false, 0x52);
+        public static HotkeySettings DefaultHotKeyReconnect => new HotkeySettings(true, true, true, false, 0x52, 3, MouseWithoutBordersSettings.ModuleName);
 
         [CmdConfigureIgnore]
-        public static HotkeySettings DefaultHotKeyToggleEasyMouse => new HotkeySettings(true, true, true, false, 0x45);
+        public static HotkeySettings DefaultHotKeyToggleEasyMouse => new HotkeySettings(true, true, true, false, 0x45, 0, MouseWithoutBordersSettings.ModuleName);
 
         [CmdConfigureIgnore]
         public StringProperty SecurityKey { get; set; }

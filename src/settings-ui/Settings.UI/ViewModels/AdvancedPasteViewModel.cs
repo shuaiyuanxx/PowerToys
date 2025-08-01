@@ -13,10 +13,11 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Timers;
-
 using global::PowerToys.GPOWrapper;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
+using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
 using Microsoft.Win32;
@@ -24,14 +25,19 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
-    public partial class AdvancedPasteViewModel : Observable, IDisposable
+    public partial class AdvancedPasteViewModel : PageViewModelBase, IDisposable
     {
         private static readonly HashSet<string> WarnHotkeys = ["Ctrl + V", "Ctrl + Shift + V"];
+
+        // Counter for the increment method
+        private int _counter = 3;
 
         private bool disposedValue;
 
         // Delay saving of settings in order to avoid calling save multiple times and hitting file in use exception. If there is no other request to save settings in given interval, we proceed to save it; otherwise, we schedule saving it after this interval
         private const int SaveSettingsDelayInMs = 500;
+
+        protected override string ModuleName => AdvancedPasteSettings.ModuleName;
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
 
@@ -74,6 +80,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _additionalActions = _advancedPasteSettings.Properties.AdditionalActions;
             _customActions = _advancedPasteSettings.Properties.CustomActions.Value;
 
+            CheckAndUpdateHotkeyName();
+
             InitializeEnabledValue();
 
             // set the callback functions value to handle outgoing IPC message.
@@ -84,19 +92,42 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _delayedTimer.Elapsed += DelayedTimer_Tick;
             _delayedTimer.AutoReset = false;
 
+            _customActions.CollectionChanged += OnCustomActionsCollectionChanged;
+            UpdateCustomActionsCanMoveUpDown();
+        }
+
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                PasteAsPlainTextShortcut,
+                AdvancedPasteUIShortcut,
+                PasteAsMarkdownShortcut,
+                PasteAsJsonShortcut,
+            };
+
             foreach (var action in _additionalActions.GetAllActions())
             {
-                action.PropertyChanged += OnAdditionalActionPropertyChanged;
+                if (action is AdvancedPasteAdditionalAction additionalAction)
+                {
+                    hotkeysList.Add(additionalAction.Shortcut);
+                }
             }
 
             foreach (var customAction in _customActions)
             {
-                customAction.PropertyChanged += OnCustomActionPropertyChanged;
+                hotkeysList.Add(customAction.Shortcut);
             }
 
-            _customActions.CollectionChanged += OnCustomActionsCollectionChanged;
-            UpdateCustomActionsCanMoveUpDown();
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.AdvancedPaste] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
+
+        public int GetNextHotkeyID() => ++_counter;
 
         private void InitializeEnabledValue()
         {
@@ -264,9 +295,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.AdvancedPasteUIShortcut != value)
                 {
                     _advancedPasteSettings.Properties.AdvancedPasteUIShortcut = value ?? AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut;
-                    OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
+                    OnPropertyChanged(nameof(AdvancedPasteUIShortcut));
                     SaveAndNotifySettings();
                 }
             }
@@ -280,9 +310,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 if (_advancedPasteSettings.Properties.PasteAsPlainTextShortcut != value)
                 {
                     _advancedPasteSettings.Properties.PasteAsPlainTextShortcut = value ?? AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut;
-                    OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
+                    OnPropertyChanged(nameof(PasteAsPlainTextShortcut));
                     SaveAndNotifySettings();
                 }
             }
@@ -295,10 +324,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_advancedPasteSettings.Properties.PasteAsMarkdownShortcut != value)
                 {
-                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings();
-                    OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
+                    _advancedPasteSettings.Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings(2, AdvancedPasteSettings.ModuleName);
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
+                    OnPropertyChanged(nameof(PasteAsMarkdownShortcut));
                     SaveAndNotifySettings();
                 }
             }
@@ -311,10 +339,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_advancedPasteSettings.Properties.PasteAsJsonShortcut != value)
                 {
-                    _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings();
-                    OnPropertyChanged(nameof(PasteAsJsonShortcut));
+                    _advancedPasteSettings.Properties.PasteAsJsonShortcut = value ?? new HotkeySettings(3, AdvancedPasteSettings.ModuleName);
                     OnPropertyChanged(nameof(IsConflictingCopyShortcut));
-
+                    OnPropertyChanged(nameof(PasteAsJsonShortcut));
                     SaveAndNotifySettings();
                 }
             }
@@ -412,10 +439,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            base.Dispose();
         }
 
         internal void DisableAI()
@@ -566,6 +593,54 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 customAction.CanMoveUp = index != 0;
                 customAction.CanMoveDown = index != _customActions.Count - 1;
             }
+        }
+
+        private void CheckAndUpdateHotkeyName()
+        {
+            if (PasteAsJsonShortcut.HotkeyID != 3)
+            {
+                PasteAsJsonShortcut.HotkeyID = 3;
+                PasteAsJsonShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+            }
+
+            if (PasteAsMarkdownShortcut.HotkeyID != 2)
+            {
+                PasteAsMarkdownShortcut.HotkeyID = 2;
+                PasteAsMarkdownShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+            }
+
+            if (AdvancedPasteUIShortcut.HotkeyID != 1)
+            {
+                AdvancedPasteUIShortcut.HotkeyID = 1;
+                AdvancedPasteUIShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+            }
+
+            if (PasteAsPlainTextShortcut.HotkeyID != 0)
+            {
+                PasteAsPlainTextShortcut.HotkeyID = 0;
+                PasteAsPlainTextShortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+            }
+
+            foreach (var action in _additionalActions.GetAllActions())
+            {
+                if (action is AdvancedPasteAdditionalAction additionalAction)
+                {
+                    additionalAction.Shortcut.HotkeyID = GetNextHotkeyID();
+                    additionalAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+                }
+
+                action.PropertyChanged += OnAdditionalActionPropertyChanged;
+            }
+
+            foreach (var customAction in _customActions)
+            {
+                customAction.Shortcut.HotkeyID = GetNextHotkeyID();
+                customAction.Shortcut.OwnerModuleName = AdvancedPasteSettings.ModuleName;
+
+                customAction.PropertyChanged += OnCustomActionPropertyChanged;
+            }
+
+            _settingsUtils.SaveSettings(_advancedPasteSettings.ToJsonString(), AdvancedPasteSettings.ModuleName);
         }
     }
 }

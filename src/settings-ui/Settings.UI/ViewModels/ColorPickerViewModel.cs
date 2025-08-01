@@ -9,19 +9,21 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Timers;
-
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Enumerations;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
+using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
-    public partial class ColorPickerViewModel : Observable, IDisposable
+    public partial class ColorPickerViewModel : PageViewModelBase, IDisposable
     {
+        protected override string ModuleName => ColorPickerSettings.ModuleName;
+
         private bool disposedValue;
 
         // Delay saving of settings in order to avoid calling save multiple times and hitting file in use exception. If there is no other request to save settings in given interval, we proceed to save it; otherwise, we schedule saving it after this interval
@@ -59,6 +61,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _colorPickerSettings = colorPickerSettingsRepository.SettingsConfig;
 
+            if (_colorPickerSettings.Properties.ActivationShortcut.HotkeyID != 0)
+            {
+                _colorPickerSettings.Properties.ActivationShortcut.HotkeyID = 0;
+                _colorPickerSettings.Properties.ActivationShortcut.OwnerModuleName = ColorPickerSettings.ModuleName;
+                _settingsUtils.SaveSettings(_colorPickerSettings.ToJsonString(), ColorPickerSettings.ModuleName);
+            }
+
             InitializeEnabledValue();
 
             // set the callback functions value to handle outgoing IPC message.
@@ -85,6 +94,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 _isEnabled = GeneralSettingsConfig.Enabled.ColorPicker;
             }
+        }
+
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                ActivationShortcut,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.ColorPicker] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         public bool IsEnabled
@@ -422,10 +446,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            base.Dispose();
         }
 
         internal ColorFormatModel GetNewColorFormatModel()

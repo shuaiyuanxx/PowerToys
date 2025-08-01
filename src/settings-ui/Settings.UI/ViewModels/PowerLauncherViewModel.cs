@@ -3,25 +3,27 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Input;
-
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
+using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.ViewModels.Commands;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
-    public partial class PowerLauncherViewModel : Observable
+    public partial class PowerLauncherViewModel : PageViewModelBase, IDisposable
     {
         private int _themeIndex;
         private int _monitorPositionIndex;
@@ -36,6 +38,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private PowerLauncherSettings settings;
 
         public delegate void SendCallback(PowerLauncherSettings settings);
+
+        protected override string ModuleName => PowerLauncherSettings.ModuleName;
 
         private readonly SendCallback callback;
 
@@ -77,6 +81,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         PowerLauncherSettings.ModuleName,
                         JsonSerializer.Serialize(s, SourceGenerationContextContext.Default.PowerLauncherSettings)));
             };
+
+            if (settings.Properties.OpenPowerLauncher.HotkeyID != 0)
+            {
+                settings.Properties.OpenPowerLauncher.HotkeyID = 0;
+                settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
+            }
 
             switch (settings.Properties.Theme)
             {
@@ -122,6 +132,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        {
+            var hotkeysList = new List<HotkeySettings>
+            {
+                OpenPowerLauncher,
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            {
+                [ModuleNames.PowerLauncher] = hotkeysList.ToArray(),
+            };
+
+            return hotkeysDict;
+        }
+
         private void OnPluginInfoChange(object sender, PropertyChangedEventArgs e)
         {
             if (
@@ -136,12 +161,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             OnPropertyChanged(nameof(ShowAllPluginsDisabledWarning));
             OnPropertyChanged(nameof(ShowPluginsAreGpoManagedInfo));
             UpdateSettings();
-        }
-
-        public PowerLauncherViewModel(PowerLauncherSettings settings, SendCallback callback)
-        {
-            this.settings = settings;
-            this.callback = callback;
         }
 
         private void UpdateSettings([CallerMemberName] string propertyName = null)
@@ -689,6 +708,41 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
 
             OnPropertyChanged(nameof(Plugins));
+        }
+
+        private void CheckAndUpdateHotkeyName()
+        {
+            bool hasChange = false;
+            if (settings.Properties.OpenPowerLauncher.HotkeyID != 0)
+            {
+                settings.Properties.OpenPowerLauncher.HotkeyID = 0;
+                settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (settings.Properties.OpenFileLocation.HotkeyID != 1)
+            {
+                settings.Properties.OpenFileLocation.HotkeyID = 1;
+                settings.Properties.OpenFileLocation.OwnerModuleName = PowerLauncherSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (settings.Properties.CopyPathLocation.HotkeyID != 2)
+            {
+                settings.Properties.CopyPathLocation.HotkeyID = 2;
+                settings.Properties.CopyPathLocation.OwnerModuleName = PowerLauncherSettings.ModuleName;
+                hasChange = true;
+            }
+
+            if (hasChange)
+            {
+                UpdateSettings();
+            }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
         }
     }
 }
