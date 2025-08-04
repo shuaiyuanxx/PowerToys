@@ -10,13 +10,11 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
-using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.ViewModels.Commands;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
@@ -82,10 +80,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         JsonSerializer.Serialize(s, SourceGenerationContextContext.Default.PowerLauncherSettings)));
             };
 
-            if (settings.Properties.OpenPowerLauncher.HotkeyID != 0)
+            if (HotkeyPropertyUpdateCheck())
             {
-                settings.Properties.OpenPowerLauncher.HotkeyID = 0;
-                settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
+                UpdateSettings();
             }
 
             switch (settings.Properties.Theme)
@@ -708,36 +705,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
 
             OnPropertyChanged(nameof(Plugins));
-        }
-
-        private void CheckAndUpdateHotkeyName()
-        {
-            bool hasChange = false;
-            if (settings.Properties.OpenPowerLauncher.HotkeyID != 0)
-            {
-                settings.Properties.OpenPowerLauncher.HotkeyID = 0;
-                settings.Properties.OpenPowerLauncher.OwnerModuleName = PowerLauncherSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (settings.Properties.OpenFileLocation.HotkeyID != 1)
-            {
-                settings.Properties.OpenFileLocation.HotkeyID = 1;
-                settings.Properties.OpenFileLocation.OwnerModuleName = PowerLauncherSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (settings.Properties.CopyPathLocation.HotkeyID != 2)
-            {
-                settings.Properties.CopyPathLocation.HotkeyID = 2;
-                settings.Properties.CopyPathLocation.OwnerModuleName = PowerLauncherSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (hasChange)
-            {
-                UpdateSettings();
-            }
         }
 
         public override void Dispose()

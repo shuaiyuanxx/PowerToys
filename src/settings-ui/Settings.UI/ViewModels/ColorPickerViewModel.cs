@@ -14,7 +14,6 @@ using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Enumerations;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
-using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
 
@@ -61,10 +60,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _colorPickerSettings = colorPickerSettingsRepository.SettingsConfig;
 
-            if (_colorPickerSettings.Properties.ActivationShortcut.HotkeyID != 0)
+            if (HotkeyPropertyUpdateCheck())
             {
-                _colorPickerSettings.Properties.ActivationShortcut.HotkeyID = 0;
-                _colorPickerSettings.Properties.ActivationShortcut.OwnerModuleName = ColorPickerSettings.ModuleName;
                 _settingsUtils.SaveSettings(_colorPickerSettings.ToJsonString(), ColorPickerSettings.ModuleName);
             }
 

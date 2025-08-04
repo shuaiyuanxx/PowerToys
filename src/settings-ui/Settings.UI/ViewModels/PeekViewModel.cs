@@ -8,12 +8,10 @@ using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
 using System.Text.Json;
-using System.Threading.Tasks;
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
-using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
@@ -64,10 +62,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _peekSettings = _settingsUtils.GetSettingsOrDefault<PeekSettings>(PeekSettings.ModuleName);
             _peekPreviewSettings = _settingsUtils.GetSettingsOrDefault<PeekPreviewSettings>(PeekSettings.ModuleName, PeekPreviewSettings.FileName);
 
-            if (_peekSettings.Properties.ActivationShortcut.HotkeyID != 0)
+            if (HotkeyPropertyUpdateCheck())
             {
-                _peekSettings.Properties.ActivationShortcut.HotkeyID = 0;
-                _peekSettings.Properties.ActivationShortcut.OwnerModuleName = PeekSettings.ModuleName;
                 _settingsUtils.SaveSettings(_peekSettings.ToJsonString(), PeekSettings.ModuleName);
             }
 

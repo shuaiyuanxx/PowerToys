@@ -7,11 +7,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Threading.Tasks;
 using global::PowerToys.GPOWrapper;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
-using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
@@ -48,13 +46,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = moduleSettingsRepository.SettingsConfig;
 
+            _reparentHotkey = Settings.Properties.ReparentHotkey.Value;
+            _thumbnailHotkey = Settings.Properties.ThumbnailHotkey.Value;
+
             if (HotkeyPropertyUpdateCheck())
             {
                 SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
             }
-
-            _reparentHotkey = Settings.Properties.ReparentHotkey.Value;
-            _thumbnailHotkey = Settings.Properties.ThumbnailHotkey.Value;
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;

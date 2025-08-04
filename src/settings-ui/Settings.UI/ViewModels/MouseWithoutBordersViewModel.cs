@@ -18,7 +18,6 @@ using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
-using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Library.ViewModels.Commands;
 using Microsoft.PowerToys.Settings.UI.SerializationContext;
@@ -443,7 +442,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             moduleSettings = SettingsUtils.GetSettingsOrDefault<MouseWithoutBordersSettings>("MouseWithoutBorders");
 
             LoadViewModelFromSettings(moduleSettings);
-            CheckAndUpdateHotkeyName();
+
+            if (HotkeyPropertyUpdateCheck())
+            {
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), MouseWithoutBordersSettings.ModuleName);
+            }
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
@@ -1302,43 +1305,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         public bool ShowInfobarRunAsAdminText
         {
             get { return !CanToggleUseService && IsEnabled && !ShowPolicyConfiguredInfoForServiceSettings; }
-        }
-
-        private void CheckAndUpdateHotkeyName()
-        {
-            bool hasChange = false;
-            if (Settings.Properties.ToggleEasyMouseShortcut.HotkeyID != 0)
-            {
-                Settings.Properties.ToggleEasyMouseShortcut.HotkeyID = 0;
-                Settings.Properties.ToggleEasyMouseShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (Settings.Properties.LockMachineShortcut.HotkeyID != 1)
-            {
-                Settings.Properties.LockMachineShortcut.HotkeyID = 1;
-                Settings.Properties.LockMachineShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (Settings.Properties.ReconnectShortcut.HotkeyID != 3)
-            {
-                Settings.Properties.ReconnectShortcut.HotkeyID = 3;
-                Settings.Properties.ReconnectShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (Settings.Properties.Switch2AllPCShortcut.HotkeyID != 2)
-            {
-                Settings.Properties.Switch2AllPCShortcut.HotkeyID = 2;
-                Settings.Properties.Switch2AllPCShortcut.OwnerModuleName = MouseWithoutBordersSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (hasChange)
-            {
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), MouseWithoutBordersSettings.ModuleName);
-            }
         }
     }
 }
