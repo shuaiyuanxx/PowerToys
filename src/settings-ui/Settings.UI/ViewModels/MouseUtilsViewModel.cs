@@ -22,10 +22,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => "MouseUtils";
 
-        // Conflict tracking dictionaries
-        private readonly Dictionary<string, bool> _hotkeyConflictStatus = new Dictionary<string, bool>();
-        private readonly Dictionary<string, string> _hotkeyConflictTooltips = new Dictionary<string, string>();
-
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -187,101 +183,17 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override void UpdateHotkeyConflictStatus(AllHotkeyConflictsData allConflicts)
+        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
         {
-            _hotkeyConflictStatus.Clear();
-            _hotkeyConflictTooltips.Clear();
-
-            // Define the four MouseUtils submodule names
-            var mouseUtilsModules = new HashSet<string>
+            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                FindMyMouseSettings.ModuleName,        // "FindMyMouse"
-                MouseHighlighterSettings.ModuleName,   // "MouseHighlighter"
-                MousePointerCrosshairsSettings.ModuleName, // "MousePointerCrosshairs"
-                MouseJumpSettings.ModuleName,           // "MouseJump"
+                [ModuleNames.FindMyMouse] = [FindMyMouseActivationShortcut],
+                [ModuleNames.MouseHighlighter] = [MouseHighlighterActivationShortcut],
+                [ModuleNames.MousePointerCrosshairs] = [MousePointerCrosshairsActivationShortcut],
+                [ModuleNames.MouseJump] = [MouseJumpActivationShortcut],
             };
 
-            // Process in-app conflicts
-            foreach (var conflict in allConflicts.InAppConflicts)
-            {
-                ProcessConflictGroup(conflict, mouseUtilsModules, false);
-            }
-
-            // Process system conflicts
-            foreach (var conflict in allConflicts.SystemConflicts)
-            {
-                ProcessConflictGroup(conflict, mouseUtilsModules, true);
-            }
-        }
-
-        private void ProcessConflictGroup(HotkeyConflictGroupData conflict, HashSet<string> mouseUtilsModules, bool isSysConflict)
-        {
-            // Check if any of the modules in this conflict are MouseUtils submodules
-            var involvedMouseUtilsModules = conflict.Modules
-                .Where(module => mouseUtilsModules.Contains(module.ModuleName))
-                .ToList();
-
-            if (involvedMouseUtilsModules.Count != 0)
-            {
-                // For each involved MouseUtils module, mark the hotkey as having a conflict
-                foreach (var module in involvedMouseUtilsModules)
-                {
-                    string hotkeyKey = $"{module.ModuleName}_{module.HotkeyID}";
-                    _hotkeyConflictStatus[hotkeyKey] = true;
-                    _hotkeyConflictTooltips[hotkeyKey] = isSysConflict
-                        ? ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText")
-                        : ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
-                }
-            }
-        }
-
-        protected override bool GetHotkeyConflictStatus(string key)
-        {
-            return _hotkeyConflictStatus.ContainsKey(key) && _hotkeyConflictStatus[key];
-        }
-
-        protected override string GetHotkeyConflictTooltip(string key)
-        {
-            return _hotkeyConflictTooltips.TryGetValue(key, out string value) ? value : null;
-        }
-
-        protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
-        {
-            UpdateHotkeyConflictStatus(e.Conflicts);
-
-            // Update properties using setters to trigger PropertyChanged
-            void UpdateConflictProperties()
-            {
-                FindMyMouseActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{FindMyMouseSettings.ModuleName}_0");
-                MouseHighlighterActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{MouseHighlighterSettings.ModuleName}_0");
-                MousePointerCrosshairsActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{MousePointerCrosshairsSettings.ModuleName}_0");
-                MouseJumpActivationShortcut.HasConflict = GetHotkeyConflictStatus($"{MouseJumpSettings.ModuleName}_0");
-
-                FindMyMouseActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{FindMyMouseSettings.ModuleName}_0");
-                MouseHighlighterActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{MouseHighlighterSettings.ModuleName}_0");
-                MousePointerCrosshairsActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{MousePointerCrosshairsSettings.ModuleName}_0");
-                MouseJumpActivationShortcut.ConflictDescription = GetHotkeyConflictTooltip($"{MouseJumpSettings.ModuleName}_0");
-            }
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    var settingsWindow = App.GetSettingsWindow();
-                    if (settingsWindow?.DispatcherQueue != null)
-                    {
-                        settingsWindow.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, UpdateConflictProperties);
-                    }
-                    else
-                    {
-                        UpdateConflictProperties();
-                    }
-                }
-                catch
-                {
-                    UpdateConflictProperties();
-                }
-            });
+            return hotkeysDict;
         }
 
         public bool IsFindMyMouseEnabled

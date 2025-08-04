@@ -120,40 +120,86 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             return moduleConflicts;
         }
 
+        private void ProcessMouseUtilsConflictGroup(HotkeyConflictGroupData conflict, HashSet<string> mouseUtilsModules, bool isSysConflict)
+        {
+            // Check if any of the modules in this conflict are MouseUtils submodules
+            var involvedMouseUtilsModules = conflict.Modules
+                .Where(module => mouseUtilsModules.Contains(module.ModuleName))
+                .ToList();
+
+            if (involvedMouseUtilsModules.Count != 0)
+            {
+                // For each involved MouseUtils module, mark the hotkey as having a conflict
+                foreach (var module in involvedMouseUtilsModules)
+                {
+                    string hotkeyKey = $"{module.ModuleName.ToLowerInvariant()}_{module.HotkeyID}";
+                    _hotkeyConflictStatus[hotkeyKey] = true;
+                    _hotkeyConflictTooltips[hotkeyKey] = isSysConflict
+                        ? ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText")
+                        : ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                }
+            }
+        }
+
         protected virtual void UpdateHotkeyConflictStatus(AllHotkeyConflictsData allConflicts)
         {
             _hotkeyConflictStatus.Clear();
             _hotkeyConflictTooltips.Clear();
 
-            var moduleRelatedConflicts = GetModuleRelatedConflicts(allConflicts);
-
-            if (moduleRelatedConflicts.InAppConflicts.Count > 0)
+            // Since MouseUtils in Settings consolidates four modules: Find My Mouse, Mouse Highlighter, Mouse Pointer Crosshairs, and Mouse Jump
+            // We need to handle this case separately here.
+            if (string.Equals(ModuleName, ModuleNames.MouseUtils, StringComparison.OrdinalIgnoreCase))
             {
-                foreach (var conflictGroup in moduleRelatedConflicts.InAppConflicts)
+                var mouseUtilsModules = new HashSet<string>
                 {
-                    foreach (var conflict in conflictGroup.Modules)
+                    FindMyMouseSettings.ModuleName,
+                    MouseHighlighterSettings.ModuleName,
+                    MousePointerCrosshairsSettings.ModuleName,
+                    MouseJumpSettings.ModuleName,
+                };
+
+                // Process in-app conflicts
+                foreach (var conflict in allConflicts.InAppConflicts)
+                {
+                    ProcessMouseUtilsConflictGroup(conflict, mouseUtilsModules, false);
+                }
+
+                // Process system conflicts
+                foreach (var conflict in allConflicts.SystemConflicts)
+                {
+                    ProcessMouseUtilsConflictGroup(conflict, mouseUtilsModules, true);
+                }
+            }
+            else
+            {
+                if (allConflicts.InAppConflicts.Count > 0)
+                {
+                    foreach (var conflictGroup in allConflicts.InAppConflicts)
                     {
-                        if (string.Equals(conflict.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase))
+                        foreach (var conflict in conflictGroup.Modules)
                         {
-                            var keyName = $"{conflict.ModuleName.ToLowerInvariant()}_{conflict.HotkeyID}";
-                            _hotkeyConflictStatus[keyName] = true;
-                            _hotkeyConflictTooltips[keyName] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                            if (string.Equals(conflict.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                var keyName = $"{conflict.ModuleName.ToLowerInvariant()}_{conflict.HotkeyID}";
+                                _hotkeyConflictStatus[keyName] = true;
+                                _hotkeyConflictTooltips[keyName] = ResourceLoaderInstance.ResourceLoader.GetString("InAppHotkeyConflictTooltipText");
+                            }
                         }
                     }
                 }
-            }
 
-            if (moduleRelatedConflicts.SystemConflicts.Count > 0)
-            {
-                foreach (var conflictGroup in moduleRelatedConflicts.SystemConflicts)
+                if (allConflicts.SystemConflicts.Count > 0)
                 {
-                    foreach (var conflict in conflictGroup.Modules)
+                    foreach (var conflictGroup in allConflicts.SystemConflicts)
                     {
-                        if (string.Equals(conflict.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase))
+                        foreach (var conflict in conflictGroup.Modules)
                         {
-                            var keyName = $"{conflict.ModuleName.ToLowerInvariant()}_{conflict.HotkeyID}";
-                            _hotkeyConflictStatus[keyName] = true;
-                            _hotkeyConflictTooltips[keyName] = ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText");
+                            if (string.Equals(conflict.ModuleName, ModuleName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                var keyName = $"{conflict.ModuleName.ToLowerInvariant()}_{conflict.HotkeyID}";
+                                _hotkeyConflictStatus[keyName] = true;
+                                _hotkeyConflictTooltips[keyName] = ResourceLoaderInstance.ResourceLoader.GetString("SysHotkeyConflictTooltipText");
+                            }
                         }
                     }
                 }
