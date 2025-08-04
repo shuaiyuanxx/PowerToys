@@ -62,7 +62,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _excludedApps = Settings.Properties.ExcludedApps.Value;
             _windows11 = OSVersionHelper.IsWindows11();
 
-            CheckAndUpdateHotkeyID();
+            if (HotkeyPropertyUpdateCheck())
+            {
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), AlwaysOnTopSettings.ModuleName);
+            }
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
@@ -92,7 +95,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                [ModuleNames.AlwaysOnTop] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeysList.ToArray(),
             };
 
             return hotkeysDict;
@@ -315,16 +318,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             InitializeEnabledValue();
             OnPropertyChanged(nameof(IsEnabled));
-        }
-
-        private void CheckAndUpdateHotkeyID()
-        {
-            if (Settings.Properties.Hotkey.Value.HotkeyID != 0)
-            {
-                Settings.Properties.Hotkey.Value.HotkeyID = AlwaysOnTopProperties.DefaultHotkeyValue.HotkeyID;
-                Settings.Properties.Hotkey.Value.OwnerModuleName = AlwaysOnTopSettings.ModuleName;
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), AlwaysOnTopSettings.ModuleName);
-            }
         }
 
         private GpoRuleConfigured _enabledGpoRuleConfiguration;

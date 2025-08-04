@@ -105,7 +105,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                [ModuleNames.ColorPicker] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeysList.ToArray(),
             };
 
             return hotkeysDict;

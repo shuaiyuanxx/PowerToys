@@ -48,7 +48,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = moduleSettingsRepository.SettingsConfig;
 
-            CheckAndUpdateHotkeySettings();
+            if (HotkeyPropertyUpdateCheck())
+            {
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
+            }
 
             _reparentHotkey = Settings.Properties.ReparentHotkey.Value;
             _thumbnailHotkey = Settings.Properties.ThumbnailHotkey.Value;
@@ -82,34 +85,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                [ModuleNames.CropAndLock] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeysList.ToArray(),
             };
 
             return hotkeysDict;
-        }
-
-        private void CheckAndUpdateHotkeySettings()
-        {
-            bool shouldUpdate = false;
-
-            if (Settings.Properties.ReparentHotkey.Value.HotkeyID != 0)
-            {
-                Settings.Properties.ReparentHotkey.Value.HotkeyID = 0;
-                Settings.Properties.ReparentHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
-                shouldUpdate = true;
-            }
-
-            if (Settings.Properties.ThumbnailHotkey.Value.HotkeyID != 1)
-            {
-                Settings.Properties.ThumbnailHotkey.Value.HotkeyID = 1;
-                Settings.Properties.ThumbnailHotkey.Value.OwnerModuleName = CropAndLockSettings.ModuleName;
-                shouldUpdate = true;
-            }
-
-            if (shouldUpdate)
-            {
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), CropAndLockSettings.ModuleName);
-            }
         }
 
         public bool IsEnabled

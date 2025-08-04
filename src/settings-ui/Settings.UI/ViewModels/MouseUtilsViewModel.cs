@@ -187,10 +187,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                [ModuleNames.FindMyMouse] = [FindMyMouseActivationShortcut],
-                [ModuleNames.MouseHighlighter] = [MouseHighlighterActivationShortcut],
-                [ModuleNames.MousePointerCrosshairs] = [MousePointerCrosshairsActivationShortcut],
-                [ModuleNames.MouseJump] = [MouseJumpActivationShortcut],
+                [FindMyMouseSettings.ModuleName] = [FindMyMouseActivationShortcut],
+                [MouseHighlighterSettings.ModuleName] = [MouseHighlighterActivationShortcut],
+                [MousePointerCrosshairsSettings.ModuleName] = [MousePointerCrosshairsActivationShortcut],
+                [MouseJumpSettings.ModuleName] = [MouseJumpActivationShortcut],
             };
 
             return hotkeysDict;

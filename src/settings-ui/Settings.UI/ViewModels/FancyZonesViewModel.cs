@@ -34,44 +34,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private bool _windows11;
 
-        private GpoRuleConfigured _enabledGpoRuleConfiguration;
-        private bool _enabledStateIsGPOConfigured;
-        private bool _isEnabled;
-        private bool _shiftDrag;
-        private bool _mouseSwitch;
-        private bool _mouseMiddleButtonSpanningMultipleZones;
-        private bool _overrideSnapHotkeys;
-        private bool _moveWindowsAcrossMonitors;
-        private MoveWindowBehaviour _moveWindowBehaviour;
-        private OverlappingZonesAlgorithm _overlappingZonesAlgorithm;
-        private bool _displayOrWorkAreaChangeMoveWindows;
-        private bool _zoneSetChangeMoveWindows;
-        private bool _appLastZoneMoveWindows;
-        private bool _openWindowOnActiveMonitor;
-        private bool _spanZonesAcrossMonitors;
-        private bool _restoreSize;
-        private bool _quickLayoutSwitch;
-        private bool _flashZonesOnQuickLayoutSwitch;
-        private bool _useCursorPosEditorStartupScreen;
-        private bool _showOnAllMonitors;
-        private bool _makeDraggedWindowTransparent;
-        private bool _systemTheme;
-        private bool _showZoneNumber;
-        private bool _allowPopupWindowSnap;
-        private bool _allowChildWindowSnap;
-        private bool _disableRoundCornersOnSnap;
-
-        private int _highlightOpacity;
-        private string _excludedApps;
-        private HotkeySettings _editorHotkey;
-        private bool _windowSwitching;
-        private HotkeySettings _nextTabHotkey;
-        private HotkeySettings _prevTabHotkey;
-        private string _zoneInActiveColor;
-        private string _zoneBorderColor;
-        private string _zoneHighlightColor;
-        private string _zoneNumberColor;
-
         private enum MoveWindowBehaviour
         {
             MoveWindowBasedOnZoneIndex = 0,
@@ -131,7 +93,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _showZoneNumber = Settings.Properties.FancyzonesShowZoneNumber.Value;
             _windowSwitching = Settings.Properties.FancyzonesWindowSwitching.Value;
 
-            CheckAndUpdateHotkeyName();
+            if (HotkeyPropertyUpdateCheck())
+            {
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), FancyZonesSettings.ModuleName);
+            }
 
             EditorHotkey = Settings.Properties.FancyzonesEditorHotkey.Value;
             NextTabHotkey = Settings.Properties.FancyzonesNextTabHotkey.Value;
@@ -189,11 +154,49 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             var hotkeysDict = new Dictionary<string, HotkeySettings[]>
             {
-                [ModuleNames.FancyZones] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeysList.ToArray(),
             };
 
             return hotkeysDict;
         }
+
+        private GpoRuleConfigured _enabledGpoRuleConfiguration;
+        private bool _enabledStateIsGPOConfigured;
+        private bool _isEnabled;
+        private bool _shiftDrag;
+        private bool _mouseSwitch;
+        private bool _mouseMiddleButtonSpanningMultipleZones;
+        private bool _overrideSnapHotkeys;
+        private bool _moveWindowsAcrossMonitors;
+        private MoveWindowBehaviour _moveWindowBehaviour;
+        private OverlappingZonesAlgorithm _overlappingZonesAlgorithm;
+        private bool _displayOrWorkAreaChangeMoveWindows;
+        private bool _zoneSetChangeMoveWindows;
+        private bool _appLastZoneMoveWindows;
+        private bool _openWindowOnActiveMonitor;
+        private bool _spanZonesAcrossMonitors;
+        private bool _restoreSize;
+        private bool _quickLayoutSwitch;
+        private bool _flashZonesOnQuickLayoutSwitch;
+        private bool _useCursorPosEditorStartupScreen;
+        private bool _showOnAllMonitors;
+        private bool _makeDraggedWindowTransparent;
+        private bool _systemTheme;
+        private bool _showZoneNumber;
+        private bool _allowPopupWindowSnap;
+        private bool _allowChildWindowSnap;
+        private bool _disableRoundCornersOnSnap;
+
+        private int _highlightOpacity;
+        private string _excludedApps;
+        private HotkeySettings _editorHotkey;
+        private bool _windowSwitching;
+        private HotkeySettings _nextTabHotkey;
+        private HotkeySettings _prevTabHotkey;
+        private string _zoneInActiveColor;
+        private string _zoneBorderColor;
+        private string _zoneHighlightColor;
+        private string _zoneNumberColor;
 
         public bool IsEnabled
         {
@@ -912,36 +915,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             OnPropertyChanged(nameof(SnapHotkeysCategoryEnabled));
             OnPropertyChanged(nameof(QuickSwitchEnabled));
             OnPropertyChanged(nameof(WindowSwitchingCategoryEnabled));
-        }
-
-        private void CheckAndUpdateHotkeyName()
-        {
-            bool hasChange = false;
-            if (Settings.Properties.FancyzonesEditorHotkey.Value.HotkeyID != 0)
-            {
-                Settings.Properties.FancyzonesEditorHotkey.Value.HotkeyID = 0;
-                Settings.Properties.FancyzonesEditorHotkey.Value.OwnerModuleName = FancyZonesSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (Settings.Properties.FancyzonesNextTabHotkey.Value.HotkeyID != 1)
-            {
-                Settings.Properties.FancyzonesNextTabHotkey.Value.HotkeyID = 1;
-                Settings.Properties.FancyzonesNextTabHotkey.Value.OwnerModuleName = FancyZonesSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (Settings.Properties.FancyzonesPrevTabHotkey.Value.HotkeyID != 2)
-            {
-                Settings.Properties.FancyzonesPrevTabHotkey.Value.HotkeyID = 2;
-                Settings.Properties.FancyzonesPrevTabHotkey.Value.OwnerModuleName = FancyZonesSettings.ModuleName;
-                hasChange = true;
-            }
-
-            if (hasChange)
-            {
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), FancyZonesSettings.ModuleName);
-            }
         }
     }
 }
