@@ -33,6 +33,9 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         private bool _isActive;
         private bool disposedValue;
 
+        private bool _hasConflict;
+        private string _tooltip;
+
         public string Header { get; set; }
 
         public string Keys { get; set; }
@@ -40,10 +43,6 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
         public static readonly DependencyProperty IsActiveProperty = DependencyProperty.Register("Enabled", typeof(bool), typeof(ShortcutControl), null);
         public static readonly DependencyProperty HotkeySettingsProperty = DependencyProperty.Register("HotkeySettings", typeof(HotkeySettings), typeof(ShortcutControl), null);
         public static readonly DependencyProperty AllowDisableProperty = DependencyProperty.Register("AllowDisable", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnAllowDisableChanged));
-
-        // New dependency properties for conflict status and tooltip
-        public static readonly DependencyProperty HasConflictProperty = DependencyProperty.Register("HasConflict", typeof(bool), typeof(ShortcutControl), new PropertyMetadata(false, OnHasConflictChanged));
-        public static readonly DependencyProperty TooltipProperty = DependencyProperty.Register("Tooltip", typeof(string), typeof(ShortcutControl), new PropertyMetadata(null, OnTooltipChanged));
 
         private static ResourceLoader resourceLoader = Helpers.ResourceLoaderInstance.ResourceLoader;
 
@@ -100,14 +99,26 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 
         public bool HasConflict
         {
-            get => (bool)GetValue(HasConflictProperty);
-            set => SetValue(HasConflictProperty, value);
+            get => _hasConflict;
+            set
+            {
+                if (_hasConflict != value)
+                {
+                    _hasConflict = value;
+                }
+            }
         }
 
         public string Tooltip
         {
-            get => (string)GetValue(TooltipProperty);
-            set => SetValue(TooltipProperty, value);
+            get => _tooltip;
+            set
+            {
+                if (_tooltip != value)
+                {
+                    _tooltip = value;
+                }
+            }
         }
 
         public bool Enabled
