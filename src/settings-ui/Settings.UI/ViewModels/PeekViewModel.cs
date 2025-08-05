@@ -62,11 +62,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _peekSettings = _settingsUtils.GetSettingsOrDefault<PeekSettings>(PeekSettings.ModuleName);
             _peekPreviewSettings = _settingsUtils.GetSettingsOrDefault<PeekPreviewSettings>(PeekSettings.ModuleName, PeekPreviewSettings.FileName);
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                _settingsUtils.SaveSettings(_peekSettings.ToJsonString(), PeekSettings.ModuleName);
-            }
-
             SetupSettingsFileWatcher();
 
             InitializeEnabledValue();

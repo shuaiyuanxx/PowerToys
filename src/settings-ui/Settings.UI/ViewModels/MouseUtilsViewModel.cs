@@ -102,32 +102,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _mousePointerCrosshairsFixedLength = MousePointerCrosshairsSettingsConfig.Properties.CrosshairsFixedLength.Value;
             _mousePointerCrosshairsAutoActivate = MousePointerCrosshairsSettingsConfig.Properties.AutoActivate.Value;
 
-            // Set the hotkey id
-            if (MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
-            {
-                MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
-                MousePointerCrosshairsSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = MousePointerCrosshairsSettings.ModuleName;
-                SettingsUtils.SaveSettings(MouseHighlighterSettingsConfig.ToJsonString(), MousePointerCrosshairsSettings.ModuleName);
-            }
-
-            if (FindMyMouseSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
-            {
-                FindMyMouseSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
-                FindMyMouseSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = FindMyMouseSettings.ModuleName;
-                SettingsUtils.SaveSettings(MouseHighlighterSettingsConfig.ToJsonString(), FindMyMouseSettings.ModuleName);
-            }
-
-            if (MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyID != 0)
-            {
-                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.HotkeyID = 0;
-                MouseHighlighterSettingsConfig.Properties.ActivationShortcut.OwnerModuleName = MouseHighlighterSettings.ModuleName;
-                SettingsUtils.SaveSettings(MouseHighlighterSettingsConfig.ToJsonString(), MouseHighlighterSettings.ModuleName);
-            }
-
             int isEnabled = 0;
 
-            // Using Utilities.NativeMethods to access system parameters for animation settings.
-            Utilities.NativeMethods.SystemParametersInfo(Utilities.NativeMethods.SPI_GETCLIENTAREAANIMATION, 0, ref isEnabled, 0);
+            NativeMethods.SystemParametersInfo(NativeMethods.SPI_GETCLIENTAREAANIMATION, 0, ref isEnabled, 0);
             _isAnimationEnabledBySystem = isEnabled != 0;
 
             // set the callback functions value to handle outgoing IPC message.

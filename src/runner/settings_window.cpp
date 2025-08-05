@@ -264,11 +264,9 @@ void dispatch_received_json(const std::wstring& json_to_parse)
                 hotkey.key = static_cast<unsigned char>(value.GetObjectW().GetNamedNumber(L"key", 0));
 
                 std::wstring requestId = value.GetObjectW().GetNamedString(L"request_id", L"").c_str();
-                std::wstring moduleName = value.GetObjectW().GetNamedString(L"moduleName", L"").c_str();
-                uint32_t hotkeyID = static_cast<uint32_t>(value.GetObjectW().GetNamedNumber(L"hotkeyID", 0));
 
                 auto& hkmng = HotkeyConflictDetector::HotkeyConflictManager::GetInstance();
-                bool hasConflict = hkmng.HasConflict(hotkey, moduleName.c_str(), hotkeyID);
+                bool hasConflict = hkmng.HasConflict(hotkey);
 
                 json::JsonObject response;
                 response.SetNamedValue(L"response_type", json::JsonValue::CreateStringValue(L"hotkey_conflict_result"));

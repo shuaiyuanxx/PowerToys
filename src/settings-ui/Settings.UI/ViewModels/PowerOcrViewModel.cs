@@ -90,11 +90,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _powerOcrSettings = powerOcrsettingsRepository.SettingsConfig;
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                _settingsUtils.SaveSettings(_powerOcrSettings.ToJsonString(), PowerOcrSettings.ModuleName);
-            }
-
             InitializeEnabledValue();
 
             // set the callback functions value to handle outgoing IPC message.

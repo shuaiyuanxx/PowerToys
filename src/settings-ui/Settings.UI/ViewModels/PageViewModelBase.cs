@@ -234,35 +234,5 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 GlobalHotkeyConflictManager.Instance.ConflictsUpdated -= OnConflictsUpdated;
             }
         }
-
-        protected bool HotkeyPropertyUpdateCheck()
-        {
-            bool shouldUpdate = false;
-
-            var allHotkeySettings = GetAllHotkeySettings();
-
-            if (allHotkeySettings == null)
-            {
-                return false;
-            }
-
-            foreach (KeyValuePair<string, HotkeySettings[]> kvp in allHotkeySettings)
-            {
-                var module = kvp.Key;
-                var hotkeyList = kvp.Value;
-
-                for (int i = 0; i < hotkeyList.Length; i++)
-                {
-                    if (hotkeyList[i].HotkeyID != i || !string.Equals(hotkeyList[i].OwnerModuleName, module, StringComparison.Ordinal))
-                    {
-                        shouldUpdate = true;
-                        hotkeyList[i].HotkeyID = i;
-                        hotkeyList[i].OwnerModuleName = module;
-                    }
-                }
-            }
-
-            return shouldUpdate;
-        }
     }
 }

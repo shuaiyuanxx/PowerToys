@@ -43,11 +43,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = measureToolSettingsRepository.SettingsConfig;
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                settingsUtils.SaveSettings(Settings.ToJsonString(), MeasureToolSettings.ModuleName);
-            }
-
             SendConfigMSG = ipcMSGCallBackFunc;
         }
 

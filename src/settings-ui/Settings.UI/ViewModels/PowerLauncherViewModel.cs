@@ -80,11 +80,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                         JsonSerializer.Serialize(s, SourceGenerationContextContext.Default.PowerLauncherSettings)));
             };
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                UpdateSettings();
-            }
-
             switch (settings.Properties.Theme)
             {
                 case Theme.Dark:

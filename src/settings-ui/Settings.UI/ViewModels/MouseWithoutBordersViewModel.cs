@@ -443,11 +443,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             LoadViewModelFromSettings(moduleSettings);
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), MouseWithoutBordersSettings.ModuleName);
-            }
-
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 

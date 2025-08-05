@@ -46,6 +46,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
 
             // PowerOCR/TextExtractor module mappings
             { (ModuleNames.PowerOcr, 0), "Activation_Shortcut" },
+            { (ModuleNames.TextExtractor, 0), "Activation_Shortcut" },
 
             // Workspaces module mappings
             { (ModuleNames.Workspaces, 0), "Workspaces_ActivationShortcut" },

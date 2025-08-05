@@ -91,11 +91,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _showZoneNumber = Settings.Properties.FancyzonesShowZoneNumber.Value;
             _windowSwitching = Settings.Properties.FancyzonesWindowSwitching.Value;
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), FancyZonesSettings.ModuleName);
-            }
-
             EditorHotkey = Settings.Properties.FancyzonesEditorHotkey.Value;
             NextTabHotkey = Settings.Properties.FancyzonesNextTabHotkey.Value;
             PrevTabHotkey = Settings.Properties.FancyzonesPrevTabHotkey.Value;

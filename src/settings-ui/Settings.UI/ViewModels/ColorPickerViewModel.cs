@@ -60,11 +60,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _colorPickerSettings = colorPickerSettingsRepository.SettingsConfig;
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                _settingsUtils.SaveSettings(_colorPickerSettings.ToJsonString(), ColorPickerSettings.ModuleName);
-            }
-
             InitializeEnabledValue();
 
             // set the callback functions value to handle outgoing IPC message.

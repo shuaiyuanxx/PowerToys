@@ -45,11 +45,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             Settings = moduleSettingsRepository.SettingsConfig;
 
-            if (HotkeyPropertyUpdateCheck())
-            {
-                SettingsUtils.SaveSettings(Settings.ToJsonString(), ModuleName);
-            }
-
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
