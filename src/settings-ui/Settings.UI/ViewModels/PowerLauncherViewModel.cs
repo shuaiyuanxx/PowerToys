@@ -13,6 +13,7 @@ using System.Text.Json;
 using System.Windows.Input;
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -124,16 +125,18 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        public override Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
-            var hotkeysList = new List<HotkeySettings>
+            var hotkeyAccessors = new List<HotkeyAccessor>
             {
-                OpenPowerLauncher,
+                new HotkeyAccessor(
+                    () => OpenPowerLauncher,
+                    value => OpenPowerLauncher = value),
             };
 
-            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
             {
-                [ModuleName] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeyAccessors.ToArray(),
             };
 
             return hotkeysDict;

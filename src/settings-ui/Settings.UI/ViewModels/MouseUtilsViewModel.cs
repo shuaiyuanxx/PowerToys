@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using global::PowerToys.GPOWrapper;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -104,7 +105,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             int isEnabled = 0;
 
-            NativeMethods.SystemParametersInfo(NativeMethods.SPI_GETCLIENTAREAANIMATION, 0, ref isEnabled, 0);
+            Utilities.NativeMethods.SystemParametersInfo(Utilities.NativeMethods.SPI_GETCLIENTAREAANIMATION, 0, ref isEnabled, 0);
             _isAnimationEnabledBySystem = isEnabled != 0;
 
             // set the callback functions value to handle outgoing IPC message.
@@ -152,14 +153,26 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        public override Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
-            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
             {
-                [FindMyMouseSettings.ModuleName] = [FindMyMouseActivationShortcut],
-                [MouseHighlighterSettings.ModuleName] = [MouseHighlighterActivationShortcut],
-                [MousePointerCrosshairsSettings.ModuleName] = [MousePointerCrosshairsActivationShortcut],
-                [MouseJumpSettings.ModuleName] = [MouseJumpActivationShortcut],
+                [FindMyMouseSettings.ModuleName] = [
+                    new HotkeyAccessor(
+                        () => FindMyMouseActivationShortcut,
+                        value => FindMyMouseActivationShortcut = value),],
+                [MouseHighlighterSettings.ModuleName] = [
+                    new HotkeyAccessor(
+                        () => MouseHighlighterActivationShortcut,
+                        value => MouseHighlighterActivationShortcut = value),],
+                [MousePointerCrosshairsSettings.ModuleName] = [
+                    new HotkeyAccessor(
+                        () => MousePointerCrosshairsActivationShortcut,
+                        value => MousePointerCrosshairsActivationShortcut = value),],
+                [MouseJumpSettings.ModuleName] = [
+                    new HotkeyAccessor(
+                        () => MouseJumpActivationShortcut,
+                        value => MouseJumpActivationShortcut = value),],
             };
 
             return hotkeysDict;

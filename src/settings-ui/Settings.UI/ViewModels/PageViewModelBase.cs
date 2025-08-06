@@ -51,22 +51,22 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         protected virtual void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
         {
             UpdateHotkeyConflictStatus(e.Conflicts);
-            var allHotkeySettings = GetAllHotkeySettings();
+            var allHotkeyAccessors = GetAllHotkeyAccessors();
 
             void UpdateConflictProperties()
             {
-                if (allHotkeySettings != null)
+                if (allHotkeyAccessors != null)
                 {
-                    foreach (KeyValuePair<string, HotkeySettings[]> kvp in allHotkeySettings)
+                    foreach (KeyValuePair<string, HotkeyAccessor[]> kvp in allHotkeyAccessors)
                     {
                         var module = kvp.Key;
-                        var hotkeyList = kvp.Value;
+                        var hotkeyAccessorList = kvp.Value;
 
-                        for (int i = 0; i < hotkeyList.Length; i++)
+                        for (int i = 0; i < hotkeyAccessorList.Length; i++)
                         {
                             var key = $"{module.ToLowerInvariant()}_{i}";
-                            hotkeyList[i].HasConflict = GetHotkeyConflictStatus(key);
-                            hotkeyList[i].ConflictDescription = GetHotkeyConflictTooltip(key);
+                            hotkeyAccessorList[i].Value.HasConflict = GetHotkeyConflictStatus(key);
+                            hotkeyAccessorList[i].Value.ConflictDescription = GetHotkeyConflictTooltip(key);
                         }
                     }
                 }
@@ -86,7 +86,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             });
         }
 
-        protected virtual Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        public virtual Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             return null;
         }

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using global::PowerToys.GPOWrapper;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -68,17 +69,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        public override Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
-            var hotkeysList = new List<HotkeySettings>
+            var hotkeyAccessors = new List<HotkeyAccessor>
             {
-                ReparentActivationShortcut,
-                ThumbnailActivationShortcut,
+                new HotkeyAccessor(
+                    () => ReparentActivationShortcut,
+                    value => ReparentActivationShortcut = value),
+                new HotkeyAccessor(
+                    () => ThumbnailActivationShortcut,
+                    value => ThumbnailActivationShortcut = value),
             };
 
-            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
             {
-                [ModuleName] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeyAccessors.ToArray(),
             };
 
             return hotkeysDict;

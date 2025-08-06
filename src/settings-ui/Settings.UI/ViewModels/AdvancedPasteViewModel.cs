@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Timers;
 using global::PowerToys.GPOWrapper;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -99,35 +100,45 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             UpdateCustomActionsCanMoveUpDown();
         }
 
-        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        public override Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
-            var hotkeysList = new List<HotkeySettings>
+            var hotkeyAccessors = new List<HotkeyAccessor>
             {
-                PasteAsPlainTextShortcut,
-                AdvancedPasteUIShortcut,
-                PasteAsMarkdownShortcut,
-                PasteAsJsonShortcut,
+                new HotkeyAccessor(
+                    () => PasteAsPlainTextShortcut,
+                    value => PasteAsPlainTextShortcut = value),
+                new HotkeyAccessor(
+                    () => AdvancedPasteUIShortcut,
+                    value => AdvancedPasteUIShortcut = value),
+                new HotkeyAccessor(
+                    () => PasteAsMarkdownShortcut,
+                    value => PasteAsMarkdownShortcut = value),
+                new HotkeyAccessor(
+                    () => PasteAsJsonShortcut,
+                    value => PasteAsJsonShortcut = value),
             };
 
             foreach (var action in _additionalActions.GetAllActions())
             {
                 if (action is AdvancedPasteAdditionalAction additionalAction)
                 {
-                    hotkeysList.Add(additionalAction.Shortcut);
+                    hotkeyAccessors.Add(new HotkeyAccessor(
+                        () => additionalAction.Shortcut,
+                        value => additionalAction.Shortcut = value));
                 }
             }
 
             foreach (var customAction in _customActions)
             {
-                hotkeysList.Add(customAction.Shortcut);
+                hotkeyAccessors.Add(new HotkeyAccessor(
+                    () => customAction.Shortcut,
+                    value => customAction.Shortcut = value));
             }
 
-            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            return new Dictionary<string, HotkeyAccessor[]>
             {
-                [ModuleName] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeyAccessors.ToArray(),
             };
-
-            return hotkeysDict;
         }
 
         private void InitializeEnabledValue()

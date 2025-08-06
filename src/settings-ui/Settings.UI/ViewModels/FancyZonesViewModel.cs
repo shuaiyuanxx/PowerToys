@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using global::PowerToys.GPOWrapper;
 using ManagedCommon;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -18,7 +19,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
     {
         protected override string ModuleName => FancyZonesSettings.ModuleName;
 
-        private SettingsUtils SettingsUtils { get; set; }
+        private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
 
@@ -45,7 +46,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             Positional = 2,
         }
 
-        public FancyZonesViewModel(SettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<FancyZonesSettings> moduleSettingsRepository, Func<string, int> ipcMSGCallBackFunc, string configFileSubfolder = "")
+        public FancyZonesViewModel(ISettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<FancyZonesSettings> moduleSettingsRepository, Func<string, int> ipcMSGCallBackFunc, string configFileSubfolder = "")
         {
             ArgumentNullException.ThrowIfNull(settingsUtils);
 
@@ -136,18 +137,24 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        protected override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
+        public override Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
-            var hotkeysList = new List<HotkeySettings>
+            var hotkeyAccessors = new List<HotkeyAccessor>
             {
-                EditorHotkey,
-                NextTabHotkey,
-                PrevTabHotkey,
+                new HotkeyAccessor(
+                    () => EditorHotkey,
+                    value => EditorHotkey = value),
+                new HotkeyAccessor(
+                    () => NextTabHotkey,
+                    value => NextTabHotkey = value),
+                new HotkeyAccessor(
+                    () => PrevTabHotkey,
+                    value => PrevTabHotkey = value),
             };
 
-            var hotkeysDict = new Dictionary<string, HotkeySettings[]>
+            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
             {
-                [ModuleName] = hotkeysList.ToArray(),
+                [ModuleName] = hotkeyAccessors.ToArray(),
             };
 
             return hotkeysDict;
