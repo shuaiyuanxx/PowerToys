@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Threading;
 using Microsoft.PowerToys.Settings.UI.Helpers;
@@ -140,7 +141,16 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             module.PropertyChanged += OnModuleHotkeyDataPropertyChanged;
             module.HotkeySettings = GetHotkeySettingsFromViewModel(module.ModuleName, module.HotkeyID);
-            module.Header = LocalizationHelper.GetLocalizedHotkeyHeader(module.ModuleName, module.HotkeyID);
+
+            if (module.ModuleName == "AdvancedPaste")
+            {
+                module.Header = GetHotkeyLocalizationHeader(module.ModuleName, module.HotkeyID);
+            }
+            else
+            {
+                module.Header = LocalizationHelper.GetLocalizedHotkeyHeader(module.ModuleName, module.HotkeyID);
+            }
+
             module.IsSystemConflict = isSystemConflict;
 
             if (module.HotkeySettings != null)
@@ -185,6 +195,29 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 var viewModel = GetOrCreateViewModel(GetModuleKey(moduleName));
                 return HotkeyAccessorHelper.GetHotkeySettings(viewModel, moduleName, hotkeyID);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting hotkey settings for {moduleName}.{hotkeyID}: {ex.Message}");
+                return null;
+            }
+        }
+
+        private string GetHotkeyLocalizationHeader(string moduleName, int hotkeyID)
+        {
+            try
+            {
+                var viewModel = GetOrCreateViewModel(GetModuleKey(moduleName));
+                var headerKey = HotkeyAccessorHelper.GetHotkeyLocalizationHeaderKey(viewModel, moduleName, hotkeyID);
+
+                // Handle AdvancedPaste custom actions
+                if (string.Equals(moduleName, ModuleNames.AdvancedPaste, StringComparison.OrdinalIgnoreCase)
+                    && hotkeyID > 9)
+                {
+                    return headerKey;
+                }
+
+                return LocalizationHelper.GetLocalizedStringFromResource(headerKey);
             }
             catch (Exception ex)
             {

@@ -38,6 +38,26 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
             return null;
         }
 
+        public static string GetHotkeyLocalizationHeaderKey(PageViewModelBase viewModel, string moduleName, int hotkeyID)
+        {
+            var hotkeyAccessors = viewModel?.GetAllHotkeyAccessors();
+            if (hotkeyAccessors == null)
+            {
+                return null;
+            }
+
+            var accessorKey = GetAccessorKey(moduleName);
+            var kvp = hotkeyAccessors.FirstOrDefault(x =>
+                string.Equals(x.Key, accessorKey, StringComparison.OrdinalIgnoreCase));
+
+            if (kvp.Key != null && hotkeyID >= 0 && hotkeyID < kvp.Value.Length)
+            {
+                return kvp.Value[hotkeyID].LocalizationHeaderKey;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Updates hotkey settings in a ViewModel using the standardized accessor pattern
         /// </summary>

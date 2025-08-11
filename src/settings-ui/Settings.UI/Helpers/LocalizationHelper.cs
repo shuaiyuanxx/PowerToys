@@ -138,7 +138,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
         /// </summary>
         /// <param name="resourceKey">The resource key</param>
         /// <returns>The localized string, or null if not found</returns>
-        private static string GetLocalizedStringFromResource(string resourceKey)
+        public static string GetLocalizedStringFromResource(string resourceKey)
         {
             if (string.IsNullOrEmpty(resourceKey))
             {
