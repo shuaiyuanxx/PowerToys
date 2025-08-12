@@ -8,13 +8,16 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Threading;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.HotkeyConflicts;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using Microsoft.PowerToys.Settings.UI.Services;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
@@ -26,6 +29,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private AllHotkeyConflictsData _conflictsData = new();
         private ObservableCollection<HotkeyConflictGroupData> _conflictItems = new();
+        private ResourceLoader resourceLoader;
 
         public ShortcutConflictViewModel(
             ISettingsUtils settingsUtils,
@@ -33,6 +37,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             Func<string, int> ipcMSGCallBackFunc)
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
+            resourceLoader = ResourceLoaderInstance.ResourceLoader;
 
             // Create ViewModelFactory with all necessary dependencies
             _viewModelFactory = new ViewModelFactory(
@@ -148,6 +153,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             module.Header = GetHotkeyLocalizationHeader(module.ModuleName, module.HotkeyID, headerKey);
             module.IsSystemConflict = isSystemConflict;
 
+            var moduleType = ModuleNames.ToModuleType(module.ModuleName);
+            if (moduleType.HasValue)
+            {
+                var displayName = resourceLoader.GetString(ModuleHelper.GetModuleLabelResourceName(moduleType.Value));
+                module.DisplayName = displayName;
+                module.IconPath = ModuleHelper.GetModuleTypeFluentIconName(moduleType.Value);
+            }
+
             if (module.HotkeySettings != null)
             {
                 SetConflictProperties(module.HotkeySettings, isSystemConflict);
@@ -195,7 +208,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             try
             {
-                return LocalizationHelper.GetLocalizedStringFromResource(headerKey);
+                return resourceLoader.GetString($"{headerKey}/Header");
             }
             catch (Exception ex)
             {
