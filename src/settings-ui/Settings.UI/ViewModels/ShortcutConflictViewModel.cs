@@ -139,18 +139,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private void SetupModuleData(ModuleHotkeyData module, bool isSystemConflict)
         {
+            var viewModel = GetOrCreateViewModel(GetModuleKey(module.ModuleName));
+            var hotkeyAccessor = HotkeyAccessorHelper.GetHotkeyAccessor(viewModel, module.ModuleName, module.HotkeyID);
+            var headerKey = HotkeyAccessorHelper.GetHotkeyLocalizationHeaderKey(hotkeyAccessor);
             module.PropertyChanged += OnModuleHotkeyDataPropertyChanged;
-            module.HotkeySettings = GetHotkeySettingsFromViewModel(module.ModuleName, module.HotkeyID);
 
-            if (module.ModuleName == "AdvancedPaste")
-            {
-                module.Header = GetHotkeyLocalizationHeader(module.ModuleName, module.HotkeyID);
-            }
-            else
-            {
-                module.Header = LocalizationHelper.GetLocalizedHotkeyHeader(module.ModuleName, module.HotkeyID);
-            }
-
+            module.HotkeySettings = HotkeyAccessorHelper.GetHotkeySettings(hotkeyAccessor);
+            module.Header = GetHotkeyLocalizationHeader(module.ModuleName, module.HotkeyID, headerKey);
             module.IsSystemConflict = isSystemConflict;
 
             if (module.HotkeySettings != null)
@@ -189,34 +184,17 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private HotkeySettings GetHotkeySettingsFromViewModel(string moduleName, int hotkeyID)
+        private string GetHotkeyLocalizationHeader(string moduleName, int hotkeyID, string headerKey)
         {
+            // Handle AdvancedPaste custom actions
+            if (string.Equals(moduleName, ModuleNames.AdvancedPaste, StringComparison.OrdinalIgnoreCase)
+                && hotkeyID > 9)
+            {
+                return headerKey;
+            }
+
             try
             {
-                var viewModel = GetOrCreateViewModel(GetModuleKey(moduleName));
-                return HotkeyAccessorHelper.GetHotkeySettings(viewModel, moduleName, hotkeyID);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error getting hotkey settings for {moduleName}.{hotkeyID}: {ex.Message}");
-                return null;
-            }
-        }
-
-        private string GetHotkeyLocalizationHeader(string moduleName, int hotkeyID)
-        {
-            try
-            {
-                var viewModel = GetOrCreateViewModel(GetModuleKey(moduleName));
-                var headerKey = HotkeyAccessorHelper.GetHotkeyLocalizationHeaderKey(viewModel, moduleName, hotkeyID);
-
-                // Handle AdvancedPaste custom actions
-                if (string.Equals(moduleName, ModuleNames.AdvancedPaste, StringComparison.OrdinalIgnoreCase)
-                    && hotkeyID > 9)
-                {
-                    return headerKey;
-                }
-
                 return LocalizationHelper.GetLocalizedStringFromResource(headerKey);
             }
             catch (Exception ex)
