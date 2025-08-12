@@ -27,7 +27,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
         /// <param name="viewModel">The PageViewModelBase containing hotkey settings</param>
         /// <param name="moduleName">The name of the module to get the hotkey accessor for</param>
         /// <param name="hotkeyID">The index of the hotkey within the module's collection</param>
-        /// <returns>The HotkeyAccessor if found, otherwise null</returns>
+        /// <returns>The HotkeyAccessor if found</returns>
         public static HotkeyAccessor GetHotkeyAccessor(PageViewModelBase viewModel, string moduleName, int hotkeyID)
         {
             var hotkeyAccessors = viewModel?.GetAllHotkeyAccessors();
