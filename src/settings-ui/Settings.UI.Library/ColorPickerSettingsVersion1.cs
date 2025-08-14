@@ -3,14 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
+using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
 {
-    public class ColorPickerSettingsVersion1 : BasePTModuleSettings, ISettingsConfig
+    public class ColorPickerSettingsVersion1 : BasePTModuleSettings, ISettingsConfig, IHotkeyConfig
     {
         public const string ModuleName = "ColorPicker";
 
@@ -37,6 +38,24 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             ArgumentNullException.ThrowIfNull(settingsUtils);
 
             settingsUtils.SaveSettings(JsonSerializer.Serialize(this, options), ModuleName);
+        }
+
+        public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
+        {
+            var hotkeyAccessors = new List<HotkeyAccessor>
+            {
+                new HotkeyAccessor(
+                    () => Properties.ActivationShortcut,
+                    value => Properties.ActivationShortcut = value,
+                    "Activation_Shortcut"),
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
+            {
+                [ModuleName] = hotkeyAccessors.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         public string GetModuleName()

@@ -6,12 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
+using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
 {
-    public class PowerLauncherSettings : BasePTModuleSettings, ISettingsConfig
+    public class PowerLauncherSettings : BasePTModuleSettings, ISettingsConfig, IHotkeyConfig
     {
         public const string ModuleName = "PowerToys Run";
 
@@ -47,6 +47,24 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public string GetModuleName()
         {
             return Name;
+        }
+
+        public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
+        {
+            var hotkeyAccessors = new List<HotkeyAccessor>
+            {
+                new HotkeyAccessor(
+                    () => Properties.OpenPowerLauncher,
+                    value => Properties.OpenPowerLauncher = value,
+                    "PowerLauncher_OpenPowerLauncher"),
+            };
+
+            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
+            {
+                [ModuleName] = hotkeyAccessors.ToArray(),
+            };
+
+            return hotkeysDict;
         }
 
         // This can be utilized in the future if the settings.json file is to be modified/deleted.

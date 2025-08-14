@@ -28,7 +28,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
         /// <param name="moduleName">The name of the module to get the hotkey accessor for</param>
         /// <param name="hotkeyID">The index of the hotkey within the module's collection</param>
         /// <returns>The HotkeyAccessor if found</returns>
-        public static HotkeyAccessor GetHotkeyAccessor(PageViewModelBase viewModel, string moduleName, int hotkeyID)
+        /*public static HotkeyAccessor GetHotkeyAccessor(PageViewModelBase viewModel, string moduleName, int hotkeyID)
         {
             var hotkeyAccessors = viewModel?.GetAllHotkeyAccessors();
             if (hotkeyAccessors == null)
@@ -46,12 +46,12 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
             }
 
             return null;
-        }
+        }*/
 
         /// <summary>
         /// Updates hotkey settings in a ViewModel using the standardized accessor pattern
         /// </summary>
-        public static bool UpdateHotkeySettings(PageViewModelBase viewModel, string moduleName, int hotkeyID, HotkeySettings newSettings)
+        /*public static bool UpdateHotkeySettings(PageViewModelBase viewModel, string moduleName, int hotkeyID, HotkeySettings newSettings)
         {
             var hotkeyAccessors = viewModel?.GetAllHotkeyAccessors();
             if (hotkeyAccessors == null)
@@ -70,7 +70,7 @@ namespace Microsoft.PowerToys.Settings.UI.Helpers
             }
 
             return false;
-        }
+        }*/
 
         /// <summary>
         /// Determines the correct accessor key for a given module name
