@@ -184,34 +184,6 @@ namespace Microsoft.PowerToys.Settings.UI.Services
         }
 
         /// <summary>
-        /// Gets all hotkey accessors from all modules
-        /// </summary>
-        /// <returns>Dictionary of module name to hotkey accessors array</returns>
-        public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
-        {
-            var result = new Dictionary<string, HotkeyAccessor[]>();
-            var allSettings = GetAllHotkeySettings();
-
-            foreach (var kvp in allSettings)
-            {
-                try
-                {
-                    var accessors = kvp.Value.GetAllHotkeyAccessors();
-                    foreach (var accessorKvp in accessors)
-                    {
-                        result[accessorKvp.Key] = accessorKvp.Value;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error getting hotkey accessors for {kvp.Key}: {ex.Message}");
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Gets a specific settings repository instance
         /// </summary>
         /// <typeparam name="T">The settings type</typeparam>

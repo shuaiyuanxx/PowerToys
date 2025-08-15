@@ -31,18 +31,17 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         public ModuleType GetModuleType() => ModuleType.MousePointerCrosshairs;
 
-        public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
+        public HotkeyAccessor[] GetAllHotkeyAccessors()
         {
-            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
+            var hotkeyAccessors = new List<HotkeyAccessor>
             {
-                [ModuleName] = [
-                   new HotkeyAccessor(
-                        () => Properties.ActivationShortcut,
-                        value => Properties.ActivationShortcut = value ?? Properties.DefaultActivationShortcut,
-                        "MouseUtils_MousePointerCrosshairs_ActivationShortcut"),],
+                new HotkeyAccessor(
+                    () => Properties.ActivationShortcut,
+                    value => Properties.ActivationShortcut = value ?? Properties.DefaultActivationShortcut,
+                    "MouseUtils_MousePointerCrosshairs_ActivationShortcut"),
             };
 
-            return hotkeysDict;
+            return hotkeyAccessors.ToArray();
         }
 
         // This can be utilized in the future if the settings.json file is to be modified/deleted.

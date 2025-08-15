@@ -43,7 +43,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         public ModuleType GetModuleType() => ModuleType.AdvancedPaste;
 
-        public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
+        public HotkeyAccessor[] GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
@@ -96,10 +96,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                     customAction.Name));
             }
 
-            return new Dictionary<string, HotkeyAccessor[]>
-            {
-                [ModuleName] = hotkeyAccessors.ToArray(),
-            };
+            return hotkeyAccessors.ToArray();
         }
 
         public string GetModuleName()

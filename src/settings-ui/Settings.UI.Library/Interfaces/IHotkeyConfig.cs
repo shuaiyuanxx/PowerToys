@@ -10,7 +10,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Interfaces
 {
     public interface IHotkeyConfig
     {
-        Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors();
+        HotkeyAccessor[] GetAllHotkeyAccessors();
 
         ModuleType GetModuleType();
     }

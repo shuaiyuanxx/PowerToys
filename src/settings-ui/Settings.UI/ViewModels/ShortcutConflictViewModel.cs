@@ -98,14 +98,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 var settings = GetModuleSettings(moduleName);
                 if (settings != null)
                 {
-                    var allAccessors = settings.GetAllHotkeyAccessors();
-                    if (allAccessors.TryGetValue(moduleName, out var accessors))
-                    {
-                        if (accessors != null && hotkeyID >= 0 && hotkeyID < accessors.Length)
-                        {
-                            return accessors[hotkeyID];
-                        }
-                    }
+                    var accessors = settings.GetAllHotkeyAccessors();
+                    return accessors[hotkeyID];
                 }
             }
             catch (Exception ex)
@@ -223,9 +217,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             try
             {
                 var settings = GetModuleSettings(moduleName);
-                var allAccessors = settings.GetAllHotkeyAccessors();
-
-                allAccessors.TryGetValue(moduleName, out var accessors);
+                var accessors = settings.GetAllHotkeyAccessors();
 
                 var hotkeyAccessor = accessors[hotkeyID];
 

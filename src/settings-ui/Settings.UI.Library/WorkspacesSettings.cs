@@ -43,7 +43,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         public ModuleType GetModuleType() => ModuleType.Workspaces;
 
-        public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
+        public HotkeyAccessor[] GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
@@ -53,12 +53,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                     "Workspaces_ActivationShortcut"),
             };
 
-            var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
-            {
-                [ModuleName] = hotkeyAccessors.ToArray(),
-            };
-
-            return hotkeysDict;
+            return hotkeyAccessors.ToArray();
         }
 
         public virtual void Save(ISettingsUtils settingsUtils)
