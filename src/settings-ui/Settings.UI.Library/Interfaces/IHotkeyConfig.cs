@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 
 namespace Microsoft.PowerToys.Settings.UI.Library.Interfaces
@@ -10,5 +11,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Interfaces
     public interface IHotkeyConfig
     {
         Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors();
+
+        ModuleType GetModuleType();
     }
 }

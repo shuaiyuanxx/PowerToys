@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -49,13 +50,15 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return Name;
         }
 
+        public ModuleType GetModuleType() => ModuleType.PowerLauncher;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.OpenPowerLauncher,
-                    value => Properties.OpenPowerLauncher = value,
+                    value => Properties.OpenPowerLauncher = value ?? Properties.DefaultOpenPowerLauncher,
                     "PowerLauncher_OpenPowerLauncher"),
             };
 

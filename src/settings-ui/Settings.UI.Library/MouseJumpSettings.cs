@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 using MouseJump.Common.Helpers;
@@ -47,6 +48,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return Name;
         }
 
+        public ModuleType GetModuleType() => ModuleType.MouseJump;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeysDict = new Dictionary<string, HotkeyAccessor[]>
@@ -54,7 +57,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                 [ModuleName] = [
                    new HotkeyAccessor(
                         () => Properties.ActivationShortcut,
-                        value => Properties.ActivationShortcut = value,
+                        value => Properties.ActivationShortcut = value ?? Properties.DefaultActivationShortcut,
                         "MouseUtils_MouseJump_ActivationShortcut"),],
             };
 

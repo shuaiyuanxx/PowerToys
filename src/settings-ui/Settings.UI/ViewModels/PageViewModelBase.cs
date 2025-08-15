@@ -148,7 +148,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             // Since MouseUtils in Settings consolidates four modules: Find My Mouse, Mouse Highlighter, Mouse Pointer Crosshairs, and Mouse Jump
             // We need to handle this case separately here.
-            if (string.Equals(ModuleName, ModuleNames.MouseUtils, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(ModuleName, "MouseUtils", StringComparison.OrdinalIgnoreCase))
             {
                 var mouseUtilsModules = new HashSet<string>
                 {

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -43,13 +44,15 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public string GetModuleName()
             => Name;
 
+        public ModuleType GetModuleType() => ModuleType.PowerOCR;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.ActivationShortcut,
-                    value => Properties.ActivationShortcut = value,
+                    value => Properties.ActivationShortcut = value ?? Properties.DefaultActivationShortcut,
                     "Activation_Shortcut"),
             };
 

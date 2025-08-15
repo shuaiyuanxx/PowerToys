@@ -90,6 +90,31 @@ namespace Microsoft.PowerToys.Settings.UI.Services
             return settingsTypes;
         }
 
+        public IHotkeyConfig GetFreshSettings(string moduleKey)
+        {
+            if (!_settingsTypes.TryGetValue(moduleKey, out var settingsType))
+            {
+                return null;
+            }
+
+            try
+            {
+                // Create a generic method call to _settingsUtils.GetSettingsOrDefault<T>(moduleKey)
+                var getSettingsMethod = typeof(ISettingsUtils).GetMethod("GetSettingsOrDefault", new[] { typeof(string), typeof(string) });
+                var genericMethod = getSettingsMethod?.MakeGenericMethod(settingsType);
+
+                // Call GetSettingsOrDefault<T>(moduleKey) to get fresh settings from file
+                var freshSettings = genericMethod?.Invoke(_settingsUtils, new object[] { moduleKey, "settings.json" });
+
+                return freshSettings as IHotkeyConfig;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting fresh settings for {moduleKey}: {ex.Message}");
+                return null;
+            }
+        }
+
         /// <summary>
         /// Gets a settings instance for the specified module using SettingsRepository
         /// </summary>

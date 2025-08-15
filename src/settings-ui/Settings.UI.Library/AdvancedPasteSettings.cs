@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -40,25 +41,27 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             settingsUtils.SaveSettings(JsonSerializer.Serialize(this, options), ModuleName);
         }
 
+        public ModuleType GetModuleType() => ModuleType.AdvancedPaste;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.PasteAsPlainTextShortcut,
-                    value => Properties.PasteAsPlainTextShortcut = value,
+                    value => Properties.PasteAsPlainTextShortcut = value ?? AdvancedPasteProperties.DefaultPasteAsPlainTextShortcut,
                     "PasteAsPlainText_Shortcut"),
                 new HotkeyAccessor(
                     () => Properties.AdvancedPasteUIShortcut,
-                    value => Properties.AdvancedPasteUIShortcut = value,
+                    value => Properties.AdvancedPasteUIShortcut = value ?? AdvancedPasteProperties.DefaultAdvancedPasteUIShortcut,
                     "AdvancedPasteUI_Shortcut"),
                 new HotkeyAccessor(
                     () => Properties.PasteAsMarkdownShortcut,
-                    value => Properties.PasteAsMarkdownShortcut = value,
+                    value => Properties.PasteAsMarkdownShortcut = value ?? new HotkeySettings(),
                     "PasteAsMarkdown_Shortcut"),
                 new HotkeyAccessor(
                     () => Properties.PasteAsJsonShortcut,
-                    value => Properties.PasteAsJsonShortcut = value,
+                    value => Properties.PasteAsJsonShortcut = value ?? new HotkeySettings(),
                     "PasteAsJson_Shortcut"),
             };
 
@@ -78,7 +81,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                 {
                     hotkeyAccessors.Add(new HotkeyAccessor(
                         () => additionalAction.Shortcut,
-                        value => additionalAction.Shortcut = value,
+                        value => additionalAction.Shortcut = value ?? new HotkeySettings(),
                         additionalActionHeaderKeys[index]));
                     index++;
                 }
@@ -89,7 +92,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             {
                 hotkeyAccessors.Add(new HotkeyAccessor(
                     () => customAction.Shortcut,
-                    value => customAction.Shortcut = value,
+                    value => customAction.Shortcut = value ?? new HotkeySettings(),
                     customAction.Name));
             }
 

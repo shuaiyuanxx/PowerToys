@@ -64,13 +64,15 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return false;
         }
 
+        public ModuleType GetModuleType() => ModuleType.ColorPicker;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.ActivationShortcut,
-                    value => Properties.ActivationShortcut = value,
+                    value => Properties.ActivationShortcut = value ?? Properties.DefaultActivationShortcut,
                     "Activation_Shortcut"),
             };
 

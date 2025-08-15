@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -28,13 +29,15 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return Name;
         }
 
+        public ModuleType GetModuleType() => ModuleType.ShortcutGuide;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.OpenShortcutGuide,
-                    value => Properties.OpenShortcutGuide = value,
+                    value => Properties.OpenShortcutGuide = value ?? Properties.DefaultOpenShortcutGuide,
                     "Activation_Shortcut"),
             };
 

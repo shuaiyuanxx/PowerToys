@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -29,17 +30,19 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return Name;
         }
 
+        public ModuleType GetModuleType() => ModuleType.CropAndLock;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.ReparentHotkey.Value,
-                    value => Properties.ReparentHotkey.Value = value,
+                    value => Properties.ReparentHotkey.Value = value ?? CropAndLockProperties.DefaultReparentHotkeyValue,
                     "CropAndLock_ReparentActivation_Shortcut"),
                 new HotkeyAccessor(
                     () => Properties.ThumbnailHotkey.Value,
-                    value => Properties.ThumbnailHotkey.Value = value,
+                    value => Properties.ThumbnailHotkey.Value = value ?? CropAndLockProperties.DefaultThumbnailHotkeyValue,
                     "CropAndLock_ThumbnailActivation_Shortcut"),
             };
 

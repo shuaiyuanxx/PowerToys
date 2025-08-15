@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -38,25 +39,27 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return Name;
         }
 
+        public ModuleType GetModuleType() => ModuleType.MouseWithoutBorders;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.ToggleEasyMouseShortcut,
-                    value => Properties.ToggleEasyMouseShortcut = value,
+                    value => Properties.ToggleEasyMouseShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeyToggleEasyMouse,
                     "MouseWithoutBorders_ToggleEasyMouseShortcut"),
                 new HotkeyAccessor(
                     () => Properties.LockMachineShortcut,
-                    value => Properties.LockMachineShortcut = value,
+                    value => Properties.LockMachineShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeyLockMachine,
                     "MouseWithoutBorders_LockMachinesShortcut"),
                 new HotkeyAccessor(
                     () => Properties.Switch2AllPCShortcut,
-                    value => Properties.Switch2AllPCShortcut = value,
+                    value => Properties.Switch2AllPCShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeySwitch2AllPC,
                     "MouseWithoutBorders_Switch2AllPcShortcut"),
                 new HotkeyAccessor(
                     () => Properties.ReconnectShortcut,
-                    value => Properties.ReconnectShortcut = value,
+                    value => Properties.ReconnectShortcut = value ?? MouseWithoutBordersProperties.DefaultHotKeyReconnect,
                     "MouseWithoutBorders_ReconnectShortcut"),
             };
 

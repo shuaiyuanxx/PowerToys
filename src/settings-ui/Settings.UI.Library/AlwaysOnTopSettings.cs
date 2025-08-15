@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
@@ -29,13 +30,15 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             return Name;
         }
 
+        public ModuleType GetModuleType() => ModuleType.AlwaysOnTop;
+
         public Dictionary<string, HotkeyAccessor[]> GetAllHotkeyAccessors()
         {
             var hotkeyAccessors = new List<HotkeyAccessor>
             {
                 new HotkeyAccessor(
                     () => Properties.Hotkey.Value,
-                    value => Properties.Hotkey.Value = value,
+                    value => Properties.Hotkey.Value = value ?? AlwaysOnTopProperties.DefaultHotkeyValue,
                     "AlwaysOnTop_ActivationShortcut"),
             };
 

@@ -69,56 +69,42 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         protected override string ModuleName => "ShortcutConflictsWindow";
 
-        public string GetAdvancedPasteCustomActionName(int actionId)
+        private IHotkeyConfig GetModuleSettings(string moduleKey)
         {
             try
             {
-                var advancedPasteSettings = GetFreshSettings(ModuleNames.AdvancedPaste) as AdvancedPasteSettings;
-                return advancedPasteSettings?.Properties?.CustomActions?.Value?.FirstOrDefault(ca => ca.Id == actionId)?.Name;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Always gets fresh settings from file, no caching
-        /// </summary>
-        private IHotkeyConfig GetFreshSettings(string moduleKey)
-        {
-            try
-            {
-                var settings = _settingsFactory.GetSettings(moduleKey);
-                if (settings != null)
+                // MouseWithoutBorders and Peek settings may be changed by the logic in the utility as machines connect.
+                // We need to get a fresh version every time instead of using a repository.
+                if (string.Equals(moduleKey, MouseWithoutBordersSettings.ModuleName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(moduleKey, PeekSettings.ModuleName, StringComparison.OrdinalIgnoreCase))
                 {
-                    System.Diagnostics.Debug.WriteLine($"Loaded fresh settings for module: {moduleKey}");
+                    return _settingsFactory.GetFreshSettings(moduleKey);
                 }
 
-                return settings;
+                // For other modules, get the settings from SettingsRepository
+                return _settingsFactory.GetSettings(moduleKey);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading fresh settings for {moduleKey}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading settings for {moduleKey}: {ex.Message}");
                 return null;
             }
         }
 
-        /// <summary>
-        /// Always gets fresh hotkey accessors from file, no caching
-        /// </summary>
-        private HotkeyAccessor[] GetFreshHotkeyAccessors(string moduleName)
+        private HotkeyAccessor GetHotkeyAccessor(string moduleName, int hotkeyID)
         {
             try
             {
-                var settings = GetFreshSettings(moduleName);
+                var settings = GetModuleSettings(moduleName);
                 if (settings != null)
                 {
                     var allAccessors = settings.GetAllHotkeyAccessors();
                     if (allAccessors.TryGetValue(moduleName, out var accessors))
                     {
-                        System.Diagnostics.Debug.WriteLine($"Loaded fresh {accessors.Length} hotkey accessors for module: {moduleName}");
-                        return accessors;
+                        if (accessors != null && hotkeyID >= 0 && hotkeyID < accessors.Length)
+                        {
+                            return accessors[hotkeyID];
+                        }
                     }
                 }
             }
@@ -130,15 +116,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             return null;
         }
 
-        private HotkeyAccessor GetHotkeyAccessor(string moduleName, int hotkeyID)
+        private ModuleType GetModuleType(string moduleName)
         {
-            var accessors = GetFreshHotkeyAccessors(moduleName);
-            if (accessors != null && hotkeyID >= 0 && hotkeyID < accessors.Length)
-            {
-                return accessors[hotkeyID];
-            }
+            var settings = GetModuleSettings(moduleName);
 
-            return null;
+            return settings.GetModuleType();
         }
 
         protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
@@ -186,7 +168,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             try
             {
-                // Always get fresh hotkey accessor from file
                 var hotkeyAccessor = GetHotkeyAccessor(module.ModuleName, module.HotkeyID);
 
                 if (hotkeyAccessor != null)
@@ -199,13 +180,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     module.IsSystemConflict = isSystemConflict;
 
                     // Set module display info
-                    var moduleType = ModuleNames.ToModuleType(module.ModuleName);
-                    if (moduleType.HasValue)
-                    {
-                        var displayName = resourceLoader.GetString(ModuleHelper.GetModuleLabelResourceName(moduleType.Value));
-                        module.DisplayName = displayName;
-                        module.IconPath = ModuleHelper.GetModuleTypeFluentIconName(moduleType.Value);
-                    }
+                    var moduleType = GetModuleType(module.ModuleName);
+
+                    var displayName = resourceLoader.GetString(ModuleHelper.GetModuleLabelResourceName(moduleType));
+                    module.DisplayName = displayName;
+                    module.IconPath = ModuleHelper.GetModuleTypeFluentIconName(moduleType);
 
                     if (module.HotkeySettings != null)
                     {
@@ -243,20 +222,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             try
             {
-                // Get fresh hotkey accessor to ensure we're working with current data
-                var hotkeyAccessor = GetHotkeyAccessor(moduleName, hotkeyID);
-                if (hotkeyAccessor != null)
-                {
-                    // Use the accessor's setter to update the hotkey settings
-                    hotkeyAccessor.Setter(newHotkeySettings);
-                    System.Diagnostics.Debug.WriteLine($"Updated {moduleName} hotkey {hotkeyID} using accessor setter");
+                var settings = GetModuleSettings(moduleName);
+                var allAccessors = settings.GetAllHotkeyAccessors();
 
-                    // Save the settings and send IPC notification
-                    SaveModuleSettingsAndNotify(moduleName);
-                }
-                else
+                allAccessors.TryGetValue(moduleName, out var accessors);
+
+                var hotkeyAccessor = accessors[hotkeyID];
+
+                // Use the accessor's setter to update the hotkey settings
+                hotkeyAccessor.Value = newHotkeySettings;
+
+                if (settings is ISettingsConfig settingsConfig)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find hotkey accessor for updating {moduleName}.{hotkeyID}");
+                    // No need to save settings here, the runner will call module interface to save it
+                    // SaveSettingsToFile(settings);
+
+                    // Send IPC notification using the same format as other ViewModels
+                    SendConfigMSG(settingsConfig, moduleName);
                 }
             }
             catch (Exception ex)
@@ -269,16 +251,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             try
             {
-                var moduleKey = GetModuleKey(moduleName);
-                var settings = GetFreshSettings(moduleKey);
+                var settings = GetModuleSettings(moduleName);
 
                 if (settings is ISettingsConfig settingsConfig)
                 {
-                    // Save settings to file using the repository
+                    // No need to save settings here, the runner will call module interface to save it
                     // SaveSettingsToFile(settings);
 
                     // Send IPC notification using the same format as other ViewModels
-                    SendConfigMSG(settingsConfig, moduleKey);
+                    SendConfigMSG(settingsConfig, moduleName);
 
                     System.Diagnostics.Debug.WriteLine($"Saved settings and sent IPC notification for module: {moduleName}");
                 }
@@ -318,7 +299,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         /// <summary>
         /// Sends IPC notification using the same format as other ViewModels
         /// </summary>
-        private void SendConfigMSG(ISettingsConfig settingsConfig, string moduleKey)
+        private void SendConfigMSG(ISettingsConfig settingsConfig, string moduleName)
         {
             try
             {
@@ -330,15 +311,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 var ipcMessage = string.Format(
                     CultureInfo.InvariantCulture,
                     "{{ \"powertoys\": {{ \"{0}\": {1} }} }}",
-                    moduleKey,
+                    moduleName,
                     serializedSettings);
 
                 var result = _ipcMSGCallBackFunc(ipcMessage);
-                System.Diagnostics.Debug.WriteLine($"Sent IPC notification for {moduleKey}, result: {result}");
+                System.Diagnostics.Debug.WriteLine($"Sent IPC notification for {moduleName}, result: {result}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error sending IPC notification for {moduleKey}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error sending IPC notification for {moduleName}: {ex.Message}");
             }
         }
 
@@ -371,7 +352,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private string GetHotkeyLocalizationHeader(string moduleName, int hotkeyID, string headerKey)
         {
             // Handle AdvancedPaste custom actions
-            if (string.Equals(moduleName, ModuleNames.AdvancedPaste, StringComparison.OrdinalIgnoreCase)
+            if (string.Equals(moduleName, AdvancedPasteSettings.ModuleName, StringComparison.OrdinalIgnoreCase)
                 && hotkeyID > 9)
             {
                 return headerKey;
@@ -386,16 +367,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Error getting hotkey header for {moduleName}.{hotkeyID}: {ex.Message}");
                 return headerKey; // Return the key itself as fallback
             }
-        }
-
-        private static string GetModuleKey(string moduleName)
-        {
-            return moduleName?.ToLowerInvariant() switch
-            {
-                ModuleNames.MouseHighlighter or ModuleNames.MouseJump or
-                ModuleNames.MousePointerCrosshairs or ModuleNames.FindMyMouse => ModuleNames.MouseUtils,
-                _ => moduleName,
-            };
         }
 
         public override void Dispose()
