@@ -91,32 +91,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private HotkeyAccessor GetHotkeyAccessor(string moduleName, int hotkeyID)
-        {
-            try
-            {
-                var settings = GetModuleSettings(moduleName);
-                if (settings != null)
-                {
-                    var accessors = settings.GetAllHotkeyAccessors();
-                    return accessors[hotkeyID];
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error loading fresh hotkey accessors for {moduleName}: {ex.Message}");
-            }
-
-            return null;
-        }
-
-        private ModuleType GetModuleType(string moduleName)
-        {
-            var settings = GetModuleSettings(moduleName);
-
-            return settings.GetModuleType();
-        }
-
         protected override void OnConflictsUpdated(object sender, AllHotkeyConflictsEventArgs e)
         {
             _dispatcher.BeginInvoke(() =>
@@ -162,20 +136,21 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             try
             {
-                var hotkeyAccessor = GetHotkeyAccessor(module.ModuleName, module.HotkeyID);
+                var settings = GetModuleSettings(module.ModuleName);
+                var allHotkeyAccessors = settings.GetAllHotkeyAccessors();
+                var hotkeyAccessor = allHotkeyAccessors[module.HotkeyID];
 
                 if (hotkeyAccessor != null)
                 {
                     // Get current hotkey settings (fresh from file) using the accessor's getter
-                    module.HotkeySettings = hotkeyAccessor.Getter();
+                    module.HotkeySettings = hotkeyAccessor.Value;
 
                     // Set header using localization key
                     module.Header = GetHotkeyLocalizationHeader(module.ModuleName, module.HotkeyID, hotkeyAccessor.LocalizationHeaderKey);
                     module.IsSystemConflict = isSystemConflict;
 
                     // Set module display info
-                    var moduleType = GetModuleType(module.ModuleName);
-
+                    var moduleType = settings.GetModuleType();
                     var displayName = resourceLoader.GetString(ModuleHelper.GetModuleLabelResourceName(moduleType));
                     module.DisplayName = displayName;
                     module.IconPath = ModuleHelper.GetModuleTypeFluentIconName(moduleType);
