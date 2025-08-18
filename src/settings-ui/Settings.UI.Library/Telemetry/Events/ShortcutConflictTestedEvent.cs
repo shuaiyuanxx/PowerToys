@@ -16,9 +16,5 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Telemetry.Events
         public PartA_PrivTags PartA_PrivTags => PartA_PrivTags.ProductAndServiceUsage;
 
         public bool ConflictFound { get; set; }
-
-        public string ModuleName { get; set; }
-
-        public string HotkeyName { get; set; }
     }
 }

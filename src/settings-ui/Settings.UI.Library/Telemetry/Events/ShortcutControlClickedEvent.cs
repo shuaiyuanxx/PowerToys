@@ -18,9 +18,5 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Telemetry.Events
         public bool HasConflict { get; set; }
 
         public string Source { get; set; }
-
-        public string ModuleName { get; set; }
-
-        public string HotkeyName { get; set; }
     }
 }

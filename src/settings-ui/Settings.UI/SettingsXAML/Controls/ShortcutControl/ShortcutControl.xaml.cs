@@ -98,8 +98,6 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                 PowerToysTelemetry.Log.WriteEvent(new ShortcutConflictResolvedEvent()
                 {
                     Source = control.Source.ToString(),
-                    ModuleName = control.hotkeySettings?.OwnerModuleName ?? "Unknown",
-                    HotkeyName = control.hotkeySettings?.HotkeyName ?? "Unknown",
                 });
             }
         }
@@ -543,8 +541,6 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                         PowerToysTelemetry.Log.WriteEvent(new ShortcutConflictTestedEvent()
                         {
                             ConflictFound = true,
-                            ModuleName = settings?.OwnerModuleName ?? "Unknown",
-                            HotkeyName = settings?.HotkeyName ?? "Unknown",
                         });
                     }
                     else
@@ -556,8 +552,6 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
                         PowerToysTelemetry.Log.WriteEvent(new ShortcutConflictTestedEvent()
                         {
                             ConflictFound = false,
-                            ModuleName = settings?.OwnerModuleName ?? "Unknown",
-                            HotkeyName = settings?.HotkeyName ?? "Unknown",
                         });
                     }
                 });
@@ -645,13 +639,12 @@ namespace Microsoft.PowerToys.Settings.UI.Controls
 
             c.HasConflict = hotkeySettings.HasConflict;
             c.ConflictMessage = hotkeySettings.ConflictDescription;
+
             // Log telemetry when shortcut control is clicked, especially if there's a conflict
             PowerToysTelemetry.Log.WriteEvent(new ShortcutControlClickedEvent()
             {
                 HasConflict = HasConflict,
                 Source = Source.ToString(),
-                ModuleName = hotkeySettings?.OwnerModuleName ?? "Unknown",
-                HotkeyName = hotkeySettings?.HotkeyName ?? "Unknown",
             });
 
             // 92 means the Win key. The logic is: warning should be visible if the shortcut contains Alt AND contains Ctrl AND NOT contains Win.
