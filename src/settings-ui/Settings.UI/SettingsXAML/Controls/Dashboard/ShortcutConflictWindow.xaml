@@ -144,66 +144,8 @@
                                     <TextBlock
                                         x:Uid="ShortcutConflictWindow_SystemShortcutMessage"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-<<<<<<< HEAD
                                         TextWrapping="Wrap" />
                                 </tkcontrols:SettingsCard>
-=======
-                                        Style="{StaticResource BodyTextBlockStyle}" />
-                                </StackPanel>
-
-                                <!--  Module Cards and System Conflict Card  -->
-                                <StackPanel>
-                                    <!--  PowerToys Module Cards  -->
-                                    <ItemsControl ItemsSource="{x:Bind Modules}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="hotkeyConflicts:ModuleHotkeyData">
-                                                <tkcontrols:SettingsCard
-                                                    Margin="0,0,0,4"
-                                                    Click="SettingsCard_Click"
-                                                    Description="{x:Bind ModuleName}"
-                                                    Header="{x:Bind Header}"
-                                                    IsClickEnabled="True">
-
-                                                    <tkcontrols:SettingsCard.HeaderIcon>
-                                                        <BitmapIcon ShowAsMonochrome="False" UriSource="{x:Bind IconPath}" />
-                                                    </tkcontrols:SettingsCard.HeaderIcon>
-
-
-                                                    <!--  ShortcutControl with TwoWay binding and enabled for editing  -->
-                                                    <controls:ShortcutControl
-                                                        x:Name="ShortcutControl"
-                                                        MinWidth="140"
-                                                        Margin="2"
-                                                        VerticalAlignment="Center"
-                                                        Source="ConflictWindow"
-                                                        HasConflict="True"
-                                                        HotkeySettings="{x:Bind HotkeySettings, Mode=TwoWay}"
-                                                        IsEnabled="True" />
-
-                                                </tkcontrols:SettingsCard>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <!--  System Conflict Card (only show if it's a system conflict)  -->
-                                    <tkcontrols:SettingsCard
-                                        x:Uid="ShortcutConflictWindow_SystemCard"
-                                        x:Name="SystemConflictCard"
-                                        x:Load="{x:Bind IsSystemConflict}"
-                                        Margin="0,0,0,4"
-                                        HeaderIcon="{ui:BitmapIcon Source=/Assets/Settings/Icons/Windows.png}"
-                                        IsClickEnabled="False">
-
-                                        <!--  System shortcut message  -->
-                                        <TextBlock
-                                            x:Uid="ShortcutConflictWindow_SystemShortcutMessage"
-                                            VerticalAlignment="Center"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{ThemeResource TextFillColorDisabledBrush}" />
-                                    </tkcontrols:SettingsCard>
-                                </StackPanel>
->>>>>>> e0a451105 (add telemetry log code.)
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
