@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<OutputPath>..\..\..\..\$(Platform)\$(Configuration)\tests\UITests-ColorPicker\</OutputPath>
+		<OutputPath>..\..\..\..\$(Platform)\$(Configuration)\Tests\ColorPicker.UITests\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>

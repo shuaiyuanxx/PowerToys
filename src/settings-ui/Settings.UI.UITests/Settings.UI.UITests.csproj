@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<!-- Look at Directory.Build.props in root for common stuff as well -->
-	<Import Project="..\..\..\Common.Dotnet.CsWinRT.props" />
+	<Import Project="..\..\Common.Dotnet.CsWinRT.props" />
 
 	<PropertyGroup>
-		<ProjectGuid>{2B1505FA-132A-460B-B22B-7CC3FFAB0C5D}</ProjectGuid>
-		<RootNamespace>Microsoft.AdvancedPaste.UITests</RootNamespace>
+		<ProjectGuid>{29B91A80-0590-4B1F-89B8-4F8812A7F116}</ProjectGuid>
+		<RootNamespace>Microsoft.Settings.UITests</RootNamespace>
 		<IsPackable>false</IsPackable>
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<OutputPath>..\..\..\..\$(Platform)\$(Configuration)\tests\UITests-AdvancedPaste\</OutputPath>
+		<OutputPath>..\..\..\$(Platform)\$(Configuration)\Tests\Settings.UI.UITests\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -26,13 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\common\UITestAutomation\UITestAutomation.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="TestFiles\**\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
+		<ProjectReference Include="..\..\common\UITestAutomation\UITestAutomation.csproj" />
 	</ItemGroup>
 
 </Project>
