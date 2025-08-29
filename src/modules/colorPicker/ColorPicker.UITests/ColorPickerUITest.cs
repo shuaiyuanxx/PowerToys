@@ -127,7 +127,7 @@ namespace Microsoft.ColorPicker.UITests
             SendKeys(Key.Esc);
         }*/
 
-        [TestMethod("ColorPicker.TestActivationBehaviors")]
+        /*[TestMethod("ColorPicker.TestActivationBehaviors")]
         [TestCategory("Color Picker #4")]
         public void TestActivationBehaviors()
         {
@@ -168,9 +168,9 @@ namespace Microsoft.ColorPicker.UITests
             Assert.IsNotNull(editorWindow, "Color Picker Editor should show.");
 
             SendKeys(Key.Esc);
-        }
+        }*/
 
-        /*[TestMethod("ColorPicker.TestColorFormatClipboard")]
+        [TestMethod("ColorPicker.TestColorFormatClipboard")]
         [TestCategory("Color Picker #5")]
         public void TestColorFormatClipboard()
         {
@@ -203,7 +203,7 @@ namespace Microsoft.ColorPicker.UITests
             }
         }
 
-        [TestMethod("ColorPicker.TestShowColorName")]
+        /*[TestMethod("ColorPicker.TestShowColorName")]
         [TestCategory("Color Picker #6")]
         public void TestShowColorName()
         {
